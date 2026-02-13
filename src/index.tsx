@@ -1543,7 +1543,7 @@ app.get('/', (c) => {
             <!-- 帮助提示 -->
             <p class="mt-6 text-sm text-gray-400">
               <i class="fas fa-question-circle mr-1"></i>
-              首次使用？点击右上角 <i class="fas fa-question-circle"></i> 查看新手引导
+              首次使用？<button onclick="showOnboarding()" class="text-indigo-500 hover:text-indigo-600 underline font-medium">点击这里查看新手引导</button>
             </p>
           </div>
         </div>
