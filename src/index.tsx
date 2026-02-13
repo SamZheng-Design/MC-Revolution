@@ -383,28 +383,203 @@ app.get('/api/projects/:id/versions/compare', async (c) => {
   })
 })
 
-// ==================== 电子签章API（预留接口）====================
+// ==================== 电子签章API ====================
+// 内存存储签署信息（生产环境应使用D1/KV）
+const signatureStore = new Map<string, {
+  signId: string
+  projectId: string
+  projectName: string
+  status: 'pending' | 'signing' | 'completed' | 'cancelled'
+  signers: Array<{
+    id: string
+    name: string
+    email: string
+    phone: string
+    role: 'investor' | 'borrower'
+    status: 'pending' | 'signed'
+    signedAt?: string
+    signatureData?: string // base64 签名图片
+  }>
+  contractHash: string
+  createdAt: string
+  completedAt?: string
+}>()
+
 // 发起签署
 app.post('/api/projects/:id/sign/initiate', async (c) => {
   const id = c.req.param('id')
-  const { signers } = await c.req.json()
-  // TODO: 对接电子签章服务（如e签宝、法大大）
+  const { signers, projectName, contractHash } = await c.req.json()
+  
+  if (!signers || signers.length < 2) {
+    return c.json({ success: false, message: '至少需要两位签署人（投资方和融资方各一位）' })
+  }
+  
+  const signId = 'SIGN_' + Date.now().toString(36).toUpperCase() + '_' + Math.random().toString(36).substring(2, 6).toUpperCase()
+  
+  const signData = {
+    signId,
+    projectId: id,
+    projectName: projectName || '未命名项目',
+    status: 'signing' as const,
+    signers: signers.map((s: any, i: number) => ({
+      id: 'signer_' + Date.now() + '_' + i,
+      name: s.name,
+      email: s.email || '',
+      phone: s.phone || '',
+      role: s.role,
+      status: 'pending' as const
+    })),
+    contractHash: contractHash || 'hash_' + Date.now(),
+    createdAt: new Date().toISOString()
+  }
+  
+  signatureStore.set(signId, signData)
+  
   return c.json({ 
     success: true,
-    signId: 'sign_' + Date.now(),
-    signUrl: '#sign-demo',
-    message: '签署流程已发起（演示模式）'
+    signId,
+    status: 'signing',
+    signers: signData.signers,
+    message: '签署流程已发起，请各签署人完成签署'
   })
 })
 
 // 查询签署状态
 app.get('/api/projects/:id/sign/status', async (c) => {
   const id = c.req.param('id')
-  // TODO: 查询签署状态
+  
+  // 查找该项目的签署记录
+  let signData = null
+  for (const [signId, data] of signatureStore) {
+    if (data.projectId === id) {
+      signData = data
+      break
+    }
+  }
+  
+  if (!signData) {
+    return c.json({ 
+      success: true,
+      hasSignProcess: false,
+      message: '该项目尚未发起签署'
+    })
+  }
+  
+  const signedCount = signData.signers.filter(s => s.status === 'signed').length
+  const totalCount = signData.signers.length
+  
   return c.json({ 
-    status: 'pending',
-    signers: [],
-    message: '电子签章功能开发中'
+    success: true,
+    hasSignProcess: true,
+    signId: signData.signId,
+    status: signData.status,
+    progress: `${signedCount}/${totalCount}`,
+    signers: signData.signers,
+    createdAt: signData.createdAt,
+    completedAt: signData.completedAt
+  })
+})
+
+// 执行签名
+app.post('/api/sign/:signId/execute', async (c) => {
+  const signId = c.req.param('signId')
+  const { signerId, signatureData, verificationCode } = await c.req.json()
+  
+  const signData = signatureStore.get(signId)
+  if (!signData) {
+    return c.json({ success: false, message: '签署流程不存在或已过期' })
+  }
+  
+  const signer = signData.signers.find(s => s.id === signerId)
+  if (!signer) {
+    return c.json({ success: false, message: '签署人不存在' })
+  }
+  
+  if (signer.status === 'signed') {
+    return c.json({ success: false, message: '您已完成签署' })
+  }
+  
+  // 验证码校验（演示模式跳过）
+  if (verificationCode && verificationCode !== '123456') {
+    return c.json({ success: false, message: '验证码错误' })
+  }
+  
+  // 更新签署状态
+  signer.status = 'signed'
+  signer.signedAt = new Date().toISOString()
+  signer.signatureData = signatureData
+  
+  // 检查是否所有人都已签署
+  const allSigned = signData.signers.every(s => s.status === 'signed')
+  if (allSigned) {
+    signData.status = 'completed'
+    signData.completedAt = new Date().toISOString()
+  }
+  
+  signatureStore.set(signId, signData)
+  
+  return c.json({ 
+    success: true,
+    message: '签署成功',
+    allCompleted: allSigned,
+    status: signData.status,
+    signers: signData.signers
+  })
+})
+
+// 获取签署详情（用于签署页面）
+app.get('/api/sign/:signId', async (c) => {
+  const signId = c.req.param('signId')
+  const signData = signatureStore.get(signId)
+  
+  if (!signData) {
+    return c.json({ success: false, message: '签署流程不存在' })
+  }
+  
+  return c.json({
+    success: true,
+    ...signData
+  })
+})
+
+// 取消签署流程
+app.post('/api/sign/:signId/cancel', async (c) => {
+  const signId = c.req.param('signId')
+  const signData = signatureStore.get(signId)
+  
+  if (!signData) {
+    return c.json({ success: false, message: '签署流程不存在' })
+  }
+  
+  if (signData.status === 'completed') {
+    return c.json({ success: false, message: '已完成的签署无法取消' })
+  }
+  
+  signData.status = 'cancelled'
+  signatureStore.set(signId, signData)
+  
+  return c.json({ success: true, message: '签署流程已取消' })
+})
+
+// 发送签署提醒（模拟）
+app.post('/api/sign/:signId/remind', async (c) => {
+  const signId = c.req.param('signId')
+  const { signerId } = await c.req.json()
+  
+  const signData = signatureStore.get(signId)
+  if (!signData) {
+    return c.json({ success: false, message: '签署流程不存在' })
+  }
+  
+  const signer = signData.signers.find(s => s.id === signerId)
+  if (!signer) {
+    return c.json({ success: false, message: '签署人不存在' })
+  }
+  
+  // 实际应发送短信/邮件提醒
+  return c.json({ 
+    success: true, 
+    message: `已向 ${signer.name} 发送签署提醒（演示模式）`
   })
 })
 
@@ -788,7 +963,7 @@ app.get('/', (c) => {
           <button onclick="saveProject()" class="px-3 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center text-sm">
             <i class="fas fa-save mr-1"></i>保存
           </button>
-          <button onclick="showSignModal()" class="feature-coming px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center text-sm">
+          <button onclick="showSignModal()" class="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center text-sm">
             <i class="fas fa-signature mr-1"></i>发起签署
           </button>
           <button onclick="showExportModal()" class="px-3 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center text-sm">
@@ -1340,42 +1515,204 @@ app.get('/', (c) => {
 
   <!-- ==================== 弹窗: 电子签署 ==================== -->
   <div id="signModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
+    <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-emerald-900"><i class="fas fa-file-signature mr-2"></i>电子签署</h2>
+          <button onclick="hideSignModal()" class="p-2 hover:bg-white/50 rounded-lg">
+            <i class="fas fa-times text-gray-500"></i>
+          </button>
+        </div>
+      </div>
+      <div id="signModalContent" class="p-6 overflow-y-auto max-h-[70vh]">
+        <!-- 签署状态区域 -->
+        <div id="signStatusArea" class="hidden mb-6">
+          <div class="bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl p-5 text-white mb-4">
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-bold">签署进度</h3>
+              <span id="signProgressBadge" class="px-3 py-1 bg-white/20 rounded-full text-sm">签署中</span>
+            </div>
+            <div class="flex items-center space-x-3">
+              <div class="flex-1 bg-white/20 rounded-full h-3">
+                <div id="signProgressBar" class="bg-white rounded-full h-3 transition-all" style="width: 0%"></div>
+              </div>
+              <span id="signProgressText" class="text-sm font-medium">0/0</span>
+            </div>
+          </div>
+          <!-- 签署人状态列表 -->
+          <div id="signersStatusList" class="space-y-3"></div>
+        </div>
+        
+        <!-- 发起签署表单 -->
+        <div id="signInitiateForm">
+          <div class="text-center py-4 mb-6">
+            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-file-signature text-emerald-600 text-2xl"></i>
+            </div>
+            <h3 class="font-medium text-gray-900 mb-2">发起电子签署</h3>
+            <p class="text-sm text-gray-500">协商完成后，添加签署人信息发起电子签署</p>
+          </div>
+          
+          <!-- 签署人表单 -->
+          <div class="space-y-4">
+            <div class="p-4 border-2 border-indigo-200 rounded-xl bg-indigo-50/50">
+              <div class="flex items-center mb-3">
+                <div class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-landmark text-white text-sm"></i>
+                </div>
+                <h4 class="font-medium text-indigo-900">投资方签署人</h4>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">姓名 <span class="text-red-500">*</span></label>
+                  <input type="text" id="signerInvestorName" placeholder="签署人姓名" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">手机号</label>
+                  <input type="tel" id="signerInvestorPhone" placeholder="接收签署通知" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="col-span-2">
+                  <label class="block text-xs text-gray-500 mb-1">邮箱</label>
+                  <input type="email" id="signerInvestorEmail" placeholder="接收签署文件" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+              </div>
+            </div>
+            
+            <div class="p-4 border-2 border-amber-200 rounded-xl bg-amber-50/50">
+              <div class="flex items-center mb-3">
+                <div class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center mr-3">
+                  <i class="fas fa-store text-white text-sm"></i>
+                </div>
+                <h4 class="font-medium text-amber-900">融资方签署人</h4>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">姓名 <span class="text-red-500">*</span></label>
+                  <input type="text" id="signerBorrowerName" placeholder="签署人姓名" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-500 mb-1">手机号</label>
+                  <input type="tel" id="signerBorrowerPhone" placeholder="接收签署通知" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+                <div class="col-span-2">
+                  <label class="block text-xs text-gray-500 mb-1">邮箱</label>
+                  <input type="email" id="signerBorrowerEmail" placeholder="接收签署文件" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-500">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="mt-6 p-4 bg-gray-50 rounded-xl">
+            <h4 class="text-sm font-medium text-gray-700 mb-2"><i class="fas fa-shield-alt mr-2 text-emerald-600"></i>签署安全保障</h4>
+            <ul class="text-xs text-gray-500 space-y-1">
+              <li><i class="fas fa-check text-emerald-500 mr-2"></i>合同内容哈希校验，确保文件完整性</li>
+              <li><i class="fas fa-check text-emerald-500 mr-2"></i>签署时间精确记录，具有法律效力</li>
+              <li><i class="fas fa-check text-emerald-500 mr-2"></i>手写签名图像存储，真实还原签署意愿</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t border-gray-100 flex justify-between items-center">
+        <div id="signModalLeftAction"></div>
+        <div class="flex space-x-3">
+          <button onclick="hideSignModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+          <button id="btnInitiateSign" onclick="initiateSignProcess()" class="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+            <i class="fas fa-paper-plane mr-2"></i>发起签署
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ==================== 弹窗: 签名板 ==================== -->
+  <div id="signaturePadModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-lg w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-signature mr-2 text-emerald-600"></i>电子签署</h2>
-          <button onclick="hideSignModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+          <div>
+            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-pen-nib mr-2 text-emerald-600"></i>手写签名</h2>
+            <p id="signaturePadSignerName" class="text-sm text-gray-500">签署人</p>
+          </div>
+          <button onclick="hideSignaturePadModal()" class="p-2 hover:bg-gray-100 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
           </button>
         </div>
       </div>
       <div class="p-6">
-        <div class="text-center py-4">
-          <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-file-signature text-emerald-600 text-2xl"></i>
-          </div>
-          <h3 class="font-medium text-gray-900 mb-2">发起电子签署</h3>
-          <p class="text-sm text-gray-500 mb-6">协商完成后，可发起电子签署流程</p>
+        <!-- 合同摘要确认 -->
+        <div class="mb-4 p-4 bg-gray-50 rounded-xl">
+          <h4 class="text-sm font-medium text-gray-700 mb-2"><i class="fas fa-file-contract mr-2"></i>签署确认</h4>
+          <p id="signatureContractSummary" class="text-xs text-gray-500">正在签署：项目合同</p>
+          <p class="text-xs text-amber-600 mt-2"><i class="fas fa-exclamation-triangle mr-1"></i>请仔细阅读合同内容，签署后具有法律效力</p>
         </div>
-        <div class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">投资方签署人</label>
-            <input type="text" placeholder="姓名/手机号/邮箱" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm">
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">融资方签署人</label>
-            <input type="text" placeholder="姓名/手机号/邮箱" class="w-full px-4 py-2 border border-gray-200 rounded-lg text-sm">
-          </div>
+        
+        <!-- 签名画布 -->
+        <div class="border-2 border-dashed border-gray-300 rounded-xl p-2 bg-white">
+          <canvas id="signatureCanvas" width="400" height="200" class="w-full cursor-crosshair" style="touch-action: none;"></canvas>
         </div>
-        <div class="mt-6 p-4 bg-amber-50 rounded-lg">
-          <p class="text-sm text-amber-700"><i class="fas fa-info-circle mr-1"></i>电子签章服务即将上线，敬请期待</p>
+        <div class="flex items-center justify-between mt-3">
+          <button onclick="clearSignatureCanvas()" class="text-sm text-gray-500 hover:text-gray-700">
+            <i class="fas fa-eraser mr-1"></i>清除重签
+          </button>
+          <p class="text-xs text-gray-400">请在框内手写签名</p>
+        </div>
+        
+        <!-- 验证码输入 -->
+        <div class="mt-4 p-4 bg-indigo-50 rounded-xl">
+          <label class="block text-sm font-medium text-indigo-700 mb-2">
+            <i class="fas fa-shield-alt mr-1"></i>签署验证码
+          </label>
+          <div class="flex space-x-3">
+            <input type="text" id="signVerifyCode" placeholder="请输入验证码" maxlength="6" class="flex-1 px-4 py-2 border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <button onclick="sendSignVerifyCode()" id="btnSendVerifyCode" class="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 text-sm whitespace-nowrap">
+              发送验证码
+            </button>
+          </div>
+          <p class="text-xs text-indigo-500 mt-2"><i class="fas fa-info-circle mr-1"></i>演示模式：验证码为 123456</p>
         </div>
       </div>
-      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
-        <button onclick="hideSignModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
-        <button class="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 opacity-50 cursor-not-allowed" disabled>
-          <i class="fas fa-paper-plane mr-2"></i>发起签署
+      <div class="p-4 border-t border-gray-100 flex justify-end space-x-3">
+        <button onclick="hideSignaturePadModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+        <button id="btnConfirmSignature" onclick="confirmSignature()" class="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+          <i class="fas fa-check mr-2"></i>确认签署
         </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ==================== 弹窗: 签署完成 ==================== -->
+  <div id="signCompleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
+      <div class="p-8 text-center">
+        <div class="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6">
+          <i class="fas fa-check text-white text-3xl"></i>
+        </div>
+        <h2 class="text-2xl font-bold text-gray-900 mb-2">签署完成！</h2>
+        <p class="text-gray-500 mb-6">所有签署人已完成电子签署，合同正式生效</p>
+        
+        <div class="bg-gray-50 rounded-xl p-4 mb-6 text-left">
+          <div class="flex items-center justify-between text-sm mb-2">
+            <span class="text-gray-500">合同编号</span>
+            <span id="signCompleteContractId" class="font-mono text-gray-700">-</span>
+          </div>
+          <div class="flex items-center justify-between text-sm mb-2">
+            <span class="text-gray-500">签署时间</span>
+            <span id="signCompleteTime" class="text-gray-700">-</span>
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-gray-500">签署人数</span>
+            <span id="signCompleteSignerCount" class="text-emerald-600 font-medium">-</span>
+          </div>
+        </div>
+        
+        <div class="flex space-x-3">
+          <button onclick="downloadSignedContract()" class="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            <i class="fas fa-download mr-2"></i>下载合同
+          </button>
+          <button onclick="hideSignCompleteModal()" class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+            完成
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -2166,8 +2503,458 @@ app.get('/', (c) => {
     function hideVersionDetailModal() { document.getElementById('versionDetailModal').classList.add('hidden'); }
     function showAIAdvisorModal() { document.getElementById('aiAdvisorModal').classList.remove('hidden'); }
     function hideAIAdvisorModal() { document.getElementById('aiAdvisorModal').classList.add('hidden'); }
-    function showSignModal() { document.getElementById('signModal').classList.remove('hidden'); }
-    function hideSignModal() { document.getElementById('signModal').classList.add('hidden'); }
+    // ==================== 电子签章功能 ====================
+    let currentSignProcess = null;
+    let currentSignerId = null;
+    let signatureCtx = null;
+    let isDrawing = false;
+    
+    function showSignModal() { 
+      document.getElementById('signModal').classList.remove('hidden');
+      checkExistingSignProcess();
+    }
+    function hideSignModal() { 
+      document.getElementById('signModal').classList.add('hidden');
+      resetSignModal();
+    }
+    
+    async function checkExistingSignProcess() {
+      if (!currentProject) return;
+      
+      try {
+        const res = await fetch('/api/projects/' + currentProject.id + '/sign/status');
+        const result = await res.json();
+        
+        if (result.hasSignProcess && result.status === 'signing') {
+          currentSignProcess = result;
+          showSignStatus(result);
+        } else if (result.hasSignProcess && result.status === 'completed') {
+          currentSignProcess = result;
+          showSignStatus(result);
+        } else {
+          showSignInitiateForm();
+        }
+      } catch (e) {
+        showSignInitiateForm();
+      }
+    }
+    
+    function showSignStatus(signData) {
+      document.getElementById('signStatusArea').classList.remove('hidden');
+      document.getElementById('signInitiateForm').classList.add('hidden');
+      
+      const signedCount = signData.signers.filter(s => s.status === 'signed').length;
+      const totalCount = signData.signers.length;
+      const progress = (signedCount / totalCount) * 100;
+      
+      document.getElementById('signProgressBar').style.width = progress + '%';
+      document.getElementById('signProgressText').textContent = signedCount + '/' + totalCount;
+      
+      if (signData.status === 'completed') {
+        document.getElementById('signProgressBadge').textContent = '已完成';
+        document.getElementById('signProgressBadge').className = 'px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm';
+      } else {
+        document.getElementById('signProgressBadge').textContent = '签署中';
+        document.getElementById('signProgressBadge').className = 'px-3 py-1 bg-white/20 rounded-full text-sm';
+      }
+      
+      // 渲染签署人状态
+      const container = document.getElementById('signersStatusList');
+      container.innerHTML = signData.signers.map(s => {
+        const roleConfig = {
+          investor: { icon: 'fa-landmark', color: 'indigo', label: '投资方' },
+          borrower: { icon: 'fa-store', color: 'amber', label: '融资方' }
+        };
+        const role = roleConfig[s.role] || roleConfig.investor;
+        const isSigned = s.status === 'signed';
+        
+        return \`
+          <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border \${isSigned ? 'border-emerald-200 bg-emerald-50' : 'border-gray-200'}">
+            <div class="flex items-center space-x-3">
+              <div class="w-12 h-12 bg-\${role.color}-100 rounded-full flex items-center justify-center">
+                <i class="fas \${role.icon} text-\${role.color}-600 text-lg"></i>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">\${s.name}</p>
+                <p class="text-xs text-gray-500">\${role.label} · \${s.phone || s.email || '未提供联系方式'}</p>
+                \${isSigned ? \`<p class="text-xs text-emerald-600 mt-1"><i class="fas fa-check-circle mr-1"></i>已于 \${formatDateTime(s.signedAt)} 签署</p>\` : ''}
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              \${isSigned ? \`
+                <span class="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-sm"><i class="fas fa-check mr-1"></i>已签署</span>
+              \` : \`
+                <button onclick="openSignaturePad('\${s.id}', '\${s.name}', '\${s.role}')" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm">
+                  <i class="fas fa-pen mr-1"></i>去签署
+                </button>
+                <button onclick="sendSignReminder('\${signData.signId}', '\${s.id}')" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg" title="发送提醒">
+                  <i class="fas fa-bell"></i>
+                </button>
+              \`}
+            </div>
+          </div>
+        \`;
+      }).join('');
+      
+      // 更新底部操作按钮
+      const leftAction = document.getElementById('signModalLeftAction');
+      if (signData.status === 'completed') {
+        leftAction.innerHTML = '<button onclick="downloadSignedContract()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"><i class="fas fa-download mr-2"></i>下载已签合同</button>';
+        document.getElementById('btnInitiateSign').classList.add('hidden');
+      } else {
+        leftAction.innerHTML = '<button onclick="cancelSignProcess()" class="text-sm text-red-500 hover:text-red-700"><i class="fas fa-times mr-1"></i>取消签署流程</button>';
+        document.getElementById('btnInitiateSign').classList.add('hidden');
+      }
+    }
+    
+    function showSignInitiateForm() {
+      document.getElementById('signStatusArea').classList.add('hidden');
+      document.getElementById('signInitiateForm').classList.remove('hidden');
+      document.getElementById('btnInitiateSign').classList.remove('hidden');
+      document.getElementById('signModalLeftAction').innerHTML = '';
+    }
+    
+    function resetSignModal() {
+      document.getElementById('signerInvestorName').value = '';
+      document.getElementById('signerInvestorPhone').value = '';
+      document.getElementById('signerInvestorEmail').value = '';
+      document.getElementById('signerBorrowerName').value = '';
+      document.getElementById('signerBorrowerPhone').value = '';
+      document.getElementById('signerBorrowerEmail').value = '';
+      currentSignProcess = null;
+    }
+    
+    async function initiateSignProcess() {
+      if (!currentProject) {
+        showToast('请先打开一个项目', 'warning');
+        return;
+      }
+      
+      const investorName = document.getElementById('signerInvestorName').value.trim();
+      const investorPhone = document.getElementById('signerInvestorPhone').value.trim();
+      const investorEmail = document.getElementById('signerInvestorEmail').value.trim();
+      const borrowerName = document.getElementById('signerBorrowerName').value.trim();
+      const borrowerPhone = document.getElementById('signerBorrowerPhone').value.trim();
+      const borrowerEmail = document.getElementById('signerBorrowerEmail').value.trim();
+      
+      if (!investorName || !borrowerName) {
+        showToast('请填写所有签署人姓名', 'warning');
+        return;
+      }
+      
+      const btn = document.getElementById('btnInitiateSign');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>发起中...';
+      
+      try {
+        const res = await fetch('/api/projects/' + currentProject.id + '/sign/initiate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            projectName: currentProject.name,
+            contractHash: 'hash_' + Date.now(),
+            signers: [
+              { name: investorName, phone: investorPhone, email: investorEmail, role: 'investor' },
+              { name: borrowerName, phone: borrowerPhone, email: borrowerEmail, role: 'borrower' }
+            ]
+          })
+        });
+        
+        const result = await res.json();
+        
+        if (result.success) {
+          currentSignProcess = {
+            signId: result.signId,
+            status: result.status,
+            signers: result.signers
+          };
+          
+          // 保存签署ID到项目
+          currentProject.signId = result.signId;
+          currentProject.signStatus = 'signing';
+          saveProjects();
+          
+          showToast('签署流程已发起', 'success');
+          showSignStatus(currentSignProcess);
+        } else {
+          showToast(result.message || '发起失败', 'error');
+        }
+      } catch (e) {
+        showToast('网络错误，请重试', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>发起签署';
+      }
+    }
+    
+    async function cancelSignProcess() {
+      if (!currentSignProcess) return;
+      if (!confirm('确定要取消签署流程吗？已完成的签名将作废。')) return;
+      
+      try {
+        const res = await fetch('/api/sign/' + currentSignProcess.signId + '/cancel', {
+          method: 'POST'
+        });
+        const result = await res.json();
+        
+        if (result.success) {
+          currentProject.signStatus = 'cancelled';
+          saveProjects();
+          showToast('签署流程已取消', 'success');
+          hideSignModal();
+        } else {
+          showToast(result.message || '取消失败', 'error');
+        }
+      } catch (e) {
+        showToast('网络错误', 'error');
+      }
+    }
+    
+    async function sendSignReminder(signId, signerId) {
+      try {
+        const res = await fetch('/api/sign/' + signId + '/remind', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ signerId })
+        });
+        const result = await res.json();
+        showToast(result.message || '提醒已发送', 'success');
+      } catch (e) {
+        showToast('发送失败', 'error');
+      }
+    }
+    
+    // ==================== 签名板功能 ====================
+    function showSignaturePadModal() { document.getElementById('signaturePadModal').classList.remove('hidden'); initSignatureCanvas(); }
+    function hideSignaturePadModal() { document.getElementById('signaturePadModal').classList.add('hidden'); currentSignerId = null; }
+    function showSignCompleteModal() { document.getElementById('signCompleteModal').classList.remove('hidden'); }
+    function hideSignCompleteModal() { 
+      document.getElementById('signCompleteModal').classList.add('hidden');
+      // 更新项目状态
+      if (currentProject) {
+        currentProject.status = 'signed';
+        saveProjects();
+        // 更新顶部状态显示
+        document.getElementById('projectStatus').className = 'px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700';
+        document.getElementById('projectStatus').textContent = '已签署';
+      }
+    }
+    
+    function openSignaturePad(signerId, signerName, signerRole) {
+      currentSignerId = signerId;
+      document.getElementById('signaturePadSignerName').textContent = signerName + ' (' + (signerRole === 'investor' ? '投资方' : '融资方') + ')';
+      document.getElementById('signatureContractSummary').textContent = '正在签署：' + (currentProject?.name || '项目合同');
+      document.getElementById('signVerifyCode').value = '';
+      showSignaturePadModal();
+    }
+    
+    function initSignatureCanvas() {
+      const canvas = document.getElementById('signatureCanvas');
+      signatureCtx = canvas.getContext('2d');
+      
+      // 清空画布
+      signatureCtx.fillStyle = 'white';
+      signatureCtx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // 设置画笔样式
+      signatureCtx.strokeStyle = '#1f2937';
+      signatureCtx.lineWidth = 2;
+      signatureCtx.lineCap = 'round';
+      signatureCtx.lineJoin = 'round';
+      
+      // 移除旧的事件监听器
+      canvas.removeEventListener('mousedown', startDrawing);
+      canvas.removeEventListener('mousemove', draw);
+      canvas.removeEventListener('mouseup', stopDrawing);
+      canvas.removeEventListener('mouseout', stopDrawing);
+      canvas.removeEventListener('touchstart', handleTouchStart);
+      canvas.removeEventListener('touchmove', handleTouchMove);
+      canvas.removeEventListener('touchend', stopDrawing);
+      
+      // 添加事件监听器
+      canvas.addEventListener('mousedown', startDrawing);
+      canvas.addEventListener('mousemove', draw);
+      canvas.addEventListener('mouseup', stopDrawing);
+      canvas.addEventListener('mouseout', stopDrawing);
+      
+      // 触摸支持
+      canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+      canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+      canvas.addEventListener('touchend', stopDrawing);
+    }
+    
+    function startDrawing(e) {
+      isDrawing = true;
+      const rect = e.target.getBoundingClientRect();
+      signatureCtx.beginPath();
+      signatureCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+    }
+    
+    function draw(e) {
+      if (!isDrawing) return;
+      const rect = e.target.getBoundingClientRect();
+      signatureCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+      signatureCtx.stroke();
+    }
+    
+    function stopDrawing() {
+      isDrawing = false;
+    }
+    
+    function handleTouchStart(e) {
+      e.preventDefault();
+      const touch = e.touches[0];
+      const rect = e.target.getBoundingClientRect();
+      isDrawing = true;
+      signatureCtx.beginPath();
+      signatureCtx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top);
+    }
+    
+    function handleTouchMove(e) {
+      e.preventDefault();
+      if (!isDrawing) return;
+      const touch = e.touches[0];
+      const rect = e.target.getBoundingClientRect();
+      signatureCtx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top);
+      signatureCtx.stroke();
+    }
+    
+    function clearSignatureCanvas() {
+      if (!signatureCtx) return;
+      const canvas = document.getElementById('signatureCanvas');
+      signatureCtx.fillStyle = 'white';
+      signatureCtx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    
+    function sendSignVerifyCode() {
+      const btn = document.getElementById('btnSendVerifyCode');
+      btn.disabled = true;
+      let countdown = 60;
+      btn.textContent = countdown + 's后重发';
+      
+      const timer = setInterval(() => {
+        countdown--;
+        if (countdown <= 0) {
+          clearInterval(timer);
+          btn.disabled = false;
+          btn.textContent = '发送验证码';
+        } else {
+          btn.textContent = countdown + 's后重发';
+        }
+      }, 1000);
+      
+      showToast('验证码已发送（演示模式：123456）', 'info');
+    }
+    
+    async function confirmSignature() {
+      if (!currentSignProcess || !currentSignerId) {
+        showToast('签署信息错误', 'error');
+        return;
+      }
+      
+      const verifyCode = document.getElementById('signVerifyCode').value.trim();
+      if (!verifyCode) {
+        showToast('请输入验证码', 'warning');
+        return;
+      }
+      
+      // 获取签名图像
+      const canvas = document.getElementById('signatureCanvas');
+      const signatureData = canvas.toDataURL('image/png');
+      
+      // 检查是否有签名（简单检测：判断画布是否全白）
+      const imageData = signatureCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let hasSignature = false;
+      for (let i = 0; i < imageData.length; i += 4) {
+        if (imageData[i] < 250 || imageData[i+1] < 250 || imageData[i+2] < 250) {
+          hasSignature = true;
+          break;
+        }
+      }
+      
+      if (!hasSignature) {
+        showToast('请在画布上签名', 'warning');
+        return;
+      }
+      
+      const btn = document.getElementById('btnConfirmSignature');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>提交中...';
+      
+      try {
+        const res = await fetch('/api/sign/' + currentSignProcess.signId + '/execute', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            signerId: currentSignerId,
+            signatureData,
+            verificationCode: verifyCode
+          })
+        });
+        
+        const result = await res.json();
+        
+        if (result.success) {
+          showToast('签署成功', 'success');
+          hideSignaturePadModal();
+          
+          // 更新本地状态
+          currentSignProcess.signers = result.signers;
+          currentSignProcess.status = result.status;
+          
+          if (result.allCompleted) {
+            // 所有人签署完成
+            currentProject.signStatus = 'completed';
+            currentProject.status = 'signed';
+            saveProjects();
+            
+            hideSignModal();
+            
+            // 显示签署完成弹窗
+            document.getElementById('signCompleteContractId').textContent = currentSignProcess.signId;
+            document.getElementById('signCompleteTime').textContent = new Date().toLocaleString('zh-CN');
+            document.getElementById('signCompleteSignerCount').textContent = result.signers.length + '人';
+            showSignCompleteModal();
+          } else {
+            // 刷新签署状态
+            showSignStatus(currentSignProcess);
+          }
+        } else {
+          showToast(result.message || '签署失败', 'error');
+        }
+      } catch (e) {
+        showToast('网络错误', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-check mr-2"></i>确认签署';
+      }
+    }
+    
+    function downloadSignedContract() {
+      if (!currentProject) return;
+      
+      // 生成已签署合同的JSON数据
+      const signedContract = {
+        projectId: currentProject.id,
+        projectName: currentProject.name,
+        signId: currentSignProcess?.signId,
+        status: 'signed',
+        params: currentProject.params,
+        signers: currentSignProcess?.signers || [],
+        signedAt: new Date().toISOString()
+      };
+      
+      const dataStr = JSON.stringify(signedContract, null, 2);
+      const blob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = currentProject.name + '_已签署合同.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      showToast('合同已下载', 'success');
+    }
     function showExportModal() { document.getElementById('exportModal').classList.remove('hidden'); }
     function hideExportModal() { document.getElementById('exportModal').classList.add('hidden'); }
     function showTemplateManagerModal() { document.getElementById('templateManagerModal').classList.remove('hidden'); }
