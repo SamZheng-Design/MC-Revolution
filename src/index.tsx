@@ -583,24 +583,167 @@ app.post('/api/sign/:signId/remind', async (c) => {
   })
 })
 
-// ==================== 自定义模板API（预留接口）====================
-// 获取自定义模板
+// ==================== 自定义模板API ====================
+// 内存存储自定义模板（生产环境应使用D1/KV）
+const customTemplateStore = new Map<string, any>()
+
+// 获取自定义模板列表
 app.get('/api/custom-templates', async (c) => {
-  // TODO: 从数据库获取用户自定义模板
+  const templates = Array.from(customTemplateStore.values())
   return c.json({ 
-    templates: [],
-    message: '模板定制功能开发中'
+    success: true,
+    templates,
+    count: templates.length
   })
+})
+
+// 获取单个自定义模板
+app.get('/api/custom-templates/:id', async (c) => {
+  const id = c.req.param('id')
+  const template = customTemplateStore.get(id)
+  if (!template) {
+    return c.json({ success: false, message: '模板不存在' }, 404)
+  }
+  return c.json({ success: true, template })
 })
 
 // 创建自定义模板
 app.post('/api/custom-templates', async (c) => {
   const template = await c.req.json()
-  // TODO: 保存自定义模板
+  const templateId = 'custom_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6)
+  
+  const newTemplate = {
+    id: templateId,
+    name: template.name || '未命名模板',
+    icon: template.icon || 'fa-file-contract',
+    description: template.description || '',
+    color: template.color || 'gray',
+    industry: template.industry || '自定义',
+    defaultParams: template.defaultParams || {},
+    modules: template.modules || [],
+    fullText: template.fullText || [],
+    isCustom: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+  
+  customTemplateStore.set(templateId, newTemplate)
+  
   return c.json({ 
     success: true,
-    templateId: 'tpl_' + Date.now(),
-    message: '模板已保存（演示模式）'
+    templateId,
+    template: newTemplate,
+    message: '模板已创建'
+  })
+})
+
+// 更新自定义模板
+app.put('/api/custom-templates/:id', async (c) => {
+  const id = c.req.param('id')
+  const updates = await c.req.json()
+  
+  const existing = customTemplateStore.get(id)
+  if (!existing) {
+    return c.json({ success: false, message: '模板不存在' }, 404)
+  }
+  
+  const updated = {
+    ...existing,
+    ...updates,
+    id, // 确保ID不变
+    isCustom: true,
+    updatedAt: new Date().toISOString()
+  }
+  
+  customTemplateStore.set(id, updated)
+  
+  return c.json({ 
+    success: true,
+    template: updated,
+    message: '模板已更新'
+  })
+})
+
+// 删除自定义模板
+app.delete('/api/custom-templates/:id', async (c) => {
+  const id = c.req.param('id')
+  
+  if (!customTemplateStore.has(id)) {
+    return c.json({ success: false, message: '模板不存在' }, 404)
+  }
+  
+  customTemplateStore.delete(id)
+  
+  return c.json({ 
+    success: true,
+    message: '模板已删除'
+  })
+})
+
+// 复制系统模板为自定义模板
+app.post('/api/custom-templates/clone/:sourceId', async (c) => {
+  const sourceId = c.req.param('sourceId')
+  const { name } = await c.req.json()
+  
+  // 获取源模板（系统模板）
+  const sourceTemplate = industryTemplates[sourceId]
+  if (!sourceTemplate) {
+    return c.json({ success: false, message: '源模板不存在' }, 404)
+  }
+  
+  const templateId = 'custom_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6)
+  
+  const newTemplate = {
+    ...JSON.parse(JSON.stringify(sourceTemplate)), // 深拷贝
+    id: templateId,
+    name: name || sourceTemplate.name + ' (副本)',
+    isCustom: true,
+    sourceTemplateId: sourceId,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+  
+  customTemplateStore.set(templateId, newTemplate)
+  
+  return c.json({ 
+    success: true,
+    templateId,
+    template: newTemplate,
+    message: '模板已复制'
+  })
+})
+
+// 从项目创建模板
+app.post('/api/custom-templates/from-project', async (c) => {
+  const { name, description, projectParams, sourceTemplateId } = await c.req.json()
+  
+  // 获取源模板结构
+  const sourceTemplate = industryTemplates[sourceTemplateId]
+  if (!sourceTemplate) {
+    return c.json({ success: false, message: '源模板不存在' }, 404)
+  }
+  
+  const templateId = 'custom_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6)
+  
+  const newTemplate = {
+    ...JSON.parse(JSON.stringify(sourceTemplate)),
+    id: templateId,
+    name: name || '从项目创建的模板',
+    description: description || '基于项目参数创建',
+    defaultParams: projectParams || sourceTemplate.defaultParams,
+    isCustom: true,
+    sourceTemplateId,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+  
+  customTemplateStore.set(templateId, newTemplate)
+  
+  return c.json({ 
+    success: true,
+    templateId,
+    template: newTemplate,
+    message: '模板已从项目创建'
   })
 })
 
@@ -1765,30 +1908,188 @@ app.get('/', (c) => {
 
   <!-- ==================== 弹窗: 模板管理 ==================== -->
   <div id="templateManagerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-hidden animate-in">
-      <div class="p-6 border-b border-gray-100">
+    <div class="bg-white rounded-2xl max-w-3xl w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-layer-group mr-2 text-indigo-600"></i>模板管理</h2>
-          <button onclick="hideTemplateManagerModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+          <div>
+            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-layer-group mr-2 text-indigo-600"></i>模板管理</h2>
+            <p class="text-xs text-gray-500 mt-1">管理系统模板和自定义行业模板</p>
+          </div>
+          <button onclick="hideTemplateManagerModal()" class="p-2 hover:bg-white/50 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
           </button>
         </div>
       </div>
-      <div class="p-6 overflow-y-auto max-h-[60vh]">
+      <div class="p-6 overflow-y-auto max-h-[65vh]">
+        <!-- 标签切换和操作 -->
         <div class="flex items-center justify-between mb-4">
-          <div class="flex space-x-2">
-            <button class="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg text-sm font-medium">系统模板</button>
-            <button class="px-3 py-1.5 text-gray-600 hover:bg-gray-100 rounded-lg text-sm">我的模板</button>
+          <div class="flex space-x-2 bg-gray-100 rounded-lg p-1">
+            <button onclick="switchTemplateTab('system')" id="tabSystemTemplate" class="px-4 py-2 bg-white text-indigo-700 rounded-lg text-sm font-medium shadow-sm">
+              <i class="fas fa-building mr-1"></i>系统模板
+            </button>
+            <button onclick="switchTemplateTab('custom')" id="tabCustomTemplate" class="px-4 py-2 text-gray-600 rounded-lg text-sm font-medium hover:bg-white/50">
+              <i class="fas fa-user mr-1"></i>我的模板 <span id="customTemplateCount" class="ml-1 px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-full text-xs">0</span>
+            </button>
           </div>
-          <button class="px-3 py-1.5 border border-indigo-300 text-indigo-600 rounded-lg text-sm hover:bg-indigo-50">
-            <i class="fas fa-plus mr-1"></i>创建模板
+          <button onclick="showCreateTemplateModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 flex items-center">
+            <i class="fas fa-plus mr-2"></i>创建模板
           </button>
         </div>
-        <div id="templateManagerGrid" class="grid grid-cols-2 gap-4"></div>
-        <div class="mt-6 p-4 bg-gray-50 rounded-lg">
-          <h4 class="font-medium text-gray-700 mb-2">自定义模板功能</h4>
-          <p class="text-sm text-gray-500">即将支持基于现有模板创建自定义行业模板，设置专属参数和条款</p>
+        
+        <!-- 系统模板列表 -->
+        <div id="systemTemplateList" class="grid grid-cols-2 gap-4">
+          <!-- 动态渲染 -->
         </div>
+        
+        <!-- 自定义模板列表 -->
+        <div id="customTemplateList" class="hidden">
+          <div id="customTemplateGrid" class="grid grid-cols-2 gap-4">
+            <!-- 动态渲染 -->
+          </div>
+          <div id="emptyCustomTemplate" class="text-center py-12">
+            <div class="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-folder-open text-gray-400 text-2xl"></i>
+            </div>
+            <h4 class="font-medium text-gray-700 mb-2">暂无自定义模板</h4>
+            <p class="text-sm text-gray-500 mb-4">基于系统模板创建专属行业模板</p>
+            <button onclick="showCreateTemplateModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">
+              <i class="fas fa-plus mr-2"></i>创建第一个模板
+            </button>
+          </div>
+        </div>
+        
+        <!-- 模板操作提示 -->
+        <div class="mt-6 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-xl border border-amber-200">
+          <h4 class="font-medium text-amber-800 mb-2"><i class="fas fa-lightbulb mr-2"></i>模板使用提示</h4>
+          <ul class="text-sm text-amber-700 space-y-1">
+            <li><i class="fas fa-check text-amber-500 mr-2"></i>复制系统模板后可自由修改参数默认值</li>
+            <li><i class="fas fa-check text-amber-500 mr-2"></i>从项目另存可保留已协商的参数作为模板</li>
+            <li><i class="fas fa-check text-amber-500 mr-2"></i>自定义模板仅保存在本地浏览器中</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ==================== 弹窗: 创建/编辑模板 ==================== -->
+  <div id="createTemplateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h2 id="createTemplateTitle" class="text-lg font-bold text-gray-900"><i class="fas fa-plus-circle mr-2 text-indigo-600"></i>创建自定义模板</h2>
+          <button onclick="hideCreateTemplateModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+            <i class="fas fa-times text-gray-500"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-6 overflow-y-auto max-h-[65vh]">
+        <!-- 创建方式选择 -->
+        <div id="templateCreateMethod" class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-3">选择创建方式</label>
+          <div class="grid grid-cols-2 gap-3">
+            <button onclick="selectCreateMethod('clone')" id="methodClone" class="create-method-btn p-4 border-2 border-indigo-500 bg-indigo-50 rounded-xl text-left">
+              <div class="flex items-center mb-2">
+                <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center mr-3">
+                  <i class="fas fa-copy text-white"></i>
+                </div>
+                <div>
+                  <h4 class="font-medium text-indigo-900">复制系统模板</h4>
+                  <p class="text-xs text-indigo-600">基于现有模板修改</p>
+                </div>
+              </div>
+            </button>
+            <button onclick="selectCreateMethod('blank')" id="methodBlank" class="create-method-btn p-4 border-2 border-gray-200 rounded-xl text-left hover:border-gray-400">
+              <div class="flex items-center mb-2">
+                <div class="w-10 h-10 bg-gray-400 rounded-lg flex items-center justify-center mr-3">
+                  <i class="fas fa-file text-white"></i>
+                </div>
+                <div>
+                  <h4 class="font-medium text-gray-700">空白模板</h4>
+                  <p class="text-xs text-gray-500">从零开始创建</p>
+                </div>
+              </div>
+            </button>
+          </div>
+        </div>
+        
+        <!-- 源模板选择（复制模式） -->
+        <div id="sourceTemplateSelect" class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">选择源模板</label>
+          <div id="sourceTemplateOptions" class="grid grid-cols-3 gap-2">
+            <!-- 动态渲染 -->
+          </div>
+        </div>
+        
+        <!-- 模板基本信息 -->
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">模板名称 <span class="text-red-500">*</span></label>
+            <input type="text" id="newTemplateName" placeholder="例如：杭州餐饮连锁专用模板" 
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">行业分类</label>
+              <select id="newTemplateIndustry" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <option value="餐饮">餐饮</option>
+                <option value="零售">零售</option>
+                <option value="医疗">医疗</option>
+                <option value="教育">教育</option>
+                <option value="娱乐">娱乐</option>
+                <option value="其他">其他</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-2">图标颜色</label>
+              <div class="flex space-x-2">
+                <button onclick="selectTemplateColor('indigo')" class="color-btn w-10 h-10 bg-indigo-500 rounded-lg border-2 border-indigo-600"></button>
+                <button onclick="selectTemplateColor('amber')" class="color-btn w-10 h-10 bg-amber-500 rounded-lg border-2 border-transparent hover:border-amber-600"></button>
+                <button onclick="selectTemplateColor('emerald')" class="color-btn w-10 h-10 bg-emerald-500 rounded-lg border-2 border-transparent hover:border-emerald-600"></button>
+                <button onclick="selectTemplateColor('rose')" class="color-btn w-10 h-10 bg-rose-500 rounded-lg border-2 border-transparent hover:border-rose-600"></button>
+                <button onclick="selectTemplateColor('purple')" class="color-btn w-10 h-10 bg-purple-500 rounded-lg border-2 border-transparent hover:border-purple-600"></button>
+                <button onclick="selectTemplateColor('cyan')" class="color-btn w-10 h-10 bg-cyan-500 rounded-lg border-2 border-transparent hover:border-cyan-600"></button>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">模板描述</label>
+            <textarea id="newTemplateDesc" rows="2" placeholder="简要描述此模板的适用场景..."
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+          </div>
+          
+          <!-- 默认参数编辑 -->
+          <div id="defaultParamsEditor" class="hidden">
+            <label class="block text-sm font-medium text-gray-700 mb-2">默认参数值</label>
+            <div id="defaultParamsFields" class="space-y-2 max-h-48 overflow-y-auto p-3 bg-gray-50 rounded-xl">
+              <!-- 动态渲染参数字段 -->
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="p-4 border-t border-gray-100 flex justify-end space-x-3">
+        <button onclick="hideCreateTemplateModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+        <button id="btnSaveTemplate" onclick="saveCustomTemplate()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+          <i class="fas fa-save mr-2"></i>保存模板
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ==================== 弹窗: 模板详情 ==================== -->
+  <div id="templateDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-hidden animate-in">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-info-circle mr-2 text-indigo-600"></i>模板详情</h2>
+          <button onclick="hideTemplateDetailModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+            <i class="fas fa-times text-gray-500"></i>
+          </button>
+        </div>
+      </div>
+      <div id="templateDetailContent" class="p-6 overflow-y-auto max-h-[60vh]">
+        <!-- 动态内容 -->
       </div>
     </div>
   </div>
@@ -1805,6 +2106,7 @@ app.get('/', (c) => {
     // ==================== 初始化 ====================
     async function init() {
       await loadTemplates();
+      await loadCustomTemplatesOnInit();
       renderProjects();
       updateStats();
     }
@@ -1814,10 +2116,14 @@ app.get('/', (c) => {
         const res = await fetch('/api/templates');
         templates = await res.json();
         renderTemplateGrid();
-        renderTemplateManagerGrid();
       } catch (e) {
         console.error('Failed to load templates:', e);
       }
+    }
+    
+    async function loadCustomTemplatesOnInit() {
+      // 从localStorage加载自定义模板
+      customTemplates = JSON.parse(localStorage.getItem('rbf_custom_templates') || '[]');
     }
     
     // ==================== 项目列表 ====================
@@ -1941,14 +2247,23 @@ app.get('/', (c) => {
       if (!name) { alert('请输入项目名称'); return; }
       if (!selectedTemplateId) { alert('请选择行业模板'); return; }
       
-      const res = await fetch('/api/templates/' + selectedTemplateId);
-      const template = await res.json();
+      let template;
+      
+      // 检查是系统模板还是自定义模板
+      const customTemplate = customTemplates.find(t => t.id === selectedTemplateId);
+      if (customTemplate) {
+        template = customTemplate;
+      } else {
+        const res = await fetch('/api/templates/' + selectedTemplateId);
+        template = await res.json();
+      }
       
       const project = {
         id: 'proj_' + Date.now(),
         name,
         note,
         templateId: selectedTemplateId,
+        isCustomTemplate: !!customTemplate,
         status: 'negotiating',
         params: { ...template.defaultParams },
         negotiations: [],
@@ -1972,8 +2287,15 @@ app.get('/', (c) => {
       if (!project) return;
       
       currentProject = project;
-      const res = await fetch('/api/templates/' + project.templateId);
-      currentProject.template = await res.json();
+      
+      // 检查是系统模板还是自定义模板
+      const customTemplate = customTemplates.find(t => t.id === project.templateId);
+      if (customTemplate) {
+        currentProject.template = customTemplate;
+      } else {
+        const res = await fetch('/api/templates/' + project.templateId);
+        currentProject.template = await res.json();
+      }
       
       document.getElementById('pageProjects').classList.remove('active');
       document.getElementById('pageNegotiation').classList.add('active');
@@ -2957,8 +3279,543 @@ app.get('/', (c) => {
     }
     function showExportModal() { document.getElementById('exportModal').classList.remove('hidden'); }
     function hideExportModal() { document.getElementById('exportModal').classList.add('hidden'); }
-    function showTemplateManagerModal() { document.getElementById('templateManagerModal').classList.remove('hidden'); }
+    function showTemplateManagerModal() { 
+      document.getElementById('templateManagerModal').classList.remove('hidden'); 
+      loadCustomTemplates();
+      renderSystemTemplateList();
+    }
     function hideTemplateManagerModal() { document.getElementById('templateManagerModal').classList.add('hidden'); }
+    function showCreateTemplateModal() { 
+      document.getElementById('createTemplateModal').classList.remove('hidden');
+      resetCreateTemplateForm();
+      renderSourceTemplateOptions();
+    }
+    function hideCreateTemplateModal() { document.getElementById('createTemplateModal').classList.add('hidden'); }
+    function showTemplateDetailModal() { document.getElementById('templateDetailModal').classList.remove('hidden'); }
+    function hideTemplateDetailModal() { document.getElementById('templateDetailModal').classList.add('hidden'); }
+    
+    // ==================== 模板定制功能 ====================
+    let customTemplates = JSON.parse(localStorage.getItem('rbf_custom_templates') || '[]');
+    let templateCreateMethod = 'clone';
+    let selectedSourceTemplate = null;
+    let selectedTemplateColor = 'indigo';
+    let editingTemplateId = null;
+    
+    async function loadCustomTemplates() {
+      // 从localStorage加载
+      customTemplates = JSON.parse(localStorage.getItem('rbf_custom_templates') || '[]');
+      document.getElementById('customTemplateCount').textContent = customTemplates.length;
+    }
+    
+    function saveCustomTemplates() {
+      localStorage.setItem('rbf_custom_templates', JSON.stringify(customTemplates));
+      document.getElementById('customTemplateCount').textContent = customTemplates.length;
+    }
+    
+    function switchTemplateTab(tab) {
+      const systemTab = document.getElementById('tabSystemTemplate');
+      const customTab = document.getElementById('tabCustomTemplate');
+      const systemList = document.getElementById('systemTemplateList');
+      const customList = document.getElementById('customTemplateList');
+      
+      if (tab === 'system') {
+        systemTab.className = 'px-4 py-2 bg-white text-indigo-700 rounded-lg text-sm font-medium shadow-sm';
+        customTab.className = 'px-4 py-2 text-gray-600 rounded-lg text-sm font-medium hover:bg-white/50';
+        systemList.classList.remove('hidden');
+        customList.classList.add('hidden');
+      } else {
+        systemTab.className = 'px-4 py-2 text-gray-600 rounded-lg text-sm font-medium hover:bg-white/50';
+        customTab.className = 'px-4 py-2 bg-white text-indigo-700 rounded-lg text-sm font-medium shadow-sm';
+        systemList.classList.add('hidden');
+        customList.classList.remove('hidden');
+        renderCustomTemplateList();
+      }
+    }
+    
+    function renderSystemTemplateList() {
+      const container = document.getElementById('systemTemplateList');
+      container.innerHTML = templates.map(t => \`
+        <div class="p-4 border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all">
+          <div class="flex items-center space-x-3 mb-3">
+            <div class="w-12 h-12 rounded-xl bg-\${t.color}-100 flex items-center justify-center">
+              <i class="fas \${t.icon} text-\${t.color}-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <h4 class="font-medium text-gray-900">\${t.name}</h4>
+              <p class="text-xs text-gray-500">系统模板</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-500 mb-3 line-clamp-2">\${t.description}</p>
+          <div class="flex items-center justify-between">
+            <button onclick="viewTemplateDetail('\${t.id}', false)" class="text-xs text-indigo-600 hover:text-indigo-700">
+              <i class="fas fa-eye mr-1"></i>查看详情
+            </button>
+            <button onclick="cloneSystemTemplate('\${t.id}')" class="text-xs text-emerald-600 hover:text-emerald-700">
+              <i class="fas fa-copy mr-1"></i>复制为我的模板
+            </button>
+          </div>
+        </div>
+      \`).join('');
+    }
+    
+    function renderCustomTemplateList() {
+      const container = document.getElementById('customTemplateGrid');
+      const emptyState = document.getElementById('emptyCustomTemplate');
+      
+      if (customTemplates.length === 0) {
+        container.classList.add('hidden');
+        emptyState.classList.remove('hidden');
+        return;
+      }
+      
+      container.classList.remove('hidden');
+      emptyState.classList.add('hidden');
+      
+      container.innerHTML = customTemplates.map(t => \`
+        <div class="p-4 border-2 border-\${t.color || 'gray'}-200 rounded-xl bg-\${t.color || 'gray'}-50/30 hover:shadow-md transition-all">
+          <div class="flex items-center space-x-3 mb-3">
+            <div class="w-12 h-12 rounded-xl bg-\${t.color || 'gray'}-100 flex items-center justify-center">
+              <i class="fas \${t.icon || 'fa-file-contract'} text-\${t.color || 'gray'}-600 text-xl"></i>
+            </div>
+            <div class="flex-1">
+              <h4 class="font-medium text-gray-900">\${t.name}</h4>
+              <p class="text-xs text-\${t.color || 'gray'}-600">自定义模板</p>
+            </div>
+            <div class="flex space-x-1">
+              <button onclick="editCustomTemplate('\${t.id}')" class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded" title="编辑">
+                <i class="fas fa-edit text-xs"></i>
+              </button>
+              <button onclick="deleteCustomTemplate('\${t.id}')" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="删除">
+                <i class="fas fa-trash text-xs"></i>
+              </button>
+            </div>
+          </div>
+          <p class="text-sm text-gray-500 mb-3 line-clamp-2">\${t.description || '暂无描述'}</p>
+          <div class="flex items-center justify-between text-xs">
+            <span class="text-gray-400">\${t.industry || '自定义'} · \${formatDate(t.createdAt)}</span>
+            <button onclick="useCustomTemplate('\${t.id}')" class="px-3 py-1 bg-\${t.color || 'gray'}-500 text-white rounded-lg hover:bg-\${t.color || 'gray'}-600">
+              使用此模板
+            </button>
+          </div>
+        </div>
+      \`).join('');
+    }
+    
+    function resetCreateTemplateForm() {
+      document.getElementById('newTemplateName').value = '';
+      document.getElementById('newTemplateDesc').value = '';
+      document.getElementById('newTemplateIndustry').value = '餐饮';
+      selectedTemplateColor = 'indigo';
+      templateCreateMethod = 'clone';
+      selectedSourceTemplate = null;
+      editingTemplateId = null;
+      
+      document.getElementById('createTemplateTitle').innerHTML = '<i class="fas fa-plus-circle mr-2 text-indigo-600"></i>创建自定义模板';
+      document.getElementById('defaultParamsEditor').classList.add('hidden');
+      
+      // 重置颜色选择
+      document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-600', 'border-amber-600', 'border-emerald-600', 'border-rose-600', 'border-purple-600', 'border-cyan-600');
+        btn.classList.add('border-transparent');
+      });
+      document.querySelector('.color-btn').classList.remove('border-transparent');
+      document.querySelector('.color-btn').classList.add('border-indigo-600');
+      
+      selectCreateMethod('clone');
+    }
+    
+    function selectCreateMethod(method) {
+      templateCreateMethod = method;
+      
+      document.querySelectorAll('.create-method-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-500', 'bg-indigo-50');
+        btn.classList.add('border-gray-200');
+      });
+      
+      if (method === 'clone') {
+        document.getElementById('methodClone').classList.remove('border-gray-200');
+        document.getElementById('methodClone').classList.add('border-indigo-500', 'bg-indigo-50');
+        document.getElementById('sourceTemplateSelect').classList.remove('hidden');
+      } else {
+        document.getElementById('methodBlank').classList.remove('border-gray-200');
+        document.getElementById('methodBlank').classList.add('border-indigo-500', 'bg-indigo-50');
+        document.getElementById('sourceTemplateSelect').classList.add('hidden');
+        document.getElementById('defaultParamsEditor').classList.add('hidden');
+      }
+    }
+    
+    function renderSourceTemplateOptions() {
+      const container = document.getElementById('sourceTemplateOptions');
+      container.innerHTML = templates.map(t => \`
+        <button onclick="selectSourceTemplate('\${t.id}')" id="srcTpl_\${t.id}" 
+          class="source-tpl-btn p-3 border-2 border-gray-200 rounded-xl text-center hover:border-indigo-300 transition-all">
+          <div class="w-10 h-10 rounded-lg bg-\${t.color}-100 flex items-center justify-center mx-auto mb-2">
+            <i class="fas \${t.icon} text-\${t.color}-600"></i>
+          </div>
+          <p class="text-xs font-medium text-gray-700">\${t.name}</p>
+        </button>
+      \`).join('');
+    }
+    
+    async function selectSourceTemplate(templateId) {
+      selectedSourceTemplate = templateId;
+      
+      document.querySelectorAll('.source-tpl-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-500', 'bg-indigo-50');
+        btn.classList.add('border-gray-200');
+      });
+      
+      const btn = document.getElementById('srcTpl_' + templateId);
+      if (btn) {
+        btn.classList.remove('border-gray-200');
+        btn.classList.add('border-indigo-500', 'bg-indigo-50');
+      }
+      
+      // 加载源模板的默认参数
+      try {
+        const res = await fetch('/api/templates/' + templateId);
+        const template = await res.json();
+        
+        if (template.defaultParams) {
+          renderDefaultParamsEditor(template.defaultParams);
+          document.getElementById('defaultParamsEditor').classList.remove('hidden');
+        }
+        
+        // 自动填充名称
+        if (!document.getElementById('newTemplateName').value) {
+          document.getElementById('newTemplateName').value = template.name + ' (自定义)';
+        }
+      } catch (e) {
+        console.error('加载模板失败:', e);
+      }
+    }
+    
+    function renderDefaultParamsEditor(params) {
+      const container = document.getElementById('defaultParamsFields');
+      const paramLabels = {
+        investmentAmount: '投资金额',
+        revenueShareRatio: '分成比例',
+        terminationReturn: '终止回报率',
+        breachPenalty: '违约金比例',
+        sharingPeriod: '分成期限',
+        giftTicketLimit: '赠票上限',
+        minTicketPrice: '最低票价',
+        discountLimit: '折扣上限'
+      };
+      
+      container.innerHTML = Object.entries(params).map(([key, value]) => \`
+        <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-gray-100">
+          <label class="text-sm text-gray-600">\${paramLabels[key] || key}</label>
+          <input type="text" id="param_\${key}" value="\${value}" 
+            class="w-32 px-2 py-1 border border-gray-200 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-indigo-500">
+        </div>
+      \`).join('');
+    }
+    
+    function selectTemplateColor(color) {
+      selectedTemplateColor = color;
+      
+      document.querySelectorAll('.color-btn').forEach(btn => {
+        btn.classList.remove('border-indigo-600', 'border-amber-600', 'border-emerald-600', 'border-rose-600', 'border-purple-600', 'border-cyan-600');
+        btn.classList.add('border-transparent');
+      });
+      
+      event.target.classList.remove('border-transparent');
+      event.target.classList.add('border-' + color + '-600');
+    }
+    
+    async function saveCustomTemplate() {
+      const name = document.getElementById('newTemplateName').value.trim();
+      const description = document.getElementById('newTemplateDesc').value.trim();
+      const industry = document.getElementById('newTemplateIndustry').value;
+      
+      if (!name) {
+        showToast('请输入模板名称', 'warning');
+        return;
+      }
+      
+      const btn = document.getElementById('btnSaveTemplate');
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>保存中...';
+      
+      try {
+        let newTemplate;
+        
+        if (templateCreateMethod === 'clone' && selectedSourceTemplate) {
+          // 复制系统模板
+          const res = await fetch('/api/templates/' + selectedSourceTemplate);
+          const sourceTemplate = await res.json();
+          
+          // 获取编辑后的参数
+          const editedParams = {};
+          Object.keys(sourceTemplate.defaultParams || {}).forEach(key => {
+            const input = document.getElementById('param_' + key);
+            editedParams[key] = input ? input.value : sourceTemplate.defaultParams[key];
+          });
+          
+          newTemplate = {
+            id: 'custom_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6),
+            name,
+            description,
+            industry,
+            icon: sourceTemplate.icon,
+            color: selectedTemplateColor,
+            defaultParams: editedParams,
+            modules: sourceTemplate.modules,
+            fullText: sourceTemplate.fullText,
+            sourceTemplateId: selectedSourceTemplate,
+            isCustom: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+        } else {
+          // 空白模板
+          newTemplate = {
+            id: 'custom_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6),
+            name,
+            description,
+            industry,
+            icon: 'fa-file-contract',
+            color: selectedTemplateColor,
+            defaultParams: {
+              investmentAmount: '500 万元',
+              revenueShareRatio: '15%',
+              terminationReturn: '25%',
+              breachPenalty: '20%'
+            },
+            modules: [],
+            fullText: [],
+            isCustom: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          };
+        }
+        
+        if (editingTemplateId) {
+          // 更新现有模板
+          const index = customTemplates.findIndex(t => t.id === editingTemplateId);
+          if (index !== -1) {
+            newTemplate.id = editingTemplateId;
+            newTemplate.createdAt = customTemplates[index].createdAt;
+            customTemplates[index] = newTemplate;
+          }
+        } else {
+          // 添加新模板
+          customTemplates.push(newTemplate);
+        }
+        
+        saveCustomTemplates();
+        showToast(editingTemplateId ? '模板已更新' : '模板已创建', 'success');
+        hideCreateTemplateModal();
+        
+        // 刷新模板列表
+        switchTemplateTab('custom');
+        
+      } catch (e) {
+        showToast('保存失败: ' + e.message, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save mr-2"></i>保存模板';
+      }
+    }
+    
+    async function cloneSystemTemplate(templateId) {
+      showCreateTemplateModal();
+      await selectSourceTemplate(templateId);
+    }
+    
+    function editCustomTemplate(templateId) {
+      const template = customTemplates.find(t => t.id === templateId);
+      if (!template) return;
+      
+      editingTemplateId = templateId;
+      showCreateTemplateModal();
+      
+      document.getElementById('createTemplateTitle').innerHTML = '<i class="fas fa-edit mr-2 text-indigo-600"></i>编辑模板';
+      document.getElementById('newTemplateName').value = template.name;
+      document.getElementById('newTemplateDesc').value = template.description || '';
+      document.getElementById('newTemplateIndustry').value = template.industry || '其他';
+      selectedTemplateColor = template.color || 'indigo';
+      
+      if (template.sourceTemplateId) {
+        templateCreateMethod = 'clone';
+        selectCreateMethod('clone');
+        selectSourceTemplate(template.sourceTemplateId);
+      } else {
+        templateCreateMethod = 'blank';
+        selectCreateMethod('blank');
+      }
+      
+      // 如果有自定义参数，渲染编辑器
+      if (template.defaultParams) {
+        renderDefaultParamsEditor(template.defaultParams);
+        document.getElementById('defaultParamsEditor').classList.remove('hidden');
+      }
+    }
+    
+    function deleteCustomTemplate(templateId) {
+      if (!confirm('确定要删除此模板吗？此操作不可恢复。')) return;
+      
+      customTemplates = customTemplates.filter(t => t.id !== templateId);
+      saveCustomTemplates();
+      renderCustomTemplateList();
+      showToast('模板已删除', 'success');
+    }
+    
+    function useCustomTemplate(templateId) {
+      const template = customTemplates.find(t => t.id === templateId);
+      if (!template) return;
+      
+      // 隐藏模板管理弹窗，显示新建项目弹窗
+      hideTemplateManagerModal();
+      showNewProjectModal();
+      
+      // 添加自定义模板到选择列表并选中
+      selectedTemplateId = templateId;
+      renderTemplateGridWithCustom();
+    }
+    
+    function renderTemplateGridWithCustom() {
+      const grid = document.getElementById('templateGrid');
+      if (!grid) return;
+      
+      // 合并系统模板和自定义模板
+      const allTemplates = [...templates, ...customTemplates];
+      
+      grid.innerHTML = allTemplates.map(t => \`
+        <div class="template-card p-4 border-2 rounded-xl \${selectedTemplateId === t.id ? 'selected border-indigo-500 bg-indigo-50' : 'border-gray-200'}" 
+             onclick="selectTemplate('\${t.id}')">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-lg bg-\${t.color}-100 flex items-center justify-center">
+              <i class="fas \${t.icon} text-\${t.color}-600"></i>
+            </div>
+            <div>
+              <h4 class="font-medium text-gray-900">\${t.name}</h4>
+              <p class="text-xs text-gray-500 truncate">\${t.isCustom ? '自定义' : '系统'} · \${t.description?.substring(0, 20) || ''}</p>
+            </div>
+          </div>
+        </div>
+      \`).join('');
+    }
+    
+    function viewTemplateDetail(templateId, isCustom) {
+      const template = isCustom 
+        ? customTemplates.find(t => t.id === templateId)
+        : templates.find(t => t.id === templateId);
+      
+      if (!template) return;
+      
+      const content = document.getElementById('templateDetailContent');
+      content.innerHTML = \`
+        <div class="text-center pb-4 border-b border-gray-100">
+          <div class="w-16 h-16 bg-\${template.color || 'gray'}-100 rounded-full flex items-center justify-center mx-auto mb-3">
+            <i class="fas \${template.icon || 'fa-file-contract'} text-\${template.color || 'gray'}-600 text-2xl"></i>
+          </div>
+          <h3 class="font-bold text-gray-900">\${template.name}</h3>
+          <p class="text-sm text-gray-500">\${template.isCustom ? '自定义模板' : '系统模板'} · \${template.industry || ''}</p>
+        </div>
+        
+        <div class="mt-4">
+          <h4 class="text-sm font-medium text-gray-700 mb-2">模板描述</h4>
+          <p class="text-sm text-gray-500">\${template.description || '暂无描述'}</p>
+        </div>
+        
+        <div class="mt-4">
+          <h4 class="text-sm font-medium text-gray-700 mb-2">默认参数</h4>
+          <div class="space-y-2 bg-gray-50 rounded-lg p-3">
+            \${Object.entries(template.defaultParams || {}).map(([k, v]) => \`
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-500">\${k}</span>
+                <span class="text-gray-900 font-medium">\${v}</span>
+              </div>
+            \`).join('')}
+          </div>
+        </div>
+        
+        <div class="mt-4">
+          <h4 class="text-sm font-medium text-gray-700 mb-2">包含模块</h4>
+          <div class="flex flex-wrap gap-2">
+            \${(template.modules || []).map(m => \`
+              <span class="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs">\${m.title}</span>
+            \`).join('') || '<span class="text-sm text-gray-400">无模块信息</span>'}
+          </div>
+        </div>
+        
+        <div class="mt-6 flex space-x-3">
+          \${isCustom ? \`
+            <button onclick="editCustomTemplate('\${template.id}'); hideTemplateDetailModal();" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+              <i class="fas fa-edit mr-2"></i>编辑
+            </button>
+          \` : \`
+            <button onclick="cloneSystemTemplate('\${template.id}'); hideTemplateDetailModal();" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+              <i class="fas fa-copy mr-2"></i>复制为我的模板
+            </button>
+          \`}
+          <button onclick="hideTemplateDetailModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+            关闭
+          </button>
+        </div>
+      \`;
+      
+      showTemplateDetailModal();
+    }
+    
+    // 更新 renderTemplateGrid 以支持自定义模板
+    function renderTemplateGrid() {
+      const grid = document.getElementById('templateGrid');
+      if (!grid) return;
+      
+      // 合并系统模板和自定义模板
+      const allTemplates = [...templates, ...customTemplates];
+      
+      grid.innerHTML = allTemplates.map(t => \`
+        <div class="template-card p-4 border-2 rounded-xl \${selectedTemplateId === t.id ? 'selected border-indigo-500' : 'border-gray-200'}" 
+             onclick="selectTemplate('\${t.id}')">
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-lg bg-\${t.color}-100 flex items-center justify-center">
+              <i class="fas \${t.icon} text-\${t.color}-600"></i>
+            </div>
+            <div>
+              <h4 class="font-medium text-gray-900">\${t.name}</h4>
+              <p class="text-xs text-gray-500 truncate">\${t.isCustom ? '<i class="fas fa-user mr-1"></i>自定义' : t.description}</p>
+            </div>
+          </div>
+        </div>
+      \`).join('');
+    }
+    
+    // 更新 selectTemplate 以支持自定义模板
+    function selectTemplate(id) {
+      selectedTemplateId = id;
+      renderTemplateGrid();
+    }
+    
+    // 从当前项目另存为模板
+    function saveProjectAsTemplate() {
+      if (!currentProject) {
+        showToast('请先打开一个项目', 'warning');
+        return;
+      }
+      
+      showCreateTemplateModal();
+      templateCreateMethod = 'clone';
+      selectCreateMethod('clone');
+      
+      // 填充项目信息
+      document.getElementById('newTemplateName').value = currentProject.name + ' 模板';
+      
+      if (currentProject.templateId) {
+        selectSourceTemplate(currentProject.templateId);
+        
+        // 用项目当前参数覆盖默认参数
+        setTimeout(() => {
+          Object.entries(currentProject.params || {}).forEach(([key, value]) => {
+            const input = document.getElementById('param_' + key);
+            if (input) input.value = value;
+          });
+        }, 100);
+      }
+    }
     
     // ==================== 协作功能 - 邀请链接 ====================
     async function generateInviteLink() {
