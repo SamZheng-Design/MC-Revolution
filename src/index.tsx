@@ -1181,45 +1181,133 @@ app.get('/', (c) => {
 
   <!-- ==================== 弹窗: 版本历史 ==================== -->
   <div id="versionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-hidden animate-in">
-      <div class="p-6 border-b border-gray-100">
+    <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-indigo-50">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-history mr-2 text-indigo-600"></i>版本历史</h2>
-          <button onclick="hideVersionModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+          <div>
+            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-code-branch mr-2 text-purple-600"></i>版本管理</h2>
+            <p class="text-xs text-gray-500 mt-1">创建快照、对比版本、回退历史状态</p>
+          </div>
+          <button onclick="hideVersionModal()" class="p-2 hover:bg-white/50 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
           </button>
         </div>
       </div>
       <div class="p-6 overflow-y-auto max-h-[60vh]">
-        <div class="flex items-center justify-between mb-4">
-          <p class="text-sm text-gray-500">选择版本查看或回退</p>
-          <button onclick="createVersionSnapshot()" class="text-sm text-indigo-600 hover:text-indigo-700">
-            <i class="fas fa-plus mr-1"></i>创建快照
-          </button>
+        <!-- 创建快照 -->
+        <div class="mb-6 p-4 bg-purple-50 rounded-xl border border-purple-100">
+          <h4 class="text-sm font-medium text-purple-800 mb-3"><i class="fas fa-camera mr-2"></i>创建版本快照</h4>
+          <div class="flex space-x-2">
+            <input type="text" id="versionNameInput" placeholder="版本名称（如：初稿、第一轮协商完成）" 
+              class="flex-1 px-4 py-2 border border-purple-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
+            <button onclick="createVersionSnapshot()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm whitespace-nowrap">
+              <i class="fas fa-save mr-1"></i>保存快照
+            </button>
+          </div>
+          <p class="text-xs text-purple-600 mt-2"><i class="fas fa-info-circle mr-1"></i>快照将保存当前所有参数和协商记录</p>
         </div>
-        <div id="versionList" class="space-y-2">
-          <div class="version-item current p-4 rounded-lg border border-gray-100">
+        
+        <!-- 版本列表 -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <h4 class="text-sm font-medium text-gray-700"><i class="fas fa-history mr-2 text-gray-400"></i>版本历史</h4>
+            <span id="versionCount" class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">0个版本</span>
+          </div>
+          
+          <!-- 当前版本（固定显示） -->
+          <div class="mb-3 p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
             <div class="flex items-center justify-between">
-              <div>
-                <p class="font-medium text-gray-900">当前版本</p>
-                <p class="text-xs text-gray-500" id="currentVersionInfo">协商进行中</p>
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                  <i class="fas fa-edit text-white"></i>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-900">当前工作版本</p>
+                  <p class="text-xs text-gray-500"><span id="currentVersionNegCount">0</span>轮协商 · <span id="currentVersionParamCount">0</span>项参数</p>
+                </div>
               </div>
-              <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs">当前</span>
+              <span class="px-3 py-1 bg-blue-500 text-white rounded-lg text-xs font-medium">当前</span>
             </div>
           </div>
-          <div class="text-center text-gray-400 py-6">
-            <i class="fas fa-code-branch text-2xl mb-2 opacity-50"></i>
-            <p class="text-sm">暂无历史版本</p>
-            <p class="text-xs mt-1">点击"创建快照"保存当前状态</p>
+          
+          <!-- 历史版本列表 -->
+          <div id="versionHistoryList" class="space-y-2">
+            <div class="text-center text-gray-400 py-8">
+              <i class="fas fa-code-branch text-3xl mb-3 opacity-50"></i>
+              <p class="text-sm">暂无历史版本</p>
+              <p class="text-xs mt-1">创建快照来保存重要节点</p>
+            </div>
           </div>
         </div>
       </div>
-      <div class="p-4 border-t border-gray-100 bg-gray-50">
+      
+      <!-- 底部操作栏 -->
+      <div class="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
+        <button onclick="showVersionCompareModal()" id="btnVersionCompare" class="text-sm text-gray-500 hover:text-indigo-600 flex items-center disabled:opacity-50" disabled>
+          <i class="fas fa-code-compare mr-2"></i>版本对比
+        </button>
+        <div class="text-xs text-gray-400">
+          <i class="fas fa-lightbulb mr-1"></i>提示：回退版本不会删除当前工作内容
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ==================== 弹窗: 版本对比 ==================== -->
+  <div id="versionCompareModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
+      <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
-          <button class="text-sm text-gray-500 hover:text-gray-700 flex items-center">
-            <i class="fas fa-code-compare mr-1"></i>版本对比
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-code-compare mr-2 text-indigo-600"></i>版本对比</h2>
+          <button onclick="hideVersionCompareModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+            <i class="fas fa-times text-gray-500"></i>
           </button>
         </div>
+      </div>
+      <div class="p-6">
+        <!-- 版本选择器 -->
+        <div class="flex items-center space-x-4 mb-6">
+          <div class="flex-1">
+            <label class="text-xs text-gray-500 mb-1 block">基准版本</label>
+            <select id="compareVersionA" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" onchange="runVersionCompare()">
+              <option value="">选择版本...</option>
+            </select>
+          </div>
+          <div class="flex items-center text-gray-400">
+            <i class="fas fa-arrows-left-right"></i>
+          </div>
+          <div class="flex-1">
+            <label class="text-xs text-gray-500 mb-1 block">对比版本</label>
+            <select id="compareVersionB" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm" onchange="runVersionCompare()">
+              <option value="current">当前工作版本</option>
+            </select>
+          </div>
+        </div>
+        
+        <!-- 对比结果 -->
+        <div id="versionCompareResult" class="border border-gray-200 rounded-xl overflow-hidden">
+          <div class="text-center text-gray-400 py-12">
+            <i class="fas fa-exchange-alt text-3xl mb-3 opacity-50"></i>
+            <p class="text-sm">选择两个版本进行对比</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ==================== 弹窗: 版本详情/回退确认 ==================== -->
+  <div id="versionDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-lg w-full mx-4 animate-in">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-info-circle mr-2 text-indigo-600"></i>版本详情</h2>
+          <button onclick="hideVersionDetailModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+            <i class="fas fa-times text-gray-500"></i>
+          </button>
+        </div>
+      </div>
+      <div id="versionDetailContent" class="p-6">
+        <!-- 动态内容 -->
       </div>
     </div>
   </div>
@@ -2064,8 +2152,18 @@ app.get('/', (c) => {
         btn.classList.add('border-gray-500', 'bg-gray-100');
       }
     }
-    function showVersionModal() { document.getElementById('versionModal').classList.remove('hidden'); }
+    function showVersionModal() { 
+      document.getElementById('versionModal').classList.remove('hidden');
+      renderVersionList();
+    }
     function hideVersionModal() { document.getElementById('versionModal').classList.add('hidden'); }
+    function showVersionCompareModal() { 
+      document.getElementById('versionCompareModal').classList.remove('hidden');
+      populateVersionSelectors();
+    }
+    function hideVersionCompareModal() { document.getElementById('versionCompareModal').classList.add('hidden'); }
+    function showVersionDetailModal() { document.getElementById('versionDetailModal').classList.remove('hidden'); }
+    function hideVersionDetailModal() { document.getElementById('versionDetailModal').classList.add('hidden'); }
     function showAIAdvisorModal() { document.getElementById('aiAdvisorModal').classList.remove('hidden'); }
     function hideAIAdvisorModal() { document.getElementById('aiAdvisorModal').classList.add('hidden'); }
     function showSignModal() { document.getElementById('signModal').classList.remove('hidden'); }
@@ -2270,23 +2368,268 @@ app.get('/', (c) => {
     }
     
     // ==================== 版本管理 ====================
-    async function createVersionSnapshot() {
-      if (!currentProject) return;
-      const name = prompt('请输入版本名称', '版本 ' + (currentProject.versions?.length + 1 || 1));
-      if (!name) return;
+    function createVersionSnapshot() {
+      if (!currentProject) {
+        showToast('请先打开一个项目', 'warning');
+        return;
+      }
+      
+      const nameInput = document.getElementById('versionNameInput');
+      let name = nameInput ? nameInput.value.trim() : '';
+      if (!name) {
+        name = '版本 ' + ((currentProject.versions?.length || 0) + 1);
+      }
       
       const version = {
         id: 'v_' + Date.now(),
         name,
-        params: { ...currentProject.params },
-        negotiations: [...currentProject.negotiations],
+        params: JSON.parse(JSON.stringify(currentProject.params)), // 深拷贝
+        negotiations: JSON.parse(JSON.stringify(currentProject.negotiations || [])),
+        paramCount: Object.keys(currentProject.params || {}).length,
+        negotiationCount: (currentProject.negotiations || []).length,
         createdAt: new Date().toISOString()
       };
       
       if (!currentProject.versions) currentProject.versions = [];
       currentProject.versions.push(version);
+      currentProject.updatedAt = new Date().toISOString();
       saveProjects();
-      alert('版本快照已创建: ' + name);
+      
+      if (nameInput) nameInput.value = '';
+      renderVersionList();
+      showToast('版本快照已创建: ' + name, 'success');
+    }
+    
+    function renderVersionList() {
+      if (!currentProject) return;
+      
+      const versions = currentProject.versions || [];
+      const container = document.getElementById('versionHistoryList');
+      const countEl = document.getElementById('versionCount');
+      const compareBtn = document.getElementById('btnVersionCompare');
+      
+      // 更新当前版本信息
+      document.getElementById('currentVersionNegCount').textContent = (currentProject.negotiations || []).length;
+      document.getElementById('currentVersionParamCount').textContent = Object.keys(currentProject.params || {}).length;
+      
+      countEl.textContent = versions.length + '个版本';
+      compareBtn.disabled = versions.length === 0;
+      
+      if (versions.length === 0) {
+        container.innerHTML = \`
+          <div class="text-center text-gray-400 py-8">
+            <i class="fas fa-code-branch text-3xl mb-3 opacity-50"></i>
+            <p class="text-sm">暂无历史版本</p>
+            <p class="text-xs mt-1">创建快照来保存重要节点</p>
+          </div>
+        \`;
+        return;
+      }
+      
+      container.innerHTML = versions.slice().reverse().map((v, i) => {
+        const index = versions.length - i;
+        const isLatest = i === 0;
+        return \`
+          <div class="version-item p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors border border-gray-100">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                  <span class="text-purple-600 font-bold text-sm">V\${index}</span>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-900">\${v.name}</p>
+                  <p class="text-xs text-gray-500">\${v.negotiationCount || 0}轮协商 · \${v.paramCount || Object.keys(v.params || {}).length}项参数 · \${formatDateTime(v.createdAt)}</p>
+                </div>
+              </div>
+              <div class="flex items-center space-x-2">
+                \${isLatest ? '<span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">最新</span>' : ''}
+                <button onclick="viewVersionDetail('\${v.id}')" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg" title="查看详情">
+                  <i class="fas fa-eye text-sm"></i>
+                </button>
+                <button onclick="restoreVersion('\${v.id}')" class="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg" title="回退到此版本">
+                  <i class="fas fa-undo text-sm"></i>
+                </button>
+                <button onclick="deleteVersion('\${v.id}')" class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg" title="删除">
+                  <i class="fas fa-trash text-sm"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        \`;
+      }).join('');
+    }
+    
+    function viewVersionDetail(versionId) {
+      if (!currentProject) return;
+      const version = (currentProject.versions || []).find(v => v.id === versionId);
+      if (!version) return;
+      
+      const content = document.getElementById('versionDetailContent');
+      content.innerHTML = \`
+        <div class="space-y-4">
+          <div class="text-center pb-4 border-b border-gray-100">
+            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i class="fas fa-code-branch text-purple-600 text-2xl"></i>
+            </div>
+            <h3 class="font-bold text-gray-900">\${version.name}</h3>
+            <p class="text-sm text-gray-500">创建于 \${formatDateTime(version.createdAt)}</p>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div class="bg-indigo-50 rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-indigo-600">\${version.negotiationCount || (version.negotiations || []).length}</p>
+              <p class="text-xs text-indigo-500">协商轮次</p>
+            </div>
+            <div class="bg-purple-50 rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-purple-600">\${version.paramCount || Object.keys(version.params || {}).length}</p>
+              <p class="text-xs text-purple-500">参数数量</p>
+            </div>
+          </div>
+          
+          <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="text-sm font-medium text-gray-700 mb-2">主要参数</h4>
+            <div class="space-y-1 text-sm max-h-40 overflow-y-auto">
+              \${Object.entries(version.params || {}).slice(0, 8).map(([k, v]) => \`
+                <div class="flex justify-between">
+                  <span class="text-gray-500">\${k}</span>
+                  <span class="text-gray-900 font-medium">\${v}</span>
+                </div>
+              \`).join('')}
+              \${Object.keys(version.params || {}).length > 8 ? '<p class="text-gray-400 text-xs mt-2">... 更多参数</p>' : ''}
+            </div>
+          </div>
+          
+          <div class="flex space-x-3">
+            <button onclick="restoreVersion('\${version.id}'); hideVersionDetailModal();" class="flex-1 px-4 py-2 bg-amber-500 text-white rounded-lg hover:bg-amber-600">
+              <i class="fas fa-undo mr-2"></i>回退到此版本
+            </button>
+            <button onclick="hideVersionDetailModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+              关闭
+            </button>
+          </div>
+        </div>
+      \`;
+      showVersionDetailModal();
+    }
+    
+    function restoreVersion(versionId) {
+      if (!currentProject) return;
+      const version = (currentProject.versions || []).find(v => v.id === versionId);
+      if (!version) return;
+      
+      if (!confirm('确定要回退到版本「' + version.name + '」吗？\\n\\n当前工作内容将被替换为该版本的内容。\\n建议先创建一个快照保存当前状态。')) {
+        return;
+      }
+      
+      // 回退参数和协商记录
+      currentProject.params = JSON.parse(JSON.stringify(version.params));
+      currentProject.negotiations = JSON.parse(JSON.stringify(version.negotiations || []));
+      currentProject.updatedAt = new Date().toISOString();
+      saveProjects();
+      
+      // 重新渲染
+      renderNegotiationHistory();
+      renderModuleCards();
+      renderContractText();
+      updateChangedBadge();
+      renderVersionList();
+      
+      showToast('已回退到版本: ' + version.name, 'success');
+    }
+    
+    function deleteVersion(versionId) {
+      if (!currentProject) return;
+      if (!confirm('确定要删除此版本快照吗？此操作不可恢复。')) return;
+      
+      currentProject.versions = (currentProject.versions || []).filter(v => v.id !== versionId);
+      saveProjects();
+      renderVersionList();
+      showToast('版本已删除', 'success');
+    }
+    
+    function populateVersionSelectors() {
+      if (!currentProject) return;
+      const versions = currentProject.versions || [];
+      
+      const optionsHtml = versions.map((v, i) => \`<option value="\${v.id}">V\${i + 1}: \${v.name}</option>\`).join('');
+      
+      document.getElementById('compareVersionA').innerHTML = '<option value="">选择版本...</option>' + optionsHtml;
+      document.getElementById('compareVersionB').innerHTML = '<option value="current">当前工作版本</option>' + optionsHtml;
+    }
+    
+    function runVersionCompare() {
+      if (!currentProject) return;
+      
+      const versionAId = document.getElementById('compareVersionA').value;
+      const versionBId = document.getElementById('compareVersionB').value;
+      const container = document.getElementById('versionCompareResult');
+      
+      if (!versionAId) {
+        container.innerHTML = '<div class="text-center text-gray-400 py-12"><i class="fas fa-exchange-alt text-3xl mb-3 opacity-50"></i><p class="text-sm">请选择基准版本</p></div>';
+        return;
+      }
+      
+      const versionA = currentProject.versions.find(v => v.id === versionAId);
+      const versionB = versionBId === 'current' 
+        ? { name: '当前工作版本', params: currentProject.params, negotiations: currentProject.negotiations }
+        : currentProject.versions.find(v => v.id === versionBId);
+      
+      if (!versionA || !versionB) return;
+      
+      // 对比参数差异
+      const paramsA = versionA.params || {};
+      const paramsB = versionB.params || {};
+      const allKeys = [...new Set([...Object.keys(paramsA), ...Object.keys(paramsB)])];
+      
+      const diffs = allKeys.map(key => {
+        const valA = paramsA[key] || '-';
+        const valB = paramsB[key] || '-';
+        const changed = valA !== valB;
+        return { key, valA, valB, changed };
+      }).filter(d => d.changed);
+      
+      container.innerHTML = \`
+        <div class="bg-gray-50 p-4 border-b border-gray-200">
+          <div class="flex items-center justify-between text-sm">
+            <span class="font-medium text-purple-600">\${versionA.name}</span>
+            <span class="text-gray-400">VS</span>
+            <span class="font-medium text-blue-600">\${versionB.name}</span>
+          </div>
+        </div>
+        <div class="p-4">
+          \${diffs.length === 0 ? \`
+            <div class="text-center text-gray-400 py-8">
+              <i class="fas fa-equals text-2xl mb-2"></i>
+              <p class="text-sm">两个版本参数完全相同</p>
+            </div>
+          \` : \`
+            <div class="mb-3 flex items-center justify-between">
+              <span class="text-sm text-gray-500">共 <span class="font-bold text-red-600">\${diffs.length}</span> 处差异</span>
+            </div>
+            <div class="space-y-2 max-h-64 overflow-y-auto">
+              \${diffs.map(d => \`
+                <div class="flex items-center p-3 bg-amber-50 rounded-lg border border-amber-200">
+                  <div class="flex-1">
+                    <p class="text-sm font-medium text-gray-700">\${d.key}</p>
+                    <div class="flex items-center mt-1 text-sm">
+                      <span class="text-purple-600 bg-purple-100 px-2 py-0.5 rounded">\${d.valA}</span>
+                      <i class="fas fa-arrow-right mx-2 text-gray-400"></i>
+                      <span class="text-blue-600 bg-blue-100 px-2 py-0.5 rounded">\${d.valB}</span>
+                    </div>
+                  </div>
+                </div>
+              \`).join('')}
+            </div>
+          \`}
+        </div>
+      \`;
+    }
+    
+    function formatDateTime(dateStr) {
+      return new Date(dateStr).toLocaleString('zh-CN', { 
+        month: 'numeric', day: 'numeric', 
+        hour: '2-digit', minute: '2-digit' 
+      });
     }
     
     // ==================== AI助手 ====================
