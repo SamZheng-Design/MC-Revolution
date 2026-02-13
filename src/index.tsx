@@ -1097,6 +1097,7 @@ app.get('/', (c) => {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>收入分成融资协商平台</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet">
   <style>
@@ -1152,6 +1153,42 @@ app.get('/', (c) => {
     .delay-200 { animation-delay: 0.2s; }
     .delay-300 { animation-delay: 0.3s; }
     .delay-400 { animation-delay: 0.4s; }
+    
+    /* 修复：用CSS定义SVG背景图案 */
+    .pattern-bg {
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    /* 优化：协商输入框扩展动画 */
+    #negotiationInput:focus { min-height: 80px; }
+    #negotiationInput { transition: min-height 0.2s ease; }
+    
+    /* 优化：快捷输入闪烁提示 */
+    @keyframes quickHint { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 0 2px rgba(99,102,241,0.3); } }
+    .quick-hint { animation: quickHint 2s ease-in-out 3; }
+    
+    /* 优化：返回按钮样式强化 */
+    .back-btn { transition: all 0.2s; }
+    .back-btn:hover { transform: translateX(-4px); background: #eef2ff; }
+    
+    /* 优化：AI助手入口高亮 */
+    .ai-btn-glow { box-shadow: 0 0 20px rgba(99,102,241,0.4); animation: aiGlow 2s ease-in-out infinite; }
+    @keyframes aiGlow { 0%,100% { box-shadow: 0 0 10px rgba(99,102,241,0.3); } 50% { box-shadow: 0 0 25px rgba(99,102,241,0.5); } }
+    
+    /* 优化：签名流程进度条 */
+    .sign-progress-step { transition: all 0.3s; }
+    .sign-progress-step.active { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
+    .sign-progress-step.completed { background: #10b981; color: white; }
+    
+    /* 优化：移动端弹窗 */
+    @media (max-width: 640px) {
+      .onboarding-card, .modal-card { margin: 8px; max-height: 90vh; }
+      .modal-content { max-height: 70vh; overflow-y: auto; }
+    }
+    
+    /* 优化：空状态引导 */
+    .empty-action-btn { transition: all 0.3s; border: 2px dashed #c7d2fe; }
+    .empty-action-btn:hover { border-color: #6366f1; background: #eef2ff; transform: scale(1.02); }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -1161,7 +1198,7 @@ app.get('/', (c) => {
     <div class="onboarding-card bg-white rounded-3xl max-w-2xl w-full mx-4 overflow-hidden">
       <!-- 顶部渐变背景 -->
       <div class="relative h-48 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 overflow-hidden">
-        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.1\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+        <div class="absolute inset-0 pattern-bg"></div>
         
         <!-- 关闭按钮 -->
         <button onclick="closeOnboarding()" class="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-all">
@@ -1445,15 +1482,70 @@ app.get('/', (c) => {
         
         <div id="projectGrid" class="grid grid-cols-3 gap-4"></div>
         
-        <div id="emptyState" class="hidden text-center py-16">
-          <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-folder-open text-gray-400 text-3xl"></i>
+        <div id="emptyState" class="hidden py-12">
+          <div class="max-w-2xl mx-auto text-center">
+            <!-- 欢迎标题 -->
+            <div class="w-24 h-24 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
+              <i class="fas fa-handshake text-indigo-600 text-4xl"></i>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-3">欢迎使用RBF融资协商平台</h3>
+            <p class="text-gray-500 mb-8">让收入分成融资谈判变得简单、透明、高效</p>
+            
+            <!-- 快速开始引导 -->
+            <div class="grid grid-cols-2 gap-4 mb-8">
+              <button onclick="showNewProjectModal()" class="empty-action-btn p-6 bg-white rounded-2xl text-left group">
+                <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-200 transition-colors">
+                  <i class="fas fa-plus text-indigo-600 text-xl"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">创建新项目</h4>
+                <p class="text-sm text-gray-500">选择行业模板，开始融资协商</p>
+              </button>
+              <button onclick="showJoinCollabModal()" class="empty-action-btn p-6 bg-white rounded-2xl text-left group">
+                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-200 transition-colors">
+                  <i class="fas fa-user-plus text-emerald-600 text-xl"></i>
+                </div>
+                <h4 class="font-bold text-gray-800 mb-1">加入协作</h4>
+                <p class="text-sm text-gray-500">通过邀请码参与项目协商</p>
+              </button>
+            </div>
+            
+            <!-- 功能亮点 -->
+            <div class="bg-gray-50 rounded-2xl p-6">
+              <h4 class="text-sm font-semibold text-gray-600 mb-4"><i class="fas fa-star text-amber-500 mr-2"></i>平台特色</h4>
+              <div class="grid grid-cols-4 gap-4 text-sm">
+                <div class="text-center">
+                  <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mx-auto mb-2 shadow-sm">
+                    <i class="fas fa-robot text-indigo-500"></i>
+                  </div>
+                  <p class="text-gray-600">AI智能解析</p>
+                </div>
+                <div class="text-center">
+                  <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mx-auto mb-2 shadow-sm">
+                    <i class="fas fa-users text-purple-500"></i>
+                  </div>
+                  <p class="text-gray-600">多方协作</p>
+                </div>
+                <div class="text-center">
+                  <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mx-auto mb-2 shadow-sm">
+                    <i class="fas fa-history text-blue-500"></i>
+                  </div>
+                  <p class="text-gray-600">版本快照</p>
+                </div>
+                <div class="text-center">
+                  <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mx-auto mb-2 shadow-sm">
+                    <i class="fas fa-signature text-pink-500"></i>
+                  </div>
+                  <p class="text-gray-600">电子签章</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 帮助提示 -->
+            <p class="mt-6 text-sm text-gray-400">
+              <i class="fas fa-question-circle mr-1"></i>
+              首次使用？点击右上角 <i class="fas fa-question-circle"></i> 查看新手引导
+            </p>
           </div>
-          <h3 class="text-lg font-medium text-gray-700 mb-2">暂无项目</h3>
-          <p class="text-gray-500 mb-4">创建你的第一个收入分成融资项目</p>
-          <button onclick="showNewProjectModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-            <i class="fas fa-plus mr-2"></i>新建项目
-          </button>
         </div>
       </div>
     </div>
@@ -1464,10 +1556,11 @@ app.get('/', (c) => {
     <nav class="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-4">
-          <button onclick="goToProjects()" class="p-2 hover:bg-gray-100 rounded-lg">
-            <i class="fas fa-arrow-left text-gray-600"></i>
+          <button onclick="goToProjects()" class="back-btn flex items-center px-3 py-2 text-gray-600 hover:text-indigo-600 rounded-lg">
+            <i class="fas fa-arrow-left mr-2"></i>
+            <span class="text-sm font-medium">返回列表</span>
           </button>
-          <div>
+          <div class="border-l border-gray-200 pl-4">
             <div class="flex items-center space-x-2">
               <h1 class="font-semibold text-gray-900" id="projectTitle">项目名称</h1>
               <span id="projectStatus" class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs">协商中</span>
@@ -1519,22 +1612,39 @@ app.get('/', (c) => {
             <label class="text-sm font-medium text-gray-700">
               <i class="fas fa-comment-dots mr-1 text-indigo-600"></i>描述条款变动
             </label>
-            <button onclick="getAIAdvice()" class="text-xs text-indigo-600 hover:text-indigo-700 flex items-center">
-              <i class="fas fa-lightbulb mr-1"></i>AI建议
+            <button onclick="showAIAdvisorPanel()" id="btnAIAdvisor" class="ai-btn-glow text-xs bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-1.5 rounded-full hover:from-indigo-600 hover:to-purple-600 flex items-center shadow-lg">
+              <i class="fas fa-robot mr-1"></i>AI谈判助手
             </button>
           </div>
-          <textarea id="negotiationInput" rows="3" 
-            placeholder="用自然语言描述你希望的变动...&#10;例如：投资金额改成2000万，分成比例调整为65%"
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
-          <div class="flex items-center justify-between mt-3">
+          <textarea id="negotiationInput" rows="2" 
+            placeholder="用自然语言描述你希望的变动...&#10;例如：投资金额改成600万，分成比例降到12%"
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-sm"></textarea>
+          
+          <!-- 快捷输入提示 - 更醒目 -->
+          <div class="mt-2 p-2 bg-indigo-50 rounded-lg border border-indigo-100 quick-hint">
+            <p class="text-xs text-indigo-600 mb-2"><i class="fas fa-bolt mr-1"></i>快捷输入：点击按钮快速填写常见条款</p>
             <div class="flex gap-2 flex-wrap">
-              <button onclick="quickInput('投资金额调整为')" class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200">金额</button>
-              <button onclick="quickInput('分成比例改为')" class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200">分成</button>
-              <button onclick="quickInput('违约金调整为')" class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200">违约金</button>
-              <button onclick="quickInput('分成期限改为')" class="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs hover:bg-gray-200">期限</button>
+              <button onclick="quickInput('投资金额调整为')" class="px-3 py-1.5 bg-white text-indigo-600 rounded-lg text-xs hover:bg-indigo-100 border border-indigo-200 transition-colors">
+                <i class="fas fa-yen-sign mr-1"></i>金额
+              </button>
+              <button onclick="quickInput('分成比例改为')" class="px-3 py-1.5 bg-white text-indigo-600 rounded-lg text-xs hover:bg-indigo-100 border border-indigo-200 transition-colors">
+                <i class="fas fa-percent mr-1"></i>分成
+              </button>
+              <button onclick="quickInput('违约金调整为')" class="px-3 py-1.5 bg-white text-indigo-600 rounded-lg text-xs hover:bg-indigo-100 border border-indigo-200 transition-colors">
+                <i class="fas fa-exclamation-triangle mr-1"></i>违约金
+              </button>
+              <button onclick="quickInput('分成期限改为')" class="px-3 py-1.5 bg-white text-indigo-600 rounded-lg text-xs hover:bg-indigo-100 border border-indigo-200 transition-colors">
+                <i class="fas fa-calendar mr-1"></i>期限
+              </button>
+              <button onclick="quickInput('终止返还比例提高')" class="px-3 py-1.5 bg-white text-indigo-600 rounded-lg text-xs hover:bg-indigo-100 border border-indigo-200 transition-colors">
+                <i class="fas fa-undo mr-1"></i>返还
+              </button>
             </div>
-            <button onclick="submitNegotiation()" id="btnSubmit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center text-sm">
-              <i class="fas fa-paper-plane mr-2"></i>发送
+          </div>
+          
+          <div class="flex items-center justify-end mt-3">
+            <button onclick="submitNegotiation()" id="btnSubmit" class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center text-sm font-medium shadow-lg hover:shadow-xl transition-all">
+              <i class="fas fa-paper-plane mr-2"></i>发送变更
             </button>
           </div>
         </div>
@@ -1545,8 +1655,8 @@ app.get('/', (c) => {
               <i class="fas fa-history mr-2 text-gray-400"></i>协商记录
               <span id="negotiationCount" class="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs">0</span>
             </h3>
-            <button onclick="createVersionSnapshot()" class="text-xs text-gray-500 hover:text-gray-700 flex items-center">
-              <i class="fas fa-camera mr-1"></i>创建快照
+            <button onclick="createVersionSnapshot()" class="text-xs text-blue-600 hover:text-blue-700 flex items-center px-2 py-1 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors" title="保存当前合同版本，可随时恢复">
+              <i class="fas fa-save mr-1"></i>保存版本
             </button>
           </div>
           <div id="negotiationHistory" class="space-y-3">
@@ -1599,35 +1709,60 @@ app.get('/', (c) => {
   <!-- ==================== 弹窗: 新建项目 ==================== -->
   <div id="newProjectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
-      <div class="p-6 border-b border-gray-100">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
         <div class="flex items-center justify-between">
-          <h2 class="text-xl font-bold text-gray-900">新建项目</h2>
-          <button onclick="hideNewProjectModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+          <div>
+            <h2 class="text-xl font-bold text-gray-900"><i class="fas fa-plus-circle mr-2 text-indigo-600"></i>创建融资项目</h2>
+            <p class="text-sm text-gray-500 mt-1">选择行业模板，开始协商您的收入分成融资合同</p>
+          </div>
+          <button onclick="hideNewProjectModal()" class="p-2 hover:bg-white/50 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
           </button>
         </div>
       </div>
       <div class="p-6 overflow-y-auto max-h-[60vh]">
+        <!-- 步骤1: 项目名称 -->
         <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-2">项目名称</label>
-          <input type="text" id="newProjectName" placeholder="例如：XX品牌杭州旗舰店" 
+          <div class="flex items-center mb-3">
+            <span class="w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-2">1</span>
+            <label class="text-sm font-medium text-gray-700">为项目命名</label>
+          </div>
+          <input type="text" id="newProjectName" placeholder="例如：XX品牌杭州旗舰店融资、2024春季巡演" 
             class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <p class="text-xs text-gray-400 mt-1"><i class="fas fa-lightbulb mr-1 text-amber-500"></i>建议使用品牌+项目类型命名，便于后续管理</p>
         </div>
+        
+        <!-- 步骤2: 选择模板 -->
         <div class="mb-6">
-          <label class="block text-sm font-medium text-gray-700 mb-3">选择行业模板</label>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <span class="w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-2">2</span>
+              <label class="text-sm font-medium text-gray-700">选择行业模板</label>
+            </div>
+            <span id="selectedTemplateHint" class="text-xs text-gray-400">请选择一个模板</span>
+          </div>
           <div id="templateGrid" class="grid grid-cols-2 gap-3"></div>
+          <p class="text-xs text-gray-400 mt-2"><i class="fas fa-info-circle mr-1"></i>不同行业模板包含针对性条款，选择后仍可自由修改</p>
         </div>
+        
+        <!-- 备注（可选） -->
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-2">备注（可选）</label>
+          <div class="flex items-center mb-2">
+            <span class="w-6 h-6 bg-gray-300 text-white rounded-full flex items-center justify-center text-xs mr-2">+</span>
+            <label class="text-sm font-medium text-gray-500">备注（可选）</label>
+          </div>
           <textarea id="newProjectNote" rows="2" placeholder="项目背景、特殊要求等..."
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-sm"></textarea>
         </div>
       </div>
-      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
-        <button onclick="hideNewProjectModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
-        <button onclick="createProject()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-          <i class="fas fa-plus mr-2"></i>创建项目
-        </button>
+      <div class="p-6 border-t border-gray-100 flex justify-between items-center">
+        <p class="text-xs text-gray-400"><i class="fas fa-shield-alt mr-1 text-emerald-500"></i>数据安全存储在本地浏览器</p>
+        <div class="flex space-x-3">
+          <button onclick="hideNewProjectModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+          <button onclick="createProject()" class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium shadow-lg hover:shadow-xl transition-all">
+            <i class="fas fa-rocket mr-2"></i>开始协商
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -2183,12 +2318,27 @@ app.get('/', (c) => {
         
         <!-- 发起签署表单 -->
         <div id="signInitiateForm">
-          <div class="text-center py-4 mb-6">
-            <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-file-signature text-emerald-600 text-2xl"></i>
+          <!-- 签署流程步骤指示 -->
+          <div class="flex items-center justify-center mb-6 px-4">
+            <div class="flex items-center">
+              <div class="sign-progress-step active w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-indigo-100 text-indigo-600">1</div>
+              <span class="ml-2 text-sm font-medium text-indigo-600">填写信息</span>
             </div>
-            <h3 class="font-medium text-gray-900 mb-2">发起电子签署</h3>
-            <p class="text-sm text-gray-500">协商完成后，添加签署人信息发起电子签署</p>
+            <div class="w-12 h-0.5 bg-gray-200 mx-3"></div>
+            <div class="flex items-center">
+              <div class="sign-progress-step w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-gray-100 text-gray-400">2</div>
+              <span class="ml-2 text-sm text-gray-400">手写签名</span>
+            </div>
+            <div class="w-12 h-0.5 bg-gray-200 mx-3"></div>
+            <div class="flex items-center">
+              <div class="sign-progress-step w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-gray-100 text-gray-400">3</div>
+              <span class="ml-2 text-sm text-gray-400">验证完成</span>
+            </div>
+          </div>
+          
+          <div class="text-center py-2 mb-4">
+            <h3 class="font-medium text-gray-900 mb-2"><i class="fas fa-users mr-2 text-emerald-600"></i>添加签署人信息</h3>
+            <p class="text-sm text-gray-500">填写投资方和融资方的签署人信息，系统将发送签署邀请</p>
           </div>
           
           <!-- 签署人表单 -->
@@ -2823,17 +2973,19 @@ app.get('/', (c) => {
       const grid = document.getElementById('templateGrid');
       if (!grid) return;
       grid.innerHTML = templates.map(t => \`
-        <div class="template-card p-4 border-2 rounded-xl \${selectedTemplateId === t.id ? 'selected border-indigo-500' : 'border-gray-200'}" 
+        <div class="template-card p-4 border-2 rounded-xl relative \${selectedTemplateId === t.id ? 'selected border-indigo-500 shadow-lg shadow-indigo-100' : 'border-gray-200'}" 
              onclick="selectTemplate('\${t.id}')">
+          \${selectedTemplateId === t.id ? '<div class="absolute -top-2 -right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-check text-white text-xs"></i></div>' : ''}
           <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-lg bg-\${t.color}-100 flex items-center justify-center">
+            <div class="w-10 h-10 rounded-lg bg-\${t.color}-100 flex items-center justify-center \${selectedTemplateId === t.id ? 'ring-2 ring-indigo-300' : ''}">
               <i class="fas \${t.icon} text-\${t.color}-600"></i>
             </div>
-            <div>
+            <div class="flex-1">
               <h4 class="font-medium text-gray-900">\${t.name}</h4>
               <p class="text-xs text-gray-500 truncate">\${t.description}</p>
             </div>
           </div>
+          \${selectedTemplateId === t.id ? '<div class="mt-2 text-xs text-indigo-600 text-center font-medium"><i class="fas fa-check-circle mr-1"></i>已选择此模板</div>' : ''}
         </div>
       \`).join('');
     }
@@ -2864,6 +3016,12 @@ app.get('/', (c) => {
     function selectTemplate(id) {
       selectedTemplateId = id;
       renderTemplateGrid();
+      // 更新选择提示
+      const hint = document.getElementById('selectedTemplateHint');
+      if (hint) {
+        const template = templates.find(t => t.id === id);
+        hint.innerHTML = template ? '<i class="fas fa-check-circle text-emerald-500 mr-1"></i><span class="text-emerald-600 font-medium">' + template.name + '</span>' : '请选择一个模板';
+      }
     }
     
     async function createProject() {
@@ -3336,7 +3494,7 @@ app.get('/', (c) => {
         try {
           const data = JSON.parse(e.target.result);
           if (data.projects && Array.isArray(data.projects)) {
-            const confirmMsg = '即将导入 ' + data.projects.length + ' 个项目。\n\n选择导入模式：\n- 确定：合并到现有数据\n- 取消后重新选择覆盖模式';
+            const confirmMsg = '即将导入 ' + data.projects.length + ' 个项目。\\n\\n选择导入模式：\\n- 确定：合并到现有数据\\n- 取消后重新选择覆盖模式';
             if (confirm(confirmMsg)) {
               // 合并模式
               const existingIds = projects.map(p => p.id);
@@ -3365,7 +3523,7 @@ app.get('/', (c) => {
     }
     
     function clearAllData() {
-      const confirmText = '确定要清除所有数据吗？\n\n此操作将删除：\n- 所有项目 (' + projects.length + ' 个)\n- 所有版本快照\n- 所有自定义设置\n\n此操作不可恢复！';
+      const confirmText = '确定要清除所有数据吗？\\n\\n此操作将删除：\\n- 所有项目 (' + projects.length + ' 个)\\n- 所有版本快照\\n- 所有自定义设置\\n\\n此操作不可恢复！';
       if (confirm(confirmText)) {
         if (confirm('最后确认：真的要删除所有数据吗？')) {
           localStorage.removeItem('rbf_projects');
@@ -3451,6 +3609,10 @@ app.get('/', (c) => {
     function hideVersionDetailModal() { document.getElementById('versionDetailModal').classList.add('hidden'); }
     function showAIAdvisorModal() { document.getElementById('aiAdvisorModal').classList.remove('hidden'); }
     function hideAIAdvisorModal() { document.getElementById('aiAdvisorModal').classList.add('hidden'); }
+    
+    // AI助手面板入口（便捷别名）
+    function showAIAdvisorPanel() { showAIAdvisorModal(); }
+    function getAIAdvice() { showAIAdvisorModal(); }
     // ==================== 电子签章功能 ====================
     let currentSignProcess = null;
     let currentSignerId = null;
@@ -4414,6 +4576,12 @@ app.get('/', (c) => {
     function selectTemplate(id) {
       selectedTemplateId = id;
       renderTemplateGrid();
+      // 更新选择提示
+      const hint = document.getElementById('selectedTemplateHint');
+      if (hint) {
+        const template = templates.find(t => t.id === id) || customTemplates.find(t => t.id === id);
+        hint.innerHTML = template ? '<i class="fas fa-check-circle text-emerald-500 mr-1"></i><span class="text-emerald-600 font-medium">' + template.name + '</span>' : '请选择一个模板';
+      }
     }
     
     // 从当前项目另存为模板
