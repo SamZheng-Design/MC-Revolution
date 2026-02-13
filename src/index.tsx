@@ -1132,9 +1132,212 @@ app.get('/', (c) => {
     .version-item { transition: all 0.2s; }
     .version-item:hover { background: #f3f4f6; }
     .version-item.current { background: #dbeafe; border-left: 3px solid #3b82f6; }
+    
+    /* 引导教程弹窗样式 */
+    .onboarding-modal { backdrop-filter: blur(8px); }
+    .onboarding-card { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+    .onboarding-step { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+    .onboarding-step.active { opacity: 1; transform: translateX(0); }
+    .onboarding-step.prev { opacity: 0; transform: translateX(-100%); position: absolute; }
+    .onboarding-step.next { opacity: 0; transform: translateX(100%); position: absolute; }
+    .step-dot { transition: all 0.3s; }
+    .step-dot.active { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); transform: scale(1.2); }
+    .feature-icon { transition: all 0.3s; }
+    .feature-icon:hover { transform: scale(1.1); }
+    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    .float-animation { animation: float 3s ease-in-out infinite; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+    .delay-100 { animation-delay: 0.1s; }
+    .delay-200 { animation-delay: 0.2s; }
+    .delay-300 { animation-delay: 0.3s; }
+    .delay-400 { animation-delay: 0.4s; }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
+
+  <!-- ==================== 产品引导教程弹窗 ==================== -->
+  <div id="onboardingModal" class="hidden fixed inset-0 bg-black/60 onboarding-modal flex items-center justify-center z-[100]">
+    <div class="onboarding-card bg-white rounded-3xl max-w-2xl w-full mx-4 overflow-hidden">
+      <!-- 顶部渐变背景 -->
+      <div class="relative h-48 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 overflow-hidden">
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" xmlns=\"http://www.w3.org/2000/svg\"%3E%3Cg fill=\"none\" fill-rule=\"evenodd\"%3E%3Cg fill=\"%23ffffff\" fill-opacity=\"0.1\"%3E%3Cpath d=\"M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
+        
+        <!-- 关闭按钮 -->
+        <button onclick="closeOnboarding()" class="absolute top-4 right-4 w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white transition-all">
+          <i class="fas fa-times"></i>
+        </button>
+        
+        <!-- 步骤指示器 -->
+        <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-2">
+          <button onclick="goToStep(0)" class="step-dot w-2.5 h-2.5 rounded-full bg-white/50 active" data-step="0"></button>
+          <button onclick="goToStep(1)" class="step-dot w-2.5 h-2.5 rounded-full bg-white/50" data-step="1"></button>
+          <button onclick="goToStep(2)" class="step-dot w-2.5 h-2.5 rounded-full bg-white/50" data-step="2"></button>
+          <button onclick="goToStep(3)" class="step-dot w-2.5 h-2.5 rounded-full bg-white/50" data-step="3"></button>
+          <button onclick="goToStep(4)" class="step-dot w-2.5 h-2.5 rounded-full bg-white/50" data-step="4"></button>
+        </div>
+        
+        <!-- 动态图标区域 -->
+        <div id="onboardingIconArea" class="absolute inset-0 flex items-center justify-center">
+          <div class="float-animation">
+            <div class="w-24 h-24 bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center">
+              <i id="onboardingMainIcon" class="fas fa-handshake text-white text-4xl"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 内容区域 -->
+      <div class="p-8 relative overflow-hidden" style="min-height: 320px;">
+        <!-- 步骤0: 欢迎 -->
+        <div id="step0" class="onboarding-step active">
+          <div class="text-center">
+            <h2 class="text-2xl font-bold text-gray-900 mb-3 fade-in-up">欢迎使用收入分成融资协商平台</h2>
+            <p class="text-gray-500 mb-8 fade-in-up delay-100">一站式完成合同协商、多方协作和电子签署</p>
+            
+            <div class="grid grid-cols-3 gap-4 mb-8">
+              <div class="p-4 bg-indigo-50 rounded-2xl fade-in-up delay-100">
+                <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-3 feature-icon">
+                  <i class="fas fa-file-contract text-indigo-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-700">智能合同</p>
+              </div>
+              <div class="p-4 bg-purple-50 rounded-2xl fade-in-up delay-200">
+                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3 feature-icon">
+                  <i class="fas fa-users text-purple-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-700">多方协作</p>
+              </div>
+              <div class="p-4 bg-pink-50 rounded-2xl fade-in-up delay-300">
+                <div class="w-12 h-12 bg-pink-100 rounded-xl flex items-center justify-center mx-auto mb-3 feature-icon">
+                  <i class="fas fa-signature text-pink-600 text-xl"></i>
+                </div>
+                <p class="text-sm font-medium text-gray-700">电子签章</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 步骤1: 创建项目 -->
+        <div id="step1" class="onboarding-step next">
+          <div class="flex items-start space-x-6">
+            <div class="flex-shrink-0">
+              <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+                <i class="fas fa-plus-circle text-white text-2xl"></i>
+              </div>
+            </div>
+            <div class="flex-1">
+              <span class="text-xs font-semibold text-blue-600 uppercase tracking-wide">第一步</span>
+              <h3 class="text-xl font-bold text-gray-900 mt-1 mb-3">创建融资项目</h3>
+              <p class="text-gray-500 mb-4">点击右上角"新建项目"按钮，选择适合的行业模板（演唱会、餐饮、零售等），系统会自动生成合同框架。</p>
+              <div class="flex items-center space-x-4 text-sm">
+                <div class="flex items-center text-gray-400">
+                  <i class="fas fa-check-circle text-emerald-500 mr-2"></i>
+                  <span>5种行业模板</span>
+                </div>
+                <div class="flex items-center text-gray-400">
+                  <i class="fas fa-check-circle text-emerald-500 mr-2"></i>
+                  <span>自定义模板</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 步骤2: 协商合同 -->
+        <div id="step2" class="onboarding-step next">
+          <div class="flex items-start space-x-6">
+            <div class="flex-shrink-0">
+              <div class="w-16 h-16 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-200">
+                <i class="fas fa-comments text-white text-2xl"></i>
+              </div>
+            </div>
+            <div class="flex-1">
+              <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wide">第二步</span>
+              <h3 class="text-xl font-bold text-gray-900 mt-1 mb-3">自然语言协商</h3>
+              <p class="text-gray-500 mb-4">用日常语言描述您想要的变更，例如"把投资金额改为600万"或"分成比例降低到12%"，AI会自动解析并更新合同。</p>
+              <div class="bg-gray-50 rounded-xl p-3 border border-gray-100">
+                <div class="flex items-center text-sm text-gray-600">
+                  <i class="fas fa-magic text-purple-500 mr-2"></i>
+                  <span class="italic">"提前终止的返还比例提高5个百分点"</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 步骤3: 邀请协作 -->
+        <div id="step3" class="onboarding-step next">
+          <div class="flex items-start space-x-6">
+            <div class="flex-shrink-0">
+              <div class="w-16 h-16 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center shadow-lg shadow-amber-200">
+                <i class="fas fa-user-plus text-white text-2xl"></i>
+              </div>
+            </div>
+            <div class="flex-1">
+              <span class="text-xs font-semibold text-amber-600 uppercase tracking-wide">第三步</span>
+              <h3 class="text-xl font-bold text-gray-900 mt-1 mb-3">邀请对方协作</h3>
+              <p class="text-gray-500 mb-4">生成邀请链接发送给对方，支持投资方和融资方双视角，实时同步协商进度，所有变更自动记录。</p>
+              <div class="flex items-center space-x-3">
+                <div class="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg text-sm font-medium">
+                  <i class="fas fa-landmark mr-1"></i>投资方
+                </div>
+                <i class="fas fa-exchange-alt text-gray-300"></i>
+                <div class="px-3 py-1.5 bg-amber-100 text-amber-700 rounded-lg text-sm font-medium">
+                  <i class="fas fa-store mr-1"></i>融资方
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 步骤4: 完成签署 -->
+        <div id="step4" class="onboarding-step next">
+          <div class="flex items-start space-x-6">
+            <div class="flex-shrink-0">
+              <div class="w-16 h-16 bg-gradient-to-br from-rose-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-rose-200">
+                <i class="fas fa-file-signature text-white text-2xl"></i>
+              </div>
+            </div>
+            <div class="flex-1">
+              <span class="text-xs font-semibold text-rose-600 uppercase tracking-wide">第四步</span>
+              <h3 class="text-xl font-bold text-gray-900 mt-1 mb-3">电子签章完成</h3>
+              <p class="text-gray-500 mb-4">协商完成后发起电子签署，支持手写签名和验证码验证，签署完成后可下载正式合同文件。</p>
+              <div class="flex items-center space-x-4 text-sm">
+                <div class="flex items-center text-gray-400">
+                  <i class="fas fa-pen-nib text-rose-500 mr-2"></i>
+                  <span>手写签名</span>
+                </div>
+                <div class="flex items-center text-gray-400">
+                  <i class="fas fa-shield-alt text-rose-500 mr-2"></i>
+                  <span>安全验证</span>
+                </div>
+                <div class="flex items-center text-gray-400">
+                  <i class="fas fa-download text-rose-500 mr-2"></i>
+                  <span>合同下载</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 底部按钮区域 -->
+      <div class="px-8 pb-8 flex items-center justify-between">
+        <button onclick="skipOnboarding()" class="text-sm text-gray-400 hover:text-gray-600 transition-colors">
+          跳过教程
+        </button>
+        <div class="flex items-center space-x-3">
+          <button id="btnPrevStep" onclick="prevStep()" class="hidden px-4 py-2 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-all">
+            <i class="fas fa-arrow-left mr-2"></i>上一步
+          </button>
+          <button id="btnNextStep" onclick="nextStep()" class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-200 transition-all font-medium">
+            开始探索<i class="fas fa-arrow-right ml-2"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
   
   <!-- ==================== 页面1: 项目列表 ==================== -->
   <div id="pageProjects" class="page active flex-col min-h-screen">
@@ -1155,6 +1358,10 @@ app.get('/', (c) => {
             <i class="fas fa-database mr-2"></i>
             <span class="text-sm" id="navStorageText">本地存储</span>
             <span id="navSyncIndicator" class="ml-2 w-2 h-2 bg-emerald-400 rounded-full"></span>
+          </button>
+          <!-- 使用帮助 -->
+          <button onclick="showOnboarding()" class="tooltip px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg" data-tip="使用帮助">
+            <i class="fas fa-question-circle"></i>
           </button>
           <!-- 模板管理 -->
           <button onclick="showTemplateManagerModal()" class="tooltip px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg" data-tip="模板管理">
@@ -2391,12 +2598,143 @@ app.get('/', (c) => {
     let currentPerspective = 'investor';
     let contractView = 'card';
     
+    // ==================== 引导教程 ====================
+    let currentOnboardingStep = 0;
+    const totalSteps = 5;
+    const stepIcons = ['fa-handshake', 'fa-plus-circle', 'fa-comments', 'fa-user-plus', 'fa-file-signature'];
+    const stepColors = [
+      'from-indigo-500 via-purple-500 to-pink-500',
+      'from-blue-500 to-cyan-500',
+      'from-emerald-500 to-teal-500',
+      'from-amber-500 to-orange-500',
+      'from-rose-500 to-pink-500'
+    ];
+    
+    function checkShowOnboarding() {
+      const hasSeenOnboarding = localStorage.getItem('rbf_onboarding_seen');
+      if (!hasSeenOnboarding) {
+        showOnboarding();
+      }
+    }
+    
+    function showOnboarding() {
+      currentOnboardingStep = 0;
+      updateOnboardingUI();
+      document.getElementById('onboardingModal').classList.remove('hidden');
+    }
+    
+    function closeOnboarding() {
+      document.getElementById('onboardingModal').classList.add('hidden');
+      localStorage.setItem('rbf_onboarding_seen', 'true');
+    }
+    
+    function skipOnboarding() {
+      closeOnboarding();
+    }
+    
+    function goToStep(step) {
+      if (step >= 0 && step < totalSteps) {
+        const prevStep = currentOnboardingStep;
+        currentOnboardingStep = step;
+        animateStepTransition(prevStep, step);
+        updateOnboardingUI();
+      }
+    }
+    
+    function nextStep() {
+      if (currentOnboardingStep < totalSteps - 1) {
+        goToStep(currentOnboardingStep + 1);
+      } else {
+        closeOnboarding();
+      }
+    }
+    
+    function prevStep() {
+      if (currentOnboardingStep > 0) {
+        goToStep(currentOnboardingStep - 1);
+      }
+    }
+    
+    function animateStepTransition(fromStep, toStep) {
+      const fromEl = document.getElementById('step' + fromStep);
+      const toEl = document.getElementById('step' + toStep);
+      
+      if (fromEl && toEl) {
+        // 设置离开的步骤
+        fromEl.classList.remove('active');
+        fromEl.classList.add(toStep > fromStep ? 'prev' : 'next');
+        
+        // 设置进入的步骤
+        toEl.classList.remove('prev', 'next');
+        toEl.classList.add('active');
+      }
+    }
+    
+    function updateOnboardingUI() {
+      // 更新步骤指示器
+      document.querySelectorAll('.step-dot').forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentOnboardingStep);
+      });
+      
+      // 更新主图标
+      const mainIcon = document.getElementById('onboardingMainIcon');
+      if (mainIcon) {
+        mainIcon.className = 'fas ' + stepIcons[currentOnboardingStep] + ' text-white text-4xl';
+      }
+      
+      // 更新背景渐变
+      const iconArea = document.getElementById('onboardingIconArea');
+      if (iconArea && iconArea.parentElement) {
+        const gradientClasses = ['from-indigo-500', 'via-purple-500', 'to-pink-500', 'from-blue-500', 'to-cyan-500', 'from-emerald-500', 'to-teal-500', 'from-amber-500', 'to-orange-500', 'from-rose-500'];
+        gradientClasses.forEach(cls => iconArea.parentElement.classList.remove(cls));
+        stepColors[currentOnboardingStep].split(' ').forEach(cls => iconArea.parentElement.classList.add(cls));
+      }
+      
+      // 更新按钮状态
+      const prevBtn = document.getElementById('btnPrevStep');
+      const nextBtn = document.getElementById('btnNextStep');
+      
+      if (prevBtn) {
+        prevBtn.classList.toggle('hidden', currentOnboardingStep === 0);
+      }
+      
+      if (nextBtn) {
+        if (currentOnboardingStep === totalSteps - 1) {
+          nextBtn.innerHTML = '开始使用<i class="fas fa-rocket ml-2"></i>';
+        } else if (currentOnboardingStep === 0) {
+          nextBtn.innerHTML = '开始探索<i class="fas fa-arrow-right ml-2"></i>';
+        } else {
+          nextBtn.innerHTML = '下一步<i class="fas fa-arrow-right ml-2"></i>';
+        }
+      }
+      
+      // 确保所有步骤的初始状态正确
+      for (let i = 0; i < totalSteps; i++) {
+        const stepEl = document.getElementById('step' + i);
+        if (stepEl) {
+          stepEl.classList.remove('active', 'prev', 'next');
+          if (i === currentOnboardingStep) {
+            stepEl.classList.add('active');
+          } else if (i < currentOnboardingStep) {
+            stepEl.classList.add('prev');
+          } else {
+            stepEl.classList.add('next');
+          }
+        }
+      }
+    }
+    
     // ==================== 初始化 ====================
     async function init() {
       await loadTemplates();
       await loadCustomTemplatesOnInit();
       renderProjects();
       updateStats();
+      
+      // 检查是否需要显示引导教程
+      setTimeout(() => {
+        checkShowOnboarding();
+      }, 500);
     }
     
     async function loadTemplates() {
