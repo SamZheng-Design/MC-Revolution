@@ -748,48 +748,236 @@ app.post('/api/custom-templates/from-project', async (c) => {
 })
 
 // ==================== AI谈判助手API ====================
-app.post('/api/ai/negotiate-advice', async (c) => {
-  const { projectId, currentParams, negotiationHistory, perspective } = await c.req.json()
-  
-  const apiKey = c.env?.OPENAI_API_KEY || process.env.GENSPARK_TOKEN || ''
-  const baseUrl = c.env?.OPENAI_BASE_URL || 'https://www.genspark.ai/api/llm_proxy/v1'
-  
-  const systemPrompt = `你是一个专业的收入分成融资谈判顾问。根据当前协商情况，为${perspective === 'investor' ? '投资方' : '融资方'}提供谈判建议。
 
-当前合同参数：
+// 辅助函数：获取API配置
+function getAIConfig(c: any) {
+  // 优先从Cloudflare绑定获取，然后尝试process.env
+  const apiKey = c.env?.OPENAI_API_KEY || 
+                 (typeof process !== 'undefined' ? (process.env?.OPENAI_API_KEY || process.env?.GENSPARK_TOKEN) : '') || 
+                 ''
+  const baseUrl = c.env?.OPENAI_BASE_URL || 
+                  (typeof process !== 'undefined' ? process.env?.OPENAI_BASE_URL : '') || 
+                  'https://www.genspark.ai/api/llm_proxy/v1'
+  return { apiKey, baseUrl }
+}
+
+// 获取综合谈判建议
+app.post('/api/ai/negotiate-advice', async (c) => {
+  const { projectId, currentParams, negotiationHistory, perspective, templateName } = await c.req.json()
+  
+  const { apiKey, baseUrl } = getAIConfig(c)
+  
+  const perspectiveName = perspective === 'investor' ? '投资方' : '融资方'
+  const oppositeParty = perspective === 'investor' ? '融资方' : '投资方'
+  
+  const systemPrompt = `你是一个专业的收入分成融资谈判顾问，具有丰富的投资和法律经验。
+
+## 你的任务
+为【${perspectiveName}】提供专业的谈判策略建议，帮助其在协商中获得最佳结果。
+
+## 当前项目行业：${templateName || '未知'}
+
+## 当前合同参数：
 ${JSON.stringify(currentParams, null, 2)}
 
-协商历史：
-${negotiationHistory.map((n: any, i: number) => `第${i+1}轮(${n.perspective === 'investor' ? '投资方' : '融资方'}): ${n.input}`).join('\n')}
+## 协商历史（共${negotiationHistory?.length || 0}轮）：
+${negotiationHistory?.length > 0 ? negotiationHistory.map((n: any, i: number) => `第${i+1}轮 [${n.perspective === 'investor' ? '投资方' : '融资方'}]: ${n.input}
+  变更: ${n.changes?.map((c: any) => c.paramName + ': ' + c.oldValue + '→' + c.newValue).join(', ') || '无'}`).join('\n') : '暂无协商记录'}
 
-请提供：
-1. 当前态势分析（50字内）
-2. 建议的下一步动作（具体的参数调整建议）
-3. 谈判策略提示（如何表达更有利）
-4. 风险提醒
+## 市场参考数据（收入分成融资行业）：
+- 餐饮行业：投资金额200-800万，分成比例10-18%，期限24-48个月
+- 零售行业：投资金额100-500万，分成比例8-15%，期限36-60个月
+- 演唱会/娱乐：投资金额1000-5000万，分成比例60-80%，期限按项目
+- 违约金：通常为投资金额的15-25%
 
-输出JSON格式：
+## 请提供：
+1. **态势分析**：当前谈判进展评估（对${perspectiveName}的有利/不利因素）
+2. **最优报价建议**：基于市场数据和对方立场，给出具体参数建议
+3. **谈判策略**：如何在表达上争取更好条件
+4. **让步空间**：可接受的底线和可交换的条件
+5. **风险预警**：当前条款中的潜在风险
+6. **预测对方动作**：${oppositeParty}可能的下一步反应
+
+## 输出JSON格式：
 {
-  "analysis": "态势分析",
+  "analysis": "态势分析（100字内）",
+  "positionScore": 65,
   "suggestions": [
-    { "param": "参数名", "currentValue": "当前值", "suggestedValue": "建议值", "reason": "理由" }
+    { "param": "参数名", "currentValue": "当前值", "suggestedValue": "建议值", "minAcceptable": "最低可接受值", "reason": "理由", "priority": "high" }
   ],
-  "talkingPoints": ["表达建议1", "表达建议2"],
-  "risks": ["风险提醒1"]
+  "talkingPoints": ["表达话术1", "表达话术2"],
+  "concessionStrategy": {
+    "canGive": ["可以让步的点"],
+    "mustKeep": ["必须坚持的点"],
+    "tradeOff": "交换策略建议"
+  },
+  "risks": [
+    { "level": "high", "description": "风险描述", "mitigation": "应对建议" }
+  ],
+  "opponentPrediction": "预测对方下一步动作",
+  "confidence": 85
 }`
 
   try {
-    const response = await fetch(`${baseUrl}/chat/completions`, {
+    const response = await fetch(baseUrl + '/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-5',
         messages: [
           { role: 'system', content: systemPrompt },
-          { role: 'user', content: '请给出谈判建议' }
+          { role: 'user', content: '请基于以上信息，为我提供详细的谈判建议。' }
+        ],
+        temperature: 0.4
+      })
+    })
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      return c.json({ success: false, error: 'AI服务暂时不可用，请稍后重试', detail: errorText }, 500)
+    }
+
+    const data = await response.json()
+    const content = data.choices?.[0]?.message?.content || ''
+    
+    try {
+      const jsonMatch = content.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        const result = JSON.parse(jsonMatch[0])
+        return c.json({
+          success: true,
+          ...result,
+          generatedAt: new Date().toISOString()
+        })
+      }
+    } catch (e) {}
+    
+    return c.json({ success: false, error: 'Failed to parse response', raw: content }, 500)
+  } catch (error) {
+    return c.json({ success: false, error: 'Request failed: ' + (error as Error).message }, 500)
+  }
+})
+
+// 风险评估API
+app.post('/api/ai/risk-assessment', async (c) => {
+  const { currentParams, templateName, negotiationHistory } = await c.req.json()
+  
+  const { apiKey, baseUrl } = getAIConfig(c)
+  
+  const systemPrompt = `你是收入分成融资风险评估专家。请对当前合同条款进行全面风险评估。
+
+## 行业：${templateName || '未知'}
+## 当前合同参数：${JSON.stringify(currentParams, null, 2)}
+## 协商轮次：${negotiationHistory?.length || 0}
+
+请从以下维度评估风险：
+1. 投资回报风险
+2. 违约风险
+3. 市场风险
+4. 法律合规风险
+5. 操作风险
+
+输出JSON：
+{
+  "overallRiskScore": 65,
+  "overallRiskLevel": "medium",
+  "riskBreakdown": [
+    {
+      "category": "风险类别",
+      "score": 70,
+      "level": "high",
+      "description": "风险描述",
+      "factors": ["具体因素1", "具体因素2"],
+      "recommendations": ["建议措施1"]
+    }
+  ],
+  "criticalIssues": ["最需要关注的问题"],
+  "safetyMargin": "安全边际评估"
+}`
+
+  try {
+    const response = await fetch(baseUrl + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
+      },
+      body: JSON.stringify({
+        model: 'gpt-5',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: '请进行风险评估' }
+        ],
+        temperature: 0.2
+      })
+    })
+
+    if (!response.ok) {
+      return c.json({ error: 'API Error' }, 500)
+    }
+
+    const data = await response.json()
+    const content = data.choices?.[0]?.message?.content || ''
+    
+    try {
+      const jsonMatch = content.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        return c.json({ success: true, ...JSON.parse(jsonMatch[0]) })
+      }
+    } catch (e) {}
+    
+    return c.json({ success: false, error: 'Parse failed' }, 500)
+  } catch (error) {
+    return c.json({ success: false, error: 'Request failed' }, 500)
+  }
+})
+
+// 市场对标分析API
+app.post('/api/ai/market-benchmark', async (c) => {
+  const { currentParams, templateName, industry } = await c.req.json()
+  
+  const { apiKey, baseUrl } = getAIConfig(c)
+  
+  const systemPrompt = `你是收入分成融资市场分析专家。请对当前条款与市场标准进行对标分析。
+
+## 行业：${industry || templateName || '未知'}
+## 当前合同参数：${JSON.stringify(currentParams, null, 2)}
+
+请分析各参数与市场标准的对比，并给出优化建议。
+
+输出JSON：
+{
+  "marketAnalysis": "市场整体情况概述",
+  "benchmarks": [
+    {
+      "param": "参数名",
+      "currentValue": "当前值",
+      "marketLow": "市场最低",
+      "marketAvg": "市场平均",
+      "marketHigh": "市场最高",
+      "position": "below",
+      "recommendation": "调整建议"
+    }
+  ],
+  "competitiveness": 75,
+  "summary": "综合评价"
+}`
+
+  try {
+    const response = await fetch(baseUrl + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
+      },
+      body: JSON.stringify({
+        model: 'gpt-5',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: '请进行市场对标分析' }
         ],
         temperature: 0.3
       })
@@ -805,13 +993,13 @@ ${negotiationHistory.map((n: any, i: number) => `第${i+1}轮(${n.perspective ==
     try {
       const jsonMatch = content.match(/\{[\s\S]*\}/)
       if (jsonMatch) {
-        return c.json(JSON.parse(jsonMatch[0]))
+        return c.json({ success: true, ...JSON.parse(jsonMatch[0]) })
       }
     } catch (e) {}
     
-    return c.json({ error: 'Failed to parse', raw: content }, 500)
+    return c.json({ success: false, error: 'Parse failed' }, 500)
   } catch (error) {
-    return c.json({ error: 'Request failed' }, 500)
+    return c.json({ success: false, error: 'Request failed' }, 500)
   }
 })
 
@@ -819,7 +1007,7 @@ ${negotiationHistory.map((n: any, i: number) => `第${i+1}轮(${n.perspective ==
 app.post('/api/parse-change', async (c) => {
   const { message, templateId, currentParams } = await c.req.json()
   
-  const apiKey = c.env?.OPENAI_API_KEY || process.env.GENSPARK_TOKEN || ''
+  const { apiKey, baseUrl: _ } = getAIConfig(c)
   const baseUrl = c.env?.OPENAI_BASE_URL || 'https://www.genspark.ai/api/llm_proxy/v1'
   
   const template = industryTemplates[templateId]
@@ -871,7 +1059,7 @@ ${template.modules.flatMap(m => m.clauses.map(c => `- ${c.key}: ${c.name} (当�
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        model: 'gpt-5',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
@@ -1632,26 +1820,126 @@ app.get('/', (c) => {
 
   <!-- ==================== 弹窗: AI谈判助手 ==================== -->
   <div id="aiAdvisorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-hidden animate-in">
-      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
+    <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-500 to-purple-600">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-indigo-900"><i class="fas fa-robot mr-2"></i>AI谈判助手</h2>
-          <button onclick="hideAIAdvisorModal()" class="p-2 hover:bg-white/50 rounded-lg">
-            <i class="fas fa-times text-gray-500"></i>
+          <div class="flex items-center">
+            <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+              <i class="fas fa-robot text-white text-xl"></i>
+            </div>
+            <div>
+              <h2 class="text-lg font-bold text-white">AI谈判助手</h2>
+              <p class="text-sm text-white/70">智能分析 · 策略建议 · 风险预警</p>
+            </div>
+          </div>
+          <button onclick="hideAIAdvisorModal()" class="p-2 hover:bg-white/20 rounded-lg">
+            <i class="fas fa-times text-white"></i>
           </button>
         </div>
       </div>
-      <div id="aiAdvisorContent" class="p-6 overflow-y-auto max-h-[60vh]">
-        <div class="text-center py-8">
-          <div class="w-16 h-16 bg-indigo-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-robot text-indigo-600 text-2xl"></i>
-          </div>
-          <h3 class="font-medium text-gray-900 mb-2">获取AI谈判建议</h3>
-          <p class="text-sm text-gray-500 mb-4">基于当前协商情况，AI将为您提供专业的谈判策略建议</p>
-          <button onclick="getAIAdvice()" id="btnGetAdvice" class="px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
-            <i class="fas fa-lightbulb mr-2"></i>获取建议
+      
+      <!-- 功能标签页 -->
+      <div class="border-b border-gray-200 bg-gray-50">
+        <div class="flex">
+          <button onclick="switchAITab('advice')" id="tabAIAdvice" class="ai-tab flex-1 px-4 py-3 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600 bg-white">
+            <i class="fas fa-lightbulb mr-2"></i>谈判建议
+          </button>
+          <button onclick="switchAITab('risk')" id="tabAIRisk" class="ai-tab flex-1 px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700">
+            <i class="fas fa-shield-alt mr-2"></i>风险评估
+          </button>
+          <button onclick="switchAITab('market')" id="tabAIMarket" class="ai-tab flex-1 px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700">
+            <i class="fas fa-chart-bar mr-2"></i>市场对标
           </button>
         </div>
+      </div>
+      
+      <div id="aiAdvisorContent" class="p-6 overflow-y-auto max-h-[60vh]">
+        <!-- 初始状态：谈判建议 -->
+        <div id="aiAdvicePanel">
+          <div class="text-center py-6">
+            <div class="w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-brain text-indigo-600 text-3xl"></i>
+            </div>
+            <h3 class="font-bold text-gray-900 mb-2">智能谈判顾问</h3>
+            <p class="text-sm text-gray-500 mb-6">基于历史数据和市场行情，为您量身定制谈判策略</p>
+            
+            <div class="grid grid-cols-2 gap-3 mb-6 text-left">
+              <div class="p-3 bg-indigo-50 rounded-xl">
+                <div class="flex items-center text-indigo-700 mb-1">
+                  <i class="fas fa-bullseye mr-2"></i>
+                  <span class="text-sm font-medium">最优报价</span>
+                </div>
+                <p class="text-xs text-indigo-600">基于对方立场给出建议值</p>
+              </div>
+              <div class="p-3 bg-purple-50 rounded-xl">
+                <div class="flex items-center text-purple-700 mb-1">
+                  <i class="fas fa-chess mr-2"></i>
+                  <span class="text-sm font-medium">策略指导</span>
+                </div>
+                <p class="text-xs text-purple-600">专业话术和谈判技巧</p>
+              </div>
+              <div class="p-3 bg-amber-50 rounded-xl">
+                <div class="flex items-center text-amber-700 mb-1">
+                  <i class="fas fa-balance-scale mr-2"></i>
+                  <span class="text-sm font-medium">让步空间</span>
+                </div>
+                <p class="text-xs text-amber-600">底线分析和交换条件</p>
+              </div>
+              <div class="p-3 bg-rose-50 rounded-xl">
+                <div class="flex items-center text-rose-700 mb-1">
+                  <i class="fas fa-eye mr-2"></i>
+                  <span class="text-sm font-medium">预测对方</span>
+                </div>
+                <p class="text-xs text-rose-600">分析对方下一步动作</p>
+              </div>
+            </div>
+            
+            <button onclick="getAIAdvice()" id="btnGetAdvice" class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 font-medium shadow-lg shadow-indigo-200">
+              <i class="fas fa-magic mr-2"></i>获取AI建议
+            </button>
+          </div>
+          
+          <!-- AI建议结果区域 -->
+          <div id="aiAdviceResult" class="hidden"></div>
+        </div>
+        
+        <!-- 风险评估面板 -->
+        <div id="aiRiskPanel" class="hidden">
+          <div class="text-center py-6">
+            <div class="w-20 h-20 bg-gradient-to-br from-rose-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-shield-alt text-rose-600 text-3xl"></i>
+            </div>
+            <h3 class="font-bold text-gray-900 mb-2">合同风险评估</h3>
+            <p class="text-sm text-gray-500 mb-6">多维度分析当前条款的潜在风险</p>
+            <button onclick="getRiskAssessment()" id="btnRiskAssess" class="px-8 py-3 bg-gradient-to-r from-rose-500 to-orange-500 text-white rounded-xl hover:from-rose-600 hover:to-orange-600 font-medium">
+              <i class="fas fa-search mr-2"></i>开始评估
+            </button>
+          </div>
+          <div id="aiRiskResult" class="hidden"></div>
+        </div>
+        
+        <!-- 市场对标面板 -->
+        <div id="aiMarketPanel" class="hidden">
+          <div class="text-center py-6">
+            <div class="w-20 h-20 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-chart-line text-emerald-600 text-3xl"></i>
+            </div>
+            <h3 class="font-bold text-gray-900 mb-2">市场对标分析</h3>
+            <p class="text-sm text-gray-500 mb-6">对比行业标准，评估条款竞争力</p>
+            <button onclick="getMarketBenchmark()" id="btnMarketBench" class="px-8 py-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white rounded-xl hover:from-emerald-600 hover:to-teal-600 font-medium">
+              <i class="fas fa-chart-bar mr-2"></i>开始分析
+            </button>
+          </div>
+          <div id="aiMarketResult" class="hidden"></div>
+        </div>
+      </div>
+      
+      <!-- 底部信息 -->
+      <div class="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
+        <div class="text-xs text-gray-400">
+          <i class="fas fa-info-circle mr-1"></i>AI建议仅供参考，请结合实际情况决策
+        </div>
+        <div id="aiLastUpdate" class="text-xs text-gray-400"></div>
       </div>
     </div>
   </div>
@@ -4277,14 +4565,49 @@ app.get('/', (c) => {
     }
     
     // ==================== AI助手 ====================
-    async function getAIAdvice() {
-      if (!currentProject) return;
+    let currentAITab = 'advice';
+    let aiAdviceCache = null;
+    let aiRiskCache = null;
+    let aiMarketCache = null;
+    
+    function switchAITab(tab) {
+      currentAITab = tab;
       
-      const content = document.getElementById('aiAdvisorContent');
-      content.innerHTML = '<div class="text-center py-8"><i class="fas fa-spinner fa-spin text-4xl text-indigo-600 mb-4"></i><p class="text-gray-500">AI正在分析...</p></div>';
+      // 更新标签样式
+      document.querySelectorAll('.ai-tab').forEach(btn => {
+        btn.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600', 'bg-white');
+        btn.classList.add('text-gray-500');
+      });
+      
+      const activeTab = document.getElementById('tabAI' + tab.charAt(0).toUpperCase() + tab.slice(1));
+      if (activeTab) {
+        activeTab.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600', 'bg-white');
+        activeTab.classList.remove('text-gray-500');
+      }
+      
+      // 切换面板
+      document.getElementById('aiAdvicePanel')?.classList.toggle('hidden', tab !== 'advice');
+      document.getElementById('aiRiskPanel')?.classList.toggle('hidden', tab !== 'risk');
+      document.getElementById('aiMarketPanel')?.classList.toggle('hidden', tab !== 'market');
+    }
+    
+    async function getAIAdvice() {
+      if (!currentProject) {
+        showToast('请先选择一个项目', 'error');
+        return;
+      }
+      
       showAIAdvisorModal();
+      switchAITab('advice');
+      
+      const resultDiv = document.getElementById('aiAdviceResult');
+      const initialDiv = document.getElementById('aiAdvicePanel').querySelector('.text-center');
+      
+      initialDiv.innerHTML = '<div class="py-8"><i class="fas fa-spinner fa-spin text-4xl text-indigo-600 mb-4"></i><p class="text-gray-500">AI正在深度分析谈判态势...</p><p class="text-xs text-gray-400 mt-2">基于历史数据和市场行情生成建议</p></div>';
+      resultDiv.classList.add('hidden');
       
       try {
+        const template = templates.find(t => t.id === currentProject.templateId);
         const res = await fetch('/api/ai/negotiate-advice', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -4292,63 +4615,500 @@ app.get('/', (c) => {
             projectId: currentProject.id,
             currentParams: currentProject.params,
             negotiationHistory: currentProject.negotiations || [],
-            perspective: currentPerspective
+            perspective: currentPerspective,
+            templateName: template?.name || '未知行业'
           })
         });
         
         const advice = await res.json();
+        aiAdviceCache = advice;
         
-        if (advice.error) {
-          content.innerHTML = '<div class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle text-4xl mb-4"></i><p>获取建议失败，请重试</p></div>';
+        if (!advice.success) {
+          initialDiv.innerHTML = \`<div class="py-8"><i class="fas fa-exclamation-circle text-4xl text-red-500 mb-4"></i><p class="text-red-500">获取建议失败</p><p class="text-xs text-gray-400 mt-2">\${advice.error || '请稍后重试'}</p><button onclick="getAIAdvice()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm">重新获取</button></div>\`;
           return;
         }
         
-        content.innerHTML = \`
+        initialDiv.classList.add('hidden');
+        resultDiv.classList.remove('hidden');
+        
+        const positionScore = advice.positionScore || 50;
+        const positionColor = positionScore >= 70 ? 'emerald' : positionScore >= 40 ? 'amber' : 'red';
+        
+        resultDiv.innerHTML = \`
           <div class="space-y-4">
-            <div class="p-4 bg-indigo-50 rounded-lg">
-              <h4 class="font-medium text-indigo-900 mb-2"><i class="fas fa-chart-line mr-2"></i>态势分析</h4>
-              <p class="text-sm text-indigo-700">\${advice.analysis || '暂无分析'}</p>
+            <!-- 谈判态势评分 -->
+            <div class="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
+              <div class="flex items-center justify-between mb-3">
+                <div>
+                  <h4 class="font-bold text-indigo-900"><i class="fas fa-gauge-high mr-2"></i>谈判态势评分</h4>
+                  <p class="text-xs text-indigo-600">基于当前条款和协商历史综合评估</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-3xl font-bold text-\${positionColor}-600">\${positionScore}</div>
+                  <div class="text-xs text-gray-500">/ 100分</div>
+                </div>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-3">
+                <div class="bg-gradient-to-r from-\${positionColor}-400 to-\${positionColor}-600 h-3 rounded-full transition-all" style="width: \${positionScore}%"></div>
+              </div>
+              <p class="text-sm text-gray-600 mt-3">\${advice.analysis || '暂无分析'}</p>
             </div>
+            
+            <!-- 参数优化建议 -->
             \${advice.suggestions?.length > 0 ? \`
-              <div class="p-4 bg-emerald-50 rounded-lg">
-                <h4 class="font-medium text-emerald-900 mb-3"><i class="fas fa-lightbulb mr-2"></i>参数建议</h4>
-                <div class="space-y-2">
-                  \${advice.suggestions.map(s => \`
-                    <div class="bg-white p-3 rounded-lg border border-emerald-200">
-                      <div class="flex items-center justify-between mb-1">
-                        <span class="font-medium text-gray-700">\${s.param}</span>
-                        <div class="text-sm">
-                          <span class="text-gray-400">\${s.currentValue}</span>
-                          <i class="fas fa-arrow-right mx-2 text-emerald-500"></i>
-                          <span class="text-emerald-600 font-medium">\${s.suggestedValue}</span>
+              <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-100">
+                <h4 class="font-bold text-emerald-900 mb-3"><i class="fas fa-sliders-h mr-2"></i>最优报价建议</h4>
+                <div class="space-y-3">
+                  \${advice.suggestions.map((s, i) => \`
+                    <div class="bg-white p-4 rounded-xl border border-emerald-200 shadow-sm">
+                      <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                          <div class="flex items-center space-x-2 mb-2">
+                            <span class="px-2 py-0.5 bg-\${s.priority === 'high' ? 'red' : s.priority === 'medium' ? 'amber' : 'gray'}-100 text-\${s.priority === 'high' ? 'red' : s.priority === 'medium' ? 'amber' : 'gray'}-700 rounded text-xs">\${s.priority === 'high' ? '高优先' : s.priority === 'medium' ? '中优先' : '低优先'}</span>
+                            <span class="font-bold text-gray-800">\${s.param}</span>
+                          </div>
+                          <div class="flex items-center space-x-3 mb-2">
+                            <div class="text-center">
+                              <div class="text-xs text-gray-400">当前值</div>
+                              <div class="text-lg font-medium text-gray-600">\${s.currentValue}</div>
+                            </div>
+                            <i class="fas fa-long-arrow-alt-right text-2xl text-emerald-500"></i>
+                            <div class="text-center">
+                              <div class="text-xs text-emerald-600">建议值</div>
+                              <div class="text-lg font-bold text-emerald-600">\${s.suggestedValue}</div>
+                            </div>
+                            \${s.minAcceptable ? \`
+                              <div class="text-center border-l border-gray-200 pl-3">
+                                <div class="text-xs text-gray-400">底线</div>
+                                <div class="text-sm text-gray-500">\${s.minAcceptable}</div>
+                              </div>
+                            \` : ''}
+                          </div>
+                          <p class="text-sm text-gray-600"><i class="fas fa-comment-dots mr-1 text-emerald-400"></i>\${s.reason}</p>
                         </div>
+                        <button onclick="applyAISuggestion('\${s.param}', '\${s.suggestedValue}')" class="ml-3 px-3 py-1.5 bg-emerald-600 text-white rounded-lg text-xs hover:bg-emerald-700">
+                          <i class="fas fa-check mr-1"></i>采纳
+                        </button>
                       </div>
-                      <p class="text-xs text-gray-500">\${s.reason}</p>
                     </div>
                   \`).join('')}
                 </div>
               </div>
             \` : ''}
+            
+            <!-- 让步策略 -->
+            \${advice.concessionStrategy ? \`
+              <div class="p-4 bg-purple-50 rounded-xl border border-purple-100">
+                <h4 class="font-bold text-purple-900 mb-3"><i class="fas fa-chess mr-2"></i>让步策略</h4>
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="bg-white p-3 rounded-lg border border-purple-200">
+                    <div class="text-xs text-purple-600 mb-2 font-medium"><i class="fas fa-hand-holding-usd mr-1"></i>可让步点</div>
+                    <ul class="space-y-1">\${(advice.concessionStrategy.canGive || []).map(c => \`<li class="text-sm text-gray-600">• \${c}</li>\`).join('')}</ul>
+                  </div>
+                  <div class="bg-white p-3 rounded-lg border border-purple-200">
+                    <div class="text-xs text-red-600 mb-2 font-medium"><i class="fas fa-shield-alt mr-1"></i>必须坚持</div>
+                    <ul class="space-y-1">\${(advice.concessionStrategy.mustKeep || []).map(c => \`<li class="text-sm text-gray-600">• \${c}</li>\`).join('')}</ul>
+                  </div>
+                </div>
+                \${advice.concessionStrategy.tradeOff ? \`
+                  <div class="mt-3 p-3 bg-purple-100 rounded-lg">
+                    <div class="text-xs text-purple-700 font-medium mb-1"><i class="fas fa-exchange-alt mr-1"></i>交换策略</div>
+                    <p class="text-sm text-purple-800">\${advice.concessionStrategy.tradeOff}</p>
+                  </div>
+                \` : ''}
+              </div>
+            \` : ''}
+            
+            <!-- 表达建议 -->
             \${advice.talkingPoints?.length > 0 ? \`
-              <div class="p-4 bg-amber-50 rounded-lg">
-                <h4 class="font-medium text-amber-900 mb-2"><i class="fas fa-comment-alt mr-2"></i>表达建议</h4>
-                <ul class="space-y-1">
-                  \${advice.talkingPoints.map(t => \`<li class="text-sm text-amber-700">• \${t}</li>\`).join('')}
+              <div class="p-4 bg-amber-50 rounded-xl border border-amber-100">
+                <h4 class="font-bold text-amber-900 mb-3"><i class="fas fa-comment-alt mr-2"></i>表达话术</h4>
+                <div class="space-y-2">
+                  \${advice.talkingPoints.map((t, i) => \`
+                    <div class="bg-white p-3 rounded-lg border border-amber-200 flex items-start">
+                      <div class="w-6 h-6 bg-amber-500 rounded-full flex items-center justify-center mr-3 flex-shrink-0">
+                        <span class="text-white text-xs font-bold">\${i + 1}</span>
+                      </div>
+                      <p class="text-sm text-gray-700 flex-1">\${t}</p>
+                      <button onclick="copyToClipboard('\${t.replace(/'/g, "\\\\'")}')" class="ml-2 text-amber-600 hover:text-amber-700">
+                        <i class="fas fa-copy"></i>
+                      </button>
+                    </div>
+                  \`).join('')}
+                </div>
+              </div>
+            \` : ''}
+            
+            <!-- 风险提醒 -->
+            \${advice.risks?.length > 0 ? \`
+              <div class="p-4 bg-red-50 rounded-xl border border-red-100">
+                <h4 class="font-bold text-red-900 mb-3"><i class="fas fa-exclamation-triangle mr-2"></i>风险提醒</h4>
+                <div class="space-y-2">
+                  \${advice.risks.map(r => {
+                    const risk = typeof r === 'string' ? { description: r, level: 'medium' } : r;
+                    const levelColor = risk.level === 'high' ? 'red' : risk.level === 'medium' ? 'amber' : 'gray';
+                    return \`
+                      <div class="bg-white p-3 rounded-lg border border-red-200">
+                        <div class="flex items-start">
+                          <span class="px-2 py-0.5 bg-\${levelColor}-100 text-\${levelColor}-700 rounded text-xs mr-2">\${risk.level === 'high' ? '高' : risk.level === 'medium' ? '中' : '低'}</span>
+                          <div class="flex-1">
+                            <p class="text-sm text-gray-700">\${risk.description}</p>
+                            \${risk.mitigation ? \`<p class="text-xs text-gray-500 mt-1"><i class="fas fa-lightbulb mr-1 text-amber-500"></i>\${risk.mitigation}</p>\` : ''}
+                          </div>
+                        </div>
+                      </div>
+                    \`;
+                  }).join('')}
+                </div>
+              </div>
+            \` : ''}
+            
+            <!-- 对方预测 -->
+            \${advice.opponentPrediction ? \`
+              <div class="p-4 bg-slate-50 rounded-xl border border-slate-200">
+                <h4 class="font-bold text-slate-900 mb-2"><i class="fas fa-eye mr-2"></i>预测对方下一步</h4>
+                <p class="text-sm text-slate-700">\${advice.opponentPrediction}</p>
+              </div>
+            \` : ''}
+            
+            <!-- 置信度 -->
+            <div class="flex items-center justify-between text-xs text-gray-400 pt-2">
+              <span><i class="fas fa-robot mr-1"></i>AI置信度: \${advice.confidence || 75}%</span>
+              <span>生成时间: \${new Date(advice.generatedAt).toLocaleString('zh-CN')}</span>
+            </div>
+          </div>
+        \`;
+        
+        document.getElementById('aiLastUpdate').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
+        
+      } catch (e) {
+        initialDiv.innerHTML = \`<div class="py-8"><i class="fas fa-wifi text-4xl text-red-500 mb-4"></i><p class="text-red-500">网络错误</p><button onclick="getAIAdvice()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm">重试</button></div>\`;
+      }
+    }
+    
+    // 采纳AI建议
+    function applyAISuggestion(paramName, value) {
+      if (!currentProject) return;
+      
+      // 参数名到key的映射
+      const paramKeyMap = {
+        '投资金额': 'investmentAmount',
+        '分成比例': 'revenueShareRatio',
+        '收入分成期限': 'sharingDuration',
+        '最低收入门槛': 'minimumRevenueThreshold',
+        '提前终止返还比例': 'terminationReturn',
+        '违约金': 'breachPenalty'
+      };
+      
+      const key = paramKeyMap[paramName];
+      if (key && currentProject.params[key] !== undefined) {
+        const oldValue = currentProject.params[key];
+        currentProject.params[key] = value;
+        
+        // 添加到协商历史
+        currentProject.negotiations = currentProject.negotiations || [];
+        currentProject.negotiations.push({
+          id: 'neg_' + Date.now(),
+          timestamp: new Date().toISOString(),
+          perspective: currentPerspective,
+          input: \`采纳AI建议：\${paramName}从\${oldValue}调整为\${value}\`,
+          changes: [{
+            moduleId: 'ai_suggestion',
+            moduleName: 'AI建议',
+            paramKey: key,
+            paramName: paramName,
+            oldValue: oldValue,
+            newValue: value,
+            clauseText: ''
+          }]
+        });
+        
+        currentProject.updatedAt = new Date().toISOString();
+        saveProjects();
+        renderContractText();
+        showToast('已采纳AI建议: ' + paramName, 'success');
+      } else {
+        showToast('无法应用此建议', 'error');
+      }
+    }
+    
+    // 复制到剪贴板
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('已复制到剪贴板', 'success');
+      }).catch(() => {
+        showToast('复制失败', 'error');
+      });
+    }
+    
+    // 风险评估
+    async function getRiskAssessment() {
+      if (!currentProject) {
+        showToast('请先选择一个项目', 'error');
+        return;
+      }
+      
+      const resultDiv = document.getElementById('aiRiskResult');
+      const initialDiv = document.getElementById('aiRiskPanel').querySelector('.text-center');
+      
+      initialDiv.innerHTML = '<div class="py-8"><i class="fas fa-spinner fa-spin text-4xl text-rose-600 mb-4"></i><p class="text-gray-500">AI正在进行风险评估...</p><p class="text-xs text-gray-400 mt-2">从多个维度分析合同条款</p></div>';
+      resultDiv.classList.add('hidden');
+      
+      try {
+        const template = templates.find(t => t.id === currentProject.templateId);
+        const res = await fetch('/api/ai/risk-assessment', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            currentParams: currentProject.params,
+            templateName: template?.name || '未知行业',
+            negotiationHistory: currentProject.negotiations || []
+          })
+        });
+        
+        const risk = await res.json();
+        aiRiskCache = risk;
+        
+        if (!risk.success) {
+          initialDiv.innerHTML = \`<div class="py-8"><i class="fas fa-exclamation-circle text-4xl text-red-500 mb-4"></i><p class="text-red-500">评估失败</p><button onclick="getRiskAssessment()" class="mt-4 px-4 py-2 bg-rose-600 text-white rounded-lg text-sm">重新评估</button></div>\`;
+          return;
+        }
+        
+        initialDiv.classList.add('hidden');
+        resultDiv.classList.remove('hidden');
+        
+        const overallScore = risk.overallRiskScore || 50;
+        const overallLevel = risk.overallRiskLevel || 'medium';
+        const levelConfig = {
+          low: { color: 'emerald', text: '低风险', icon: 'fa-shield-check' },
+          medium: { color: 'amber', text: '中风险', icon: 'fa-shield-alt' },
+          high: { color: 'red', text: '高风险', icon: 'fa-shield-exclamation' }
+        };
+        const config = levelConfig[overallLevel] || levelConfig.medium;
+        
+        resultDiv.innerHTML = \`
+          <div class="space-y-4">
+            <!-- 总体风险评分 -->
+            <div class="p-5 bg-gradient-to-r from-\${config.color}-50 to-\${config.color}-100 rounded-xl border border-\${config.color}-200">
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                  <div class="w-14 h-14 bg-\${config.color}-500 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas \${config.icon} text-white text-2xl"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-bold text-\${config.color}-900 text-lg">综合风险评估</h4>
+                    <p class="text-\${config.color}-700">\${config.text}</p>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <div class="text-4xl font-bold text-\${config.color}-600">\${overallScore}</div>
+                  <div class="text-xs text-gray-500">风险指数</div>
+                </div>
+              </div>
+              <div class="w-full bg-white rounded-full h-4">
+                <div class="bg-gradient-to-r from-emerald-400 via-amber-400 to-red-500 h-4 rounded-full" style="width: 100%"></div>
+              </div>
+              <div class="flex justify-between text-xs mt-1">
+                <span class="text-emerald-600">低</span>
+                <span class="text-\${config.color}-600 font-bold">当前: \${overallScore}</span>
+                <span class="text-red-600">高</span>
+              </div>
+            </div>
+            
+            <!-- 风险细分 -->
+            \${risk.riskBreakdown?.length > 0 ? \`
+              <div class="grid grid-cols-1 gap-3">
+                \${risk.riskBreakdown.map(item => {
+                  const itemConfig = levelConfig[item.level] || levelConfig.medium;
+                  return \`
+                    <div class="p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                      <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center">
+                          <span class="px-3 py-1 bg-\${itemConfig.color}-100 text-\${itemConfig.color}-700 rounded-lg text-sm font-medium mr-3">
+                            \${item.category}
+                          </span>
+                          <span class="text-\${itemConfig.color}-600 font-bold">\${item.score}分</span>
+                        </div>
+                        <span class="px-2 py-0.5 bg-\${itemConfig.color}-100 text-\${itemConfig.color}-700 rounded text-xs">\${itemConfig.text}</span>
+                      </div>
+                      <p class="text-sm text-gray-600 mb-2">\${item.description}</p>
+                      \${item.factors?.length > 0 ? \`
+                        <div class="mb-2">
+                          <div class="text-xs text-gray-500 mb-1">风险因素:</div>
+                          <div class="flex flex-wrap gap-1">
+                            \${item.factors.map(f => \`<span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">\${f}</span>\`).join('')}
+                          </div>
+                        </div>
+                      \` : ''}
+                      \${item.recommendations?.length > 0 ? \`
+                        <div class="mt-2 p-2 bg-blue-50 rounded-lg">
+                          <div class="text-xs text-blue-700 font-medium mb-1"><i class="fas fa-lightbulb mr-1"></i>建议措施</div>
+                          <ul class="space-y-0.5">
+                            \${item.recommendations.map(r => \`<li class="text-xs text-blue-600">• \${r}</li>\`).join('')}
+                          </ul>
+                        </div>
+                      \` : ''}
+                    </div>
+                  \`;
+                }).join('')}
+              </div>
+            \` : ''}
+            
+            <!-- 关键问题 -->
+            \${risk.criticalIssues?.length > 0 ? \`
+              <div class="p-4 bg-red-50 rounded-xl border border-red-200">
+                <h4 class="font-bold text-red-900 mb-3"><i class="fas fa-exclamation-circle mr-2"></i>需重点关注</h4>
+                <ul class="space-y-2">
+                  \${risk.criticalIssues.map(issue => \`
+                    <li class="flex items-start">
+                      <i class="fas fa-arrow-right text-red-500 mr-2 mt-1"></i>
+                      <span class="text-sm text-red-700">\${issue}</span>
+                    </li>
+                  \`).join('')}
                 </ul>
               </div>
             \` : ''}
-            \${advice.risks?.length > 0 ? \`
-              <div class="p-4 bg-red-50 rounded-lg">
-                <h4 class="font-medium text-red-900 mb-2"><i class="fas fa-exclamation-triangle mr-2"></i>风险提醒</h4>
-                <ul class="space-y-1">
-                  \${advice.risks.map(r => \`<li class="text-sm text-red-700">• \${r}</li>\`).join('')}
-                </ul>
+            
+            <!-- 安全边际 -->
+            \${risk.safetyMargin ? \`
+              <div class="p-4 bg-blue-50 rounded-xl border border-blue-200">
+                <h4 class="font-bold text-blue-900 mb-2"><i class="fas fa-balance-scale mr-2"></i>安全边际评估</h4>
+                <p class="text-sm text-blue-700">\${risk.safetyMargin}</p>
               </div>
             \` : ''}
           </div>
         \`;
+        
+        document.getElementById('aiLastUpdate').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
+        
       } catch (e) {
-        content.innerHTML = '<div class="text-center py-8 text-red-500"><i class="fas fa-exclamation-circle text-4xl mb-4"></i><p>网络错误，请重试</p></div>';
+        initialDiv.innerHTML = \`<div class="py-8"><i class="fas fa-wifi text-4xl text-red-500 mb-4"></i><p class="text-red-500">网络错误</p><button onclick="getRiskAssessment()" class="mt-4 px-4 py-2 bg-rose-600 text-white rounded-lg text-sm">重试</button></div>\`;
+      }
+    }
+    
+    // 市场对标分析
+    async function getMarketBenchmark() {
+      if (!currentProject) {
+        showToast('请先选择一个项目', 'error');
+        return;
+      }
+      
+      const resultDiv = document.getElementById('aiMarketResult');
+      const initialDiv = document.getElementById('aiMarketPanel').querySelector('.text-center');
+      
+      initialDiv.innerHTML = '<div class="py-8"><i class="fas fa-spinner fa-spin text-4xl text-emerald-600 mb-4"></i><p class="text-gray-500">AI正在分析市场数据...</p><p class="text-xs text-gray-400 mt-2">对比行业标准评估竞争力</p></div>';
+      resultDiv.classList.add('hidden');
+      
+      try {
+        const template = templates.find(t => t.id === currentProject.templateId);
+        const res = await fetch('/api/ai/market-benchmark', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            currentParams: currentProject.params,
+            templateName: template?.name || '未知行业',
+            industry: template?.industry || '未知'
+          })
+        });
+        
+        const market = await res.json();
+        aiMarketCache = market;
+        
+        if (!market.success) {
+          initialDiv.innerHTML = \`<div class="py-8"><i class="fas fa-exclamation-circle text-4xl text-red-500 mb-4"></i><p class="text-red-500">分析失败</p><button onclick="getMarketBenchmark()" class="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm">重新分析</button></div>\`;
+          return;
+        }
+        
+        initialDiv.classList.add('hidden');
+        resultDiv.classList.remove('hidden');
+        
+        const competitiveness = market.competitiveness || 50;
+        const compColor = competitiveness >= 70 ? 'emerald' : competitiveness >= 40 ? 'amber' : 'red';
+        
+        resultDiv.innerHTML = \`
+          <div class="space-y-4">
+            <!-- 市场竞争力评分 -->
+            <div class="p-5 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl border border-emerald-200">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h4 class="font-bold text-emerald-900 text-lg"><i class="fas fa-chart-bar mr-2"></i>市场竞争力</h4>
+                  <p class="text-emerald-700 text-sm">\${market.marketAnalysis || '基于行业数据综合评估'}</p>
+                </div>
+                <div class="text-center">
+                  <div class="relative w-20 h-20">
+                    <svg class="w-20 h-20 transform -rotate-90">
+                      <circle cx="40" cy="40" r="35" stroke="#e5e7eb" stroke-width="8" fill="none" />
+                      <circle cx="40" cy="40" r="35" stroke="url(#gradient)" stroke-width="8" fill="none" 
+                        stroke-dasharray="\${competitiveness * 2.2} 220" stroke-linecap="round" />
+                      <defs>
+                        <linearGradient id="gradient">
+                          <stop offset="0%" stop-color="#10b981" />
+                          <stop offset="100%" stop-color="#0d9488" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                    <div class="absolute inset-0 flex items-center justify-center">
+                      <span class="text-xl font-bold text-\${compColor}-600">\${competitiveness}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 参数对标详情 -->
+            \${market.benchmarks?.length > 0 ? \`
+              <div class="space-y-3">
+                <h4 class="font-bold text-gray-800"><i class="fas fa-list-check mr-2 text-gray-400"></i>参数市场对标</h4>
+                \${market.benchmarks.map(b => {
+                  const posColor = b.position === 'above' ? 'emerald' : b.position === 'below' ? 'red' : 'amber';
+                  const posText = b.position === 'above' ? '高于市场' : b.position === 'below' ? '低于市场' : '市场平均';
+                  return \`
+                    <div class="p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                      <div class="flex items-center justify-between mb-3">
+                        <span class="font-bold text-gray-800">\${b.param}</span>
+                        <span class="px-2 py-1 bg-\${posColor}-100 text-\${posColor}-700 rounded text-xs font-medium">\${posText}</span>
+                      </div>
+                      <div class="relative mb-3">
+                        <div class="flex justify-between text-xs text-gray-500 mb-1">
+                          <span>市场最低: \${b.marketLow}</span>
+                          <span>市场平均: \${b.marketAvg}</span>
+                          <span>市场最高: \${b.marketHigh}</span>
+                        </div>
+                        <div class="h-3 bg-gradient-to-r from-red-200 via-amber-200 to-emerald-200 rounded-full relative">
+                          <div class="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-indigo-600 rounded-full border-2 border-white shadow" style="left: calc(\${
+                            b.position === 'below' ? 10 : b.position === 'above' ? 90 : 50
+                          }% - 8px)">
+                            <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-indigo-600 whitespace-nowrap">
+                              \${b.currentValue}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      \${b.recommendation ? \`
+                        <div class="mt-4 p-2 bg-blue-50 rounded-lg">
+                          <p class="text-xs text-blue-700"><i class="fas fa-lightbulb mr-1 text-blue-500"></i>\${b.recommendation}</p>
+                        </div>
+                      \` : ''}
+                    </div>
+                  \`;
+                }).join('')}
+              </div>
+            \` : ''}
+            
+            <!-- 综合评价 -->
+            \${market.summary ? \`
+              <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-200">
+                <h4 class="font-bold text-indigo-900 mb-2"><i class="fas fa-clipboard-check mr-2"></i>综合评价</h4>
+                <p class="text-sm text-indigo-700">\${market.summary}</p>
+              </div>
+            \` : ''}
+          </div>
+        \`;
+        
+        document.getElementById('aiLastUpdate').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
+        
+      } catch (e) {
+        initialDiv.innerHTML = \`<div class="py-8"><i class="fas fa-wifi text-4xl text-red-500 mb-4"></i><p class="text-red-500">网络错误</p><button onclick="getMarketBenchmark()" class="mt-4 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm">重试</button></div>\`;
       }
     }
     
