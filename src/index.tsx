@@ -1,6 +1,14 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { industryTemplates, templateList } from './templates'
+import { 
+  contractAgents, 
+  agentList, 
+  routeToAgents, 
+  executeMultiAgentWorkflow,
+  executeAgentTask,
+  type AgentTask
+} from './agents'
 
 type Bindings = {
   OPENAI_API_KEY: string
@@ -1338,7 +1346,198 @@ app.post('/api/ai/market-benchmark', async (c) => {
   }
 })
 
-// AI解析自然语言变动
+// ==================== 多Agent并行工作流API ====================
+
+// 获取Agent列表
+app.get('/api/agents', (c) => {
+  return c.json(agentList)
+})
+
+// 获取单个Agent配置
+app.get('/api/agents/:id', (c) => {
+  const id = c.req.param('id')
+  const agent = contractAgents[id]
+  if (!agent) {
+    return c.json({ error: 'Agent not found' }, 404)
+  }
+  return c.json({
+    id: agent.id,
+    name: agent.name,
+    icon: agent.icon,
+    color: agent.color,
+    description: agent.description,
+    moduleIds: agent.moduleIds,
+    expertise: agent.expertise
+  })
+})
+
+// 路由分析API - 分析输入应该分配给哪些Agent
+app.post('/api/agents/route', async (c) => {
+  const { message } = await c.req.json()
+  const { apiKey, baseUrl } = getAIConfig(c)
+  
+  if (!apiKey) {
+    return c.json({ error: 'API key not configured' }, 500)
+  }
+  
+  try {
+    const result = await routeToAgents(message, apiKey, baseUrl)
+    return c.json({
+      success: true,
+      ...result,
+      agents: result.targetAgents.map(id => {
+        const agent = contractAgents[id]
+        return agent ? {
+          id: agent.id,
+          name: agent.name,
+          icon: agent.icon,
+          color: agent.color
+        } : null
+      }).filter(Boolean)
+    })
+  } catch (error) {
+    return c.json({ 
+      success: false, 
+      error: 'Routing failed: ' + (error as Error).message 
+    }, 500)
+  }
+})
+
+// 多Agent并行处理API（核心API）
+app.post('/api/agents/process', async (c) => {
+  const { 
+    message, 
+    templateId, 
+    currentParams, 
+    negotiationHistory,
+    perspective 
+  } = await c.req.json()
+  
+  const { apiKey, baseUrl } = getAIConfig(c)
+  
+  if (!apiKey) {
+    return c.json({ error: 'API key not configured' }, 500)
+  }
+  
+  const template = industryTemplates[templateId]
+  if (!template) {
+    return c.json({ error: 'Template not found' }, 404)
+  }
+  
+  const context = {
+    currentParams: currentParams || template.defaultParams,
+    templateId,
+    templateName: template.name,
+    negotiationHistory: negotiationHistory || [],
+    perspective: perspective || 'borrower'
+  }
+  
+  try {
+    const startTime = Date.now()
+    const result = await executeMultiAgentWorkflow(message, context, apiKey, baseUrl)
+    
+    return c.json({
+      success: result.success,
+      // 路由信息
+      routing: (result as any).routerResult,
+      // 聚合结果
+      understood: result.understood,
+      changes: result.allChanges,
+      suggestions: result.allSuggestions,
+      warnings: result.allWarnings,
+      // Agent详情
+      agentDetails: result.agentResponses.map(r => ({
+        agentId: r.agentId,
+        agentName: r.agentName,
+        agentIcon: contractAgents[r.agentId]?.icon,
+        agentColor: contractAgents[r.agentId]?.color,
+        success: r.success,
+        understood: r.understood,
+        changes: r.changes,
+        suggestions: r.suggestions,
+        warnings: r.warnings,
+        processingTime: r.processingTime
+      })),
+      // 性能统计
+      stats: {
+        totalAgents: result.totalAgents,
+        respondedAgents: result.respondedAgents,
+        parallelProcessingTime: result.totalProcessingTime,
+        totalTime: Date.now() - startTime
+      }
+    })
+  } catch (error) {
+    return c.json({ 
+      success: false, 
+      error: 'Processing failed: ' + (error as Error).message 
+    }, 500)
+  }
+})
+
+// 单Agent处理API（用于单独调用特定Agent）
+app.post('/api/agents/:id/process', async (c) => {
+  const agentId = c.req.param('id')
+  const { 
+    message, 
+    templateId, 
+    currentParams, 
+    negotiationHistory,
+    perspective 
+  } = await c.req.json()
+  
+  const { apiKey, baseUrl } = getAIConfig(c)
+  
+  if (!apiKey) {
+    return c.json({ error: 'API key not configured' }, 500)
+  }
+  
+  const agent = contractAgents[agentId]
+  if (!agent) {
+    return c.json({ error: 'Agent not found' }, 404)
+  }
+  
+  const template = industryTemplates[templateId]
+  if (!template) {
+    return c.json({ error: 'Template not found' }, 404)
+  }
+  
+  const task: AgentTask = {
+    agentId,
+    input: message,
+    context: {
+      currentParams: currentParams || template.defaultParams,
+      templateId,
+      templateName: template.name,
+      negotiationHistory: negotiationHistory || [],
+      perspective: perspective || 'borrower'
+    }
+  }
+  
+  try {
+    const result = await executeAgentTask(task, apiKey, baseUrl)
+    return c.json({
+      success: result.success,
+      agent: {
+        id: agent.id,
+        name: agent.name,
+        icon: agent.icon,
+        color: agent.color
+      },
+      understood: result.understood,
+      changes: result.changes,
+      suggestions: result.suggestions,
+      warnings: result.warnings,
+      processingTime: result.processingTime
+    })
+  } catch (error) {
+    return c.json({ 
+      success: false, 
+      error: 'Agent processing failed: ' + (error as Error).message 
+    }, 500)
+  }
+})
+
+// AI解析自然语言变动（保留原API兼容性）
 app.post('/api/parse-change', async (c) => {
   const { message, templateId, currentParams } = await c.req.json()
   
@@ -1661,6 +1860,61 @@ app.get('/', (c) => {
     /* 优化：空状态引导 */
     .empty-action-btn { transition: all 0.3s; border: 2px dashed #c7d2fe; }
     .empty-action-btn:hover { border-color: #6366f1; background: #eef2ff; transform: scale(1.02); }
+    
+    /* 多Agent并行处理样式 */
+    .agent-card {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .agent-card.processing {
+      animation: agentPulse 1.5s ease-in-out infinite;
+    }
+    .agent-card.completed {
+      border-color: #10b981 !important;
+      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+    }
+    @keyframes agentPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+    }
+    @keyframes agentSuccess {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    .agent-success-animation {
+      animation: agentSuccess 0.5s ease-out;
+    }
+    
+    /* 多Agent面板动画 */
+    @keyframes slideInFromBottom {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #multiAgentPanel > div {
+      animation: slideInFromBottom 0.3s ease-out;
+    }
+    
+    /* Agent卡片渐进动画 */
+    .agent-card:nth-child(1) { animation-delay: 0s; }
+    .agent-card:nth-child(2) { animation-delay: 0.1s; }
+    .agent-card:nth-child(3) { animation-delay: 0.2s; }
+    .agent-card:nth-child(4) { animation-delay: 0.3s; }
+    .agent-card:nth-child(5) { animation-delay: 0.4s; }
+    .agent-card:nth-child(6) { animation-delay: 0.5s; }
+    .agent-card:nth-child(7) { animation-delay: 0.6s; }
+    .agent-card:nth-child(8) { animation-delay: 0.7s; }
+    
+    /* 路由动画 */
+    @keyframes routeFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .route-animation {
+      background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #6366f1);
+      background-size: 300% 300%;
+      animation: routeFlow 2s ease infinite;
+    }
     
     /* AI助手浮窗样式 */
     .ai-assistant-fab {
@@ -2766,6 +3020,9 @@ app.get('/', (c) => {
             </button>
             <button onclick="switchContractView('full')" id="btnFullView" class="px-3 py-1.5 rounded-md text-sm font-medium text-gray-600">
               <i class="fas fa-file-alt mr-1"></i>完整合同
+            </button>
+            <button onclick="switchContractView('agents')" id="btnAgentsView" class="px-3 py-1.5 rounded-md text-sm font-medium text-gray-600">
+              <i class="fas fa-robot mr-1"></i>Agent
             </button>
           </div>
         </div>
@@ -4637,6 +4894,22 @@ app.get('/', (c) => {
         : 'px-3 py-1.5 rounded-md text-sm font-medium text-gray-600';
     }
     
+    // ==================== 多Agent并行处理系统 ====================
+    let activeAgentProcessing = false;
+    let agentProcessingResults = null;
+    
+    // Agent颜色映射
+    const agentColorMap = {
+      'investment-revenue': { bg: 'yellow', icon: 'fa-coins', name: '投资分成专家' },
+      'data-payment': { bg: 'blue', icon: 'fa-chart-line', name: '数据对账专家' },
+      'early-termination': { bg: 'orange', icon: 'fa-door-open', name: '终止条款专家' },
+      'breach-liability': { bg: 'red', icon: 'fa-gavel', name: '违约责任专家' },
+      'prohibited-actions': { bg: 'purple', icon: 'fa-ban', name: '禁止行为专家' },
+      'guarantee': { bg: 'indigo', icon: 'fa-shield-halved', name: '担保责任专家' },
+      'store-info': { bg: 'teal', icon: 'fa-store', name: '门店资产专家' },
+      'dispute-resolution': { bg: 'gray', icon: 'fa-balance-scale', name: '争议解决专家' }
+    };
+    
     async function submitNegotiation() {
       const input = document.getElementById('negotiationInput');
       const message = input.value.trim();
@@ -4644,55 +4917,454 @@ app.get('/', (c) => {
       
       const btn = document.getElementById('btnSubmit');
       btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI解析中...';
+      activeAgentProcessing = true;
+      
+      // 显示多Agent处理面板
+      showMultiAgentProcessingPanel(message);
       
       try {
-        const res = await fetch('/api/parse-change', {
+        // 第一步：路由分析 - 决定调用哪些Agent
+        updateAgentPanelStatus('routing', '正在分析意图，匹配专业Agent...');
+        
+        const routeRes = await fetch('/api/agents/route', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            message,
-            templateId: currentProject.templateId,
-            currentParams: currentProject.params
-          })
+          body: JSON.stringify({ message })
         });
+        const routeResult = await routeRes.json();
         
-        const result = await res.json();
-        
-        if (result.changes && result.changes.length > 0) {
-          const negotiation = {
-            id: 'neg_' + Date.now(),
-            input: message,
-            understood: result.understood,
-            changes: result.changes,
-            suggestion: result.suggestion,
-            perspective: currentPerspective,
-            timestamp: new Date().toISOString()
-          };
-          currentProject.negotiations.push(negotiation);
+        if (routeResult.success && routeResult.targetAgents?.length > 0) {
+          // 显示匹配到的Agent
+          updateAgentPanelStatus('matched', \`已匹配 \${routeResult.targetAgents.length} 个专业Agent\`, routeResult);
           
-          for (const change of result.changes) {
-            currentProject.params[change.paramKey] = change.newValue;
+          // 第二步：并行执行多Agent处理
+          updateAgentPanelStatus('processing', '多Agent并行处理中...');
+          showAgentProcessingCards(routeResult.targetAgents);
+          
+          const processRes = await fetch('/api/agents/process', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message,
+              templateId: currentProject.templateId,
+              currentParams: currentProject.params,
+              negotiationHistory: currentProject.negotiations,
+              perspective: currentPerspective
+            })
+          });
+          
+          const result = await processRes.json();
+          agentProcessingResults = result;
+          
+          if (result.success && result.changes?.length > 0) {
+            // 显示处理结果
+            updateAgentPanelStatus('completed', '处理完成！', result);
+            showAgentProcessingResults(result);
+            
+            // 创建协商记录
+            const negotiation = {
+              id: 'neg_' + Date.now(),
+              input: message,
+              understood: result.understood,
+              changes: result.changes.map(c => ({
+                paramKey: c.key,
+                paramName: c.paramName,
+                oldValue: c.oldValue,
+                newValue: c.newValue,
+                clauseText: c.clauseText,
+                moduleId: c.moduleId || 'unknown',
+                moduleName: c.moduleName || '未知模块'
+              })),
+              agentDetails: result.agentDetails,
+              suggestions: result.suggestions,
+              warnings: result.warnings,
+              perspective: currentPerspective,
+              timestamp: new Date().toISOString(),
+              processingStats: result.stats
+            };
+            currentProject.negotiations.push(negotiation);
+            
+            // 更新参数
+            for (const change of result.changes) {
+              currentProject.params[change.key] = change.newValue;
+            }
+            
+            currentProject.updatedAt = new Date().toISOString();
+            saveProjects();
+            
+            // 延迟后关闭面板并更新UI
+            setTimeout(() => {
+              hideMultiAgentProcessingPanel();
+              input.value = '';
+              renderNegotiationHistory();
+              renderModuleCards();
+              renderContractText();
+              updateChangedBadge();
+            }, 2000);
+            
+          } else {
+            // 没有变更或处理失败
+            updateAgentPanelStatus('no-changes', result.warnings?.length > 0 
+              ? '提示: ' + result.warnings[0] 
+              : 'AI未能理解您的变动描述，请尝试更具体的表述');
+            setTimeout(() => hideMultiAgentProcessingPanel(), 3000);
           }
-          
-          currentProject.updatedAt = new Date().toISOString();
-          saveProjects();
-          
-          input.value = '';
-          renderNegotiationHistory();
-          renderModuleCards();
-          renderContractText();
-          updateChangedBadge();
         } else {
-          alert('AI未能理解您的变动描述，请尝试更具体的表述');
+          // 路由失败，回退到单一API
+          updateAgentPanelStatus('fallback', '使用单一解析模式...');
+          await fallbackToSingleParse(message, input);
         }
       } catch (e) {
-        console.error(e);
-        alert('处理失败，请重试');
+        console.error('Multi-agent processing error:', e);
+        updateAgentPanelStatus('error', '处理失败: ' + e.message);
+        setTimeout(() => {
+          hideMultiAgentProcessingPanel();
+        }, 2000);
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>发送';
+        btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>发送变更';
+        activeAgentProcessing = false;
       }
+    }
+    
+    // 回退到单一解析模式
+    async function fallbackToSingleParse(message, input) {
+      const res = await fetch('/api/parse-change', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message,
+          templateId: currentProject.templateId,
+          currentParams: currentProject.params
+        })
+      });
+      
+      const result = await res.json();
+      
+      if (result.changes && result.changes.length > 0) {
+        const negotiation = {
+          id: 'neg_' + Date.now(),
+          input: message,
+          understood: result.understood,
+          changes: result.changes,
+          suggestion: result.suggestion,
+          perspective: currentPerspective,
+          timestamp: new Date().toISOString()
+        };
+        currentProject.negotiations.push(negotiation);
+        
+        for (const change of result.changes) {
+          currentProject.params[change.paramKey] = change.newValue;
+        }
+        
+        currentProject.updatedAt = new Date().toISOString();
+        saveProjects();
+        
+        hideMultiAgentProcessingPanel();
+        input.value = '';
+        renderNegotiationHistory();
+        renderModuleCards();
+        renderContractText();
+        updateChangedBadge();
+      } else {
+        updateAgentPanelStatus('no-changes', 'AI未能理解您的变动描述，请尝试更具体的表述');
+        setTimeout(() => hideMultiAgentProcessingPanel(), 3000);
+      }
+    }
+    
+    // 显示多Agent处理面板
+    function showMultiAgentProcessingPanel(message) {
+      // 检查是否已存在面板
+      let panel = document.getElementById('multiAgentPanel');
+      if (!panel) {
+        // 创建面板
+        panel = document.createElement('div');
+        panel.id = 'multiAgentPanel';
+        panel.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-50';
+        panel.innerHTML = \`
+          <div class="bg-white rounded-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl">
+            <div class="p-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                    <i class="fas fa-robot text-white text-xl"></i>
+                  </div>
+                  <div>
+                    <h2 class="text-xl font-bold text-white">多Agent并行处理</h2>
+                    <p class="text-sm text-white/70">智能路由 · 专家协作 · 并行执行</p>
+                  </div>
+                </div>
+                <button onclick="hideMultiAgentProcessingPanel()" class="p-2 hover:bg-white/20 rounded-lg text-white/80 hover:text-white">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            
+            <!-- 用户输入展示 -->
+            <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+              <div class="flex items-start space-x-3">
+                <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <i class="fas fa-user text-indigo-600 text-sm"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="text-xs text-gray-500 mb-1">您的输入</p>
+                  <p id="agentPanelInput" class="text-gray-800 font-medium">\${escapeHtml(message)}</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- 处理状态 -->
+            <div class="px-6 py-4 border-b border-gray-100">
+              <div class="flex items-center space-x-3">
+                <div id="agentStatusIcon" class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
+                  <i class="fas fa-spinner fa-spin text-indigo-600"></i>
+                </div>
+                <div class="flex-1">
+                  <p id="agentStatusTitle" class="font-medium text-gray-800">初始化中...</p>
+                  <p id="agentStatusDesc" class="text-sm text-gray-500">正在连接AI系统</p>
+                </div>
+                <div id="agentStatusBadge" class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm">
+                  处理中
+                </div>
+              </div>
+            </div>
+            
+            <!-- Agent卡片区域 -->
+            <div id="agentCardsContainer" class="p-6 overflow-y-auto max-h-[50vh]">
+              <div class="text-center text-gray-400 py-8">
+                <i class="fas fa-cogs text-4xl mb-3 opacity-50"></i>
+                <p>等待Agent分配...</p>
+              </div>
+            </div>
+            
+            <!-- 处理结果汇总 -->
+            <div id="agentResultsSummary" class="hidden px-6 py-4 border-t border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
+              <!-- 动态填充 -->
+            </div>
+          </div>
+        \`;
+        document.body.appendChild(panel);
+      } else {
+        // 更新输入内容
+        const inputEl = document.getElementById('agentPanelInput');
+        if (inputEl) inputEl.textContent = message;
+        panel.classList.remove('hidden');
+      }
+    }
+    
+    // 隐藏多Agent处理面板
+    function hideMultiAgentProcessingPanel() {
+      const panel = document.getElementById('multiAgentPanel');
+      if (panel) {
+        panel.classList.add('hidden');
+      }
+    }
+    
+    // 更新Agent面板状态
+    function updateAgentPanelStatus(status, message, data) {
+      const icon = document.getElementById('agentStatusIcon');
+      const title = document.getElementById('agentStatusTitle');
+      const desc = document.getElementById('agentStatusDesc');
+      const badge = document.getElementById('agentStatusBadge');
+      
+      const statusConfig = {
+        'routing': {
+          icon: '<i class="fas fa-route text-blue-600"></i>',
+          iconBg: 'bg-blue-100',
+          title: '智能路由分析',
+          badge: '分析中',
+          badgeBg: 'bg-blue-100 text-blue-700'
+        },
+        'matched': {
+          icon: '<i class="fas fa-check-circle text-emerald-600"></i>',
+          iconBg: 'bg-emerald-100',
+          title: 'Agent匹配完成',
+          badge: '已匹配',
+          badgeBg: 'bg-emerald-100 text-emerald-700'
+        },
+        'processing': {
+          icon: '<i class="fas fa-cogs fa-spin text-purple-600"></i>',
+          iconBg: 'bg-purple-100',
+          title: '并行处理中',
+          badge: '执行中',
+          badgeBg: 'bg-purple-100 text-purple-700'
+        },
+        'completed': {
+          icon: '<i class="fas fa-check-double text-emerald-600"></i>',
+          iconBg: 'bg-emerald-100',
+          title: '处理完成',
+          badge: '成功',
+          badgeBg: 'bg-emerald-500 text-white'
+        },
+        'no-changes': {
+          icon: '<i class="fas fa-info-circle text-amber-600"></i>',
+          iconBg: 'bg-amber-100',
+          title: '处理完成（无变更）',
+          badge: '无变更',
+          badgeBg: 'bg-amber-100 text-amber-700'
+        },
+        'fallback': {
+          icon: '<i class="fas fa-sync text-gray-600"></i>',
+          iconBg: 'bg-gray-100',
+          title: '回退模式',
+          badge: '备用',
+          badgeBg: 'bg-gray-100 text-gray-700'
+        },
+        'error': {
+          icon: '<i class="fas fa-exclamation-triangle text-red-600"></i>',
+          iconBg: 'bg-red-100',
+          title: '处理失败',
+          badge: '错误',
+          badgeBg: 'bg-red-100 text-red-700'
+        }
+      };
+      
+      const config = statusConfig[status] || statusConfig['processing'];
+      
+      if (icon) {
+        icon.innerHTML = config.icon;
+        icon.className = 'w-10 h-10 rounded-full flex items-center justify-center ' + config.iconBg;
+      }
+      if (title) title.textContent = config.title;
+      if (desc) desc.textContent = message;
+      if (badge) {
+        badge.textContent = config.badge;
+        badge.className = 'px-3 py-1 rounded-full text-sm ' + config.badgeBg;
+      }
+    }
+    
+    // 显示Agent处理卡片
+    function showAgentProcessingCards(agentIds) {
+      const container = document.getElementById('agentCardsContainer');
+      if (!container) return;
+      
+      container.innerHTML = \`
+        <div class="mb-4">
+          <h4 class="text-sm font-medium text-gray-700 mb-3">
+            <i class="fas fa-users-cog mr-2 text-indigo-600"></i>
+            正在调用 \${agentIds.length} 个专业Agent并行处理
+          </h4>
+          <div class="grid grid-cols-2 gap-3">
+            \${agentIds.map(agentId => {
+              const agentInfo = agentColorMap[agentId] || { bg: 'gray', icon: 'fa-robot', name: agentId };
+              return \`
+                <div id="agentCard_\${agentId}" class="agent-card p-4 border-2 border-\${agentInfo.bg}-200 rounded-xl bg-\${agentInfo.bg}-50/50 transition-all">
+                  <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-\${agentInfo.bg}-100 rounded-lg flex items-center justify-center">
+                      <i class="fas \${agentInfo.icon} text-\${agentInfo.bg}-600"></i>
+                    </div>
+                    <div class="flex-1">
+                      <p class="font-medium text-gray-800">\${agentInfo.name}</p>
+                      <p class="text-xs text-gray-500" id="agentStatus_\${agentId}">
+                        <i class="fas fa-spinner fa-spin mr-1"></i>处理中...
+                      </p>
+                    </div>
+                    <div id="agentBadge_\${agentId}" class="w-6 h-6 bg-\${agentInfo.bg}-200 rounded-full flex items-center justify-center">
+                      <i class="fas fa-ellipsis-h text-\${agentInfo.bg}-600 text-xs"></i>
+                    </div>
+                  </div>
+                  <div id="agentResult_\${agentId}" class="hidden mt-3 pt-3 border-t border-\${agentInfo.bg}-200">
+                    <!-- 处理结果 -->
+                  </div>
+                </div>
+              \`;
+            }).join('')}
+          </div>
+        </div>
+        <div class="mt-4 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
+          <div class="flex items-center space-x-2 text-sm text-indigo-700">
+            <i class="fas fa-info-circle"></i>
+            <span>多Agent并行架构：各专家同时处理，提高效率并确保专业性</span>
+          </div>
+        </div>
+      \`;
+    }
+    
+    // 显示Agent处理结果
+    function showAgentProcessingResults(result) {
+      // 更新各Agent卡片状态
+      if (result.agentDetails) {
+        result.agentDetails.forEach(agent => {
+          const statusEl = document.getElementById('agentStatus_' + agent.agentId);
+          const badgeEl = document.getElementById('agentBadge_' + agent.agentId);
+          const resultEl = document.getElementById('agentResult_' + agent.agentId);
+          const cardEl = document.getElementById('agentCard_' + agent.agentId);
+          
+          if (statusEl) {
+            if (agent.success) {
+              statusEl.innerHTML = \`<i class="fas fa-check text-emerald-600 mr-1"></i>\${agent.changes?.length || 0}项建议 · \${agent.processingTime}ms\`;
+            } else {
+              statusEl.innerHTML = '<i class="fas fa-times text-red-600 mr-1"></i>处理失败';
+            }
+          }
+          
+          if (badgeEl) {
+            if (agent.success) {
+              badgeEl.innerHTML = '<i class="fas fa-check text-white text-xs"></i>';
+              badgeEl.className = 'w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center';
+            } else {
+              badgeEl.innerHTML = '<i class="fas fa-times text-white text-xs"></i>';
+              badgeEl.className = 'w-6 h-6 bg-red-500 rounded-full flex items-center justify-center';
+            }
+          }
+          
+          if (resultEl && agent.success && agent.changes?.length > 0) {
+            resultEl.classList.remove('hidden');
+            resultEl.innerHTML = agent.changes.map(c => \`
+              <div class="flex items-center justify-between text-sm mb-1">
+                <span class="text-gray-600">\${c.paramName}</span>
+                <div>
+                  <span class="text-gray-400 line-through mr-2">\${c.oldValue}</span>
+                  <span class="text-emerald-600 font-medium">\${c.newValue}</span>
+                </div>
+              </div>
+            \`).join('');
+          }
+          
+          if (cardEl && agent.success) {
+            cardEl.classList.add('border-emerald-300');
+          }
+        });
+      }
+      
+      // 显示结果汇总
+      const summaryEl = document.getElementById('agentResultsSummary');
+      if (summaryEl) {
+        summaryEl.classList.remove('hidden');
+        summaryEl.innerHTML = \`
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <div class="flex items-center text-emerald-700">
+                <i class="fas fa-check-circle mr-2"></i>
+                <span class="font-medium">\${result.changes?.length || 0} 项变更</span>
+              </div>
+              <div class="flex items-center text-indigo-700">
+                <i class="fas fa-robot mr-2"></i>
+                <span>\${result.stats?.respondedAgents || 0}/\${result.stats?.totalAgents || 0} Agent响应</span>
+              </div>
+              <div class="flex items-center text-purple-700">
+                <i class="fas fa-clock mr-2"></i>
+                <span>耗时 \${result.stats?.totalTime || 0}ms</span>
+              </div>
+            </div>
+            <div class="text-sm text-gray-500">
+              \${result.warnings?.length > 0 ? '<i class="fas fa-exclamation-triangle text-amber-500 mr-1"></i>' + result.warnings.length + ' 项提醒' : ''}
+            </div>
+          </div>
+          \${result.suggestions?.length > 0 ? \`
+            <div class="mt-3 pt-3 border-t border-emerald-200">
+              <p class="text-sm text-emerald-700"><i class="fas fa-lightbulb mr-2"></i>建议：\${result.suggestions[0]}</p>
+            </div>
+          \` : ''}
+        \`;
+      }
+    }
+    
+    // HTML转义
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
     }
     
     function quickInput(text) {
@@ -4705,10 +5377,15 @@ app.get('/', (c) => {
       const negotiations = currentProject?.negotiations || [];
       
       document.getElementById('negotiationCount').textContent = negotiations.length;
-      document.getElementById('currentVersionInfo').textContent = negotiations.length + '轮协商';
+      
+      // 检查currentVersionInfo是否存在
+      const versionInfoEl = document.getElementById('currentVersionInfo');
+      if (versionInfoEl) {
+        versionInfoEl.textContent = negotiations.length + '轮协商';
+      }
       
       if (negotiations.length === 0) {
-        container.innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fas fa-comments text-4xl mb-3 opacity-50"></i><p class="text-sm">开始协商</p></div>';
+        container.innerHTML = '<div class="text-center text-gray-400 py-8"><i class="fas fa-comments text-4xl mb-3 opacity-50"></i><p class="text-sm">开始协商</p><p class="text-xs mt-1">输入变动内容，AI将自动解析并更新合同</p></div>';
         return;
       }
       
@@ -4716,6 +5393,11 @@ app.get('/', (c) => {
         const pIcon = n.perspective === 'investor' ? 'fa-landmark' : 'fa-store';
         const pColor = n.perspective === 'investor' ? 'indigo' : 'amber';
         const pText = n.perspective === 'investor' ? '投资方' : '融资方';
+        
+        // 检查是否有多Agent处理信息
+        const hasAgentDetails = n.agentDetails && n.agentDetails.length > 0;
+        const agentCount = hasAgentDetails ? n.agentDetails.length : 0;
+        const respondedAgents = hasAgentDetails ? n.agentDetails.filter(a => a.success).length : 0;
         
         return \`
           <div class="negotiation-item bg-gray-50 rounded-xl p-4 animate-in">
@@ -4726,14 +5408,50 @@ app.get('/', (c) => {
                 </span>
                 <span class="text-xs text-\${pColor}-600 font-medium">\${pText}</span>
                 <span class="change-badge">#\${negotiations.length - i}</span>
+                \${hasAgentDetails ? \`
+                  <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs flex items-center">
+                    <i class="fas fa-robot mr-1"></i>\${respondedAgents} Agent
+                  </span>
+                \` : ''}
               </div>
               <span class="text-xs text-gray-400">\${formatTime(n.timestamp)}</span>
             </div>
             <p class="text-sm text-gray-800 mb-2">"\${n.input}"</p>
+            
+            \${hasAgentDetails ? \`
+              <!-- 多Agent处理详情展开/收起 -->
+              <div class="mb-3">
+                <button onclick="toggleAgentDetails('\${n.id}')" class="text-xs text-indigo-600 hover:text-indigo-700 flex items-center">
+                  <i class="fas fa-chevron-down mr-1" id="agentDetailsIcon_\${n.id}"></i>
+                  查看Agent处理详情 (\${n.processingStats?.totalTime || 0}ms)
+                </button>
+                <div id="agentDetails_\${n.id}" class="hidden mt-2 p-3 bg-white rounded-lg border border-indigo-100">
+                  <div class="grid grid-cols-2 gap-2">
+                    \${n.agentDetails.map(agent => {
+                      const agentInfo = agentColorMap[agent.agentId] || { bg: 'gray', icon: 'fa-robot', name: agent.agentName };
+                      return \`
+                        <div class="p-2 rounded-lg bg-\${agentInfo.bg}-50 border border-\${agentInfo.bg}-100">
+                          <div class="flex items-center space-x-2 mb-1">
+                            <i class="fas \${agentInfo.icon} text-\${agentInfo.bg}-600 text-xs"></i>
+                            <span class="text-xs font-medium text-gray-700">\${agent.agentName}</span>
+                            \${agent.success 
+                              ? '<i class="fas fa-check-circle text-emerald-500 text-xs ml-auto"></i>'
+                              : '<i class="fas fa-times-circle text-red-500 text-xs ml-auto"></i>'
+                            }
+                          </div>
+                          <p class="text-xs text-gray-500">\${agent.changes?.length || 0}项变更 · \${agent.processingTime || 0}ms</p>
+                        </div>
+                      \`;
+                    }).join('')}
+                  </div>
+                </div>
+              </div>
+            \` : ''}
+            
             <div class="space-y-2">
               \${n.changes.map(c => \`
                 <div class="bg-white rounded-lg p-2 border border-gray-100">
-                  <div class="flex items-center text-xs text-gray-500 mb-1"><i class="fas fa-folder-open mr-1"></i>\${c.moduleName}</div>
+                  <div class="flex items-center text-xs text-gray-500 mb-1"><i class="fas fa-folder-open mr-1"></i>\${c.moduleName || '模块'}</div>
                   <div class="flex items-center text-sm">
                     <span class="text-gray-600">\${c.paramName}:</span>
                     <span class="value-old ml-2">\${c.oldValue}</span>
@@ -4742,11 +5460,33 @@ app.get('/', (c) => {
                   </div>
                 </div>
               \`).join('')}
-              \${n.suggestion ? \`<div class="bg-amber-50 rounded-lg p-2 border border-amber-100"><p class="text-xs text-amber-700"><i class="fas fa-lightbulb mr-1"></i>\${n.suggestion}</p></div>\` : ''}
+              
+              \${n.suggestions?.length > 0 ? \`
+                <div class="bg-indigo-50 rounded-lg p-2 border border-indigo-100">
+                  <p class="text-xs text-indigo-700"><i class="fas fa-lightbulb mr-1"></i>\${n.suggestions[0]}</p>
+                </div>
+              \` : (n.suggestion ? \`<div class="bg-amber-50 rounded-lg p-2 border border-amber-100"><p class="text-xs text-amber-700"><i class="fas fa-lightbulb mr-1"></i>\${n.suggestion}</p></div>\` : '')}
+              
+              \${n.warnings?.length > 0 ? \`
+                <div class="bg-red-50 rounded-lg p-2 border border-red-100">
+                  <p class="text-xs text-red-700"><i class="fas fa-exclamation-triangle mr-1"></i>\${n.warnings[0]}</p>
+                </div>
+              \` : ''}
             </div>
           </div>
         \`;
       }).join('');
+    }
+    
+    // 切换Agent详情展开/收起
+    function toggleAgentDetails(negId) {
+      const detailsEl = document.getElementById('agentDetails_' + negId);
+      const iconEl = document.getElementById('agentDetailsIcon_' + negId);
+      if (detailsEl && iconEl) {
+        detailsEl.classList.toggle('hidden');
+        iconEl.classList.toggle('fa-chevron-down');
+        iconEl.classList.toggle('fa-chevron-up');
+      }
     }
     
     function renderModuleCards() {
