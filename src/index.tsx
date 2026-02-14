@@ -3900,10 +3900,8 @@ app.get('/', (c) => {
     ];
     
     function checkShowOnboarding() {
-      const hasSeenOnboarding = localStorage.getItem('rbf_onboarding_seen');
-      if (!hasSeenOnboarding) {
-        showOnboarding();
-      }
+      // 每次登录都显示教程浮窗（无论之前是否看过）
+      showOnboarding();
     }
     
     function showOnboarding() {
