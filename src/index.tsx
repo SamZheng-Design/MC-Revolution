@@ -4018,10 +4018,16 @@ app.get('/', (c) => {
       renderProjects();
       updateStats();
       
-      // 检查是否需要显示引导教程
-      setTimeout(() => {
-        checkShowOnboarding();
-      }, 500);
+      // 检查用户是否已登录
+      if (currentUser) {
+        // 已登录用户：跳转到项目页并显示教程
+        updateNavUserInfo();
+        showPage('pageProjects');
+        setTimeout(() => {
+          checkShowOnboarding();
+        }, 500);
+      }
+      // 未登录用户：保持在登录页，等待登录成功后再显示教程
     }
     
     async function loadTemplates() {
