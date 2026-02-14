@@ -1424,6 +1424,143 @@ ${template.modules.flatMap(m => m.clauses.map(c => `- ${c.key}: ${c.name} (当�
   }
 })
 
+// ==================== AI智能助手API ====================
+// 对程序功能有完整了解的AI助手，接入大模型支持自由聊天
+
+const AI_ASSISTANT_SYSTEM_PROMPT = `你是"收入分成融资协商平台"的AI智能助手，名叫"小融"。你对这个平台非常了解，可以帮助用户解答使用问题，也可以进行友好的自由对话。
+
+## 关于这个平台
+
+### 平台简介
+这是一个专业的收入分成融资（Revenue-Based Financing, RBF）合同协商平台，帮助投资方和融资方在线协商合同条款、实时协作、版本管理和电子签署。
+
+### 核心功能模块
+
+1. **个人账户系统** 👤
+   - 支持注册/登录，也可使用游客模式体验
+   - 个人主页展示统计数据
+   - 可切换角色视角：作为融资方或投资方
+   - 融资方可查看自己发起的项目
+   - 投资方可查看被邀请参与的项目
+
+2. **行业模板** 🏭
+   - 内置5个行业模板：演唱会/娱乐、餐饮连锁、零售门店、医美诊所、教育培训
+   - 每个模板包含该行业常用的合同条款和参数
+   - 支持自定义模板，可以复制系统模板进行修改
+
+3. **合同协商** 📝
+   - 使用自然语言描述条款变更，如"把投资金额改为600万"
+   - AI自动解析并更新合同条款
+   - 支持投资方/融资方双视角切换
+   - 实时记录协商历史
+
+4. **协作功能** 👥
+   - 生成邀请链接，邀请对方加入协商
+   - 支持多方实时协作
+   - 可设置协作者权限（编辑、评论、只读）
+
+5. **版本管理** 📚
+   - 创建版本快照，保存重要节点
+   - 支持版本对比，查看差异
+   - 可回退到历史版本
+
+6. **电子签章** ✍️
+   - 发起签署流程
+   - 手写签名功能
+   - 短信验证码验证
+   - 签署状态跟踪
+
+7. **AI谈判助手** 🤖
+   - 谈判建议：分析当前态势，提供策略建议
+   - 风险评估：多维度评估合同风险
+   - 市场对标：与行业标准对比分析
+
+### 使用流程
+
+1. **新用户**：注册账号 → 登录 → 查看教程 → 创建项目
+2. **创建项目**：点击"新建项目" → 输入项目名称 → 选择行业模板 → 创建
+3. **协商条款**：进入项目 → 用自然语言描述变更 → AI解析并更新
+4. **邀请协作**：点击"协作"按钮 → 生成邀请链接 → 发送给对方
+5. **签署合同**：协商完成 → 点击"签署" → 填写签署人信息 → 手写签名 → 完成
+
+### 常见问题
+
+Q: 如何修改合同条款？
+A: 进入项目后，在输入框中用自然语言描述变更，如"投资金额改为500万"、"分成比例降低到10%"，系统会自动解析并更新。
+
+Q: 如何邀请对方协商？
+A: 在项目协商页面，点击工具栏的"协作"按钮，选择对方角色，生成邀请链接后发送给对方。
+
+Q: 数据存储在哪里？
+A: 目前数据存储在浏览器本地（localStorage），支持导出备份。云端同步功能即将上线。
+
+Q: 可以自定义模板吗？
+A: 可以。点击"模板管理"，可以创建新模板或复制系统模板进行修改。
+
+## 你的角色
+
+1. 热情友好，用简洁清晰的语言回答
+2. 对平台功能了如指掌，能准确解答使用问题
+3. 如果用户问的不是平台相关问题，也可以友好地聊天
+4. 回答要简洁，一般不超过150字，除非用户要求详细说明
+5. 适当使用emoji让对话更生动 😊
+
+## 回复格式
+直接用中文回复，不需要任何格式标记。`
+
+// AI助手聊天API
+app.post('/api/ai/chat', async (c) => {
+  const { messages } = await c.req.json()
+  
+  const { apiKey, baseUrl } = getAIConfig(c)
+  
+  if (!apiKey) {
+    return c.json({ 
+      success: false, 
+      message: '抱歉，AI服务暂时不可用，请稍后再试~' 
+    }, 500)
+  }
+  
+  try {
+    const response = await fetch(baseUrl + '/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + apiKey
+      },
+      body: JSON.stringify({
+        model: 'gpt-5-mini',
+        messages: [
+          { role: 'system', content: AI_ASSISTANT_SYSTEM_PROMPT },
+          ...messages.slice(-10) // 保留最近10条对话历史
+        ],
+        temperature: 0.7,
+        max_tokens: 500
+      })
+    })
+
+    if (!response.ok) {
+      return c.json({ 
+        success: false, 
+        message: '网络繁忙，请稍后再试~' 
+      }, 500)
+    }
+
+    const data = await response.json()
+    const content = data.choices?.[0]?.message?.content || '抱歉，我没有理解您的问题，请换个方式问问？'
+    
+    return c.json({
+      success: true,
+      message: content
+    })
+  } catch (error) {
+    return c.json({ 
+      success: false, 
+      message: '服务暂时不可用，请稍后再试~' 
+    }, 500)
+  }
+})
+
 // ==================== 主页面 ====================
 app.get('/', (c) => {
   return c.html(`<!DOCTYPE html>
@@ -1524,6 +1661,229 @@ app.get('/', (c) => {
     /* 优化：空状态引导 */
     .empty-action-btn { transition: all 0.3s; border: 2px dashed #c7d2fe; }
     .empty-action-btn:hover { border-color: #6366f1; background: #eef2ff; transform: scale(1.02); }
+    
+    /* AI助手浮窗样式 */
+    .ai-assistant-fab {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+      cursor: pointer;
+      z-index: 1000;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .ai-assistant-fab:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+    }
+    .ai-assistant-fab.has-unread::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 16px;
+      height: 16px;
+      background: #ef4444;
+      border-radius: 50%;
+      border: 3px solid white;
+    }
+    @keyframes bounce-gentle {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+    .ai-assistant-fab i {
+      font-size: 24px;
+      color: white;
+      animation: bounce-gentle 2s ease-in-out infinite;
+    }
+    
+    .ai-chat-window {
+      position: fixed;
+      bottom: 100px;
+      right: 24px;
+      width: 380px;
+      max-height: 550px;
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 10px 50px rgba(0, 0, 0, 0.15);
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transform-origin: bottom right;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .ai-chat-window.hidden {
+      opacity: 0;
+      transform: scale(0.9);
+      pointer-events: none;
+    }
+    .ai-chat-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .ai-chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      background: #f8fafc;
+      max-height: 350px;
+    }
+    .ai-message {
+      display: flex;
+      margin-bottom: 12px;
+      animation: fadeInUp 0.3s ease-out;
+    }
+    .ai-message.user {
+      flex-direction: row-reverse;
+    }
+    .ai-message-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .ai-message.assistant .ai-message-avatar {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+    .ai-message.user .ai-message-avatar {
+      background: #e0e7ff;
+      color: #4f46e5;
+    }
+    .ai-message-content {
+      max-width: 75%;
+      padding: 10px 14px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0 10px;
+    }
+    .ai-message.assistant .ai-message-content {
+      background: white;
+      color: #1f2937;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .ai-message.user .ai-message-content {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+    .ai-chat-input-area {
+      padding: 12px 16px;
+      background: white;
+      border-top: 1px solid #e5e7eb;
+    }
+    .ai-chat-input-wrapper {
+      display: flex;
+      align-items: center;
+      background: #f3f4f6;
+      border-radius: 24px;
+      padding: 4px 4px 4px 16px;
+    }
+    .ai-chat-input {
+      flex: 1;
+      border: none;
+      background: transparent;
+      outline: none;
+      font-size: 14px;
+      padding: 8px 0;
+    }
+    .ai-chat-send-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+    .ai-chat-send-btn:hover {
+      transform: scale(1.05);
+    }
+    .ai-chat-send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    .ai-typing-indicator {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      background: white;
+      border-radius: 16px;
+      border-bottom-left-radius: 4px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      margin: 0 10px;
+    }
+    .ai-typing-dot {
+      width: 8px;
+      height: 8px;
+      background: #9ca3af;
+      border-radius: 50%;
+      margin: 0 2px;
+      animation: typing-bounce 1.4s infinite ease-in-out both;
+    }
+    .ai-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+    .ai-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+    @keyframes typing-bounce {
+      0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+      40% { transform: scale(1); opacity: 1; }
+    }
+    .ai-quick-questions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 8px 16px 12px;
+      background: white;
+    }
+    .ai-quick-btn {
+      padding: 6px 12px;
+      font-size: 12px;
+      background: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .ai-quick-btn:hover {
+      background: #e0e7ff;
+      border-color: #c7d2fe;
+      color: #4f46e5;
+    }
+    
+    @media (max-width: 640px) {
+      .ai-chat-window {
+        width: calc(100vw - 32px);
+        right: 16px;
+        bottom: 90px;
+        max-height: 70vh;
+      }
+      .ai-assistant-fab {
+        bottom: 16px;
+        right: 16px;
+        width: 56px;
+        height: 56px;
+      }
+    }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
@@ -6766,8 +7126,185 @@ app.get('/', (c) => {
     function formatDate(dateStr) { return new Date(dateStr).toLocaleDateString('zh-CN', { month: 'short', day: 'numeric' }); }
     function formatTime(dateStr) { return new Date(dateStr).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' }); }
     
+    // ==================== AI智能助手 ====================
+    let aiChatOpen = false;
+    let aiChatMessages = [];
+    let aiChatLoading = false;
+    
+    function toggleAIChat() {
+      aiChatOpen = !aiChatOpen;
+      const chatWindow = document.getElementById('aiChatWindow');
+      const fab = document.getElementById('aiAssistantFab');
+      
+      if (aiChatOpen) {
+        chatWindow.classList.remove('hidden');
+        fab.innerHTML = '<i class="fas fa-times"></i>';
+        fab.classList.remove('has-unread');
+        document.getElementById('aiChatInput').focus();
+        
+        // 如果是首次打开，显示欢迎消息
+        if (aiChatMessages.length === 0) {
+          addAIMessage('assistant', '你好！我是小融 🤖，你的AI助手~\\n\\n我可以帮你了解如何使用这个平台，或者随便聊聊都行。有什么想问的吗？');
+        }
+      } else {
+        chatWindow.classList.add('hidden');
+        fab.innerHTML = '<i class="fas fa-robot"></i>';
+      }
+    }
+    
+    function addAIMessage(role, content) {
+      aiChatMessages.push({ role, content });
+      renderAIChatMessages();
+    }
+    
+    function renderAIChatMessages() {
+      const container = document.getElementById('aiChatMessagesContainer');
+      container.innerHTML = aiChatMessages.map(msg => {
+        const isUser = msg.role === 'user';
+        const avatarIcon = isUser ? 'fa-user' : 'fa-robot';
+        return \`
+          <div class="ai-message \${msg.role}">
+            <div class="ai-message-avatar">
+              <i class="fas \${avatarIcon} text-sm"></i>
+            </div>
+            <div class="ai-message-content">\${msg.content.replace(/\\n/g, '<br>')}</div>
+          </div>
+        \`;
+      }).join('');
+      
+      // 如果正在加载，显示打字指示器
+      if (aiChatLoading) {
+        container.innerHTML += \`
+          <div class="ai-message assistant">
+            <div class="ai-message-avatar">
+              <i class="fas fa-robot text-sm"></i>
+            </div>
+            <div class="ai-typing-indicator">
+              <div class="ai-typing-dot"></div>
+              <div class="ai-typing-dot"></div>
+              <div class="ai-typing-dot"></div>
+            </div>
+          </div>
+        \`;
+      }
+      
+      container.scrollTop = container.scrollHeight;
+    }
+    
+    async function sendAIMessage() {
+      const input = document.getElementById('aiChatInput');
+      const message = input.value.trim();
+      
+      if (!message || aiChatLoading) return;
+      
+      // 添加用户消息
+      addAIMessage('user', message);
+      input.value = '';
+      
+      // 显示加载状态
+      aiChatLoading = true;
+      renderAIChatMessages();
+      
+      try {
+        const res = await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            messages: aiChatMessages.map(m => ({ role: m.role, content: m.content }))
+          })
+        });
+        
+        const data = await res.json();
+        aiChatLoading = false;
+        
+        if (data.success) {
+          addAIMessage('assistant', data.message);
+        } else {
+          addAIMessage('assistant', data.message || '抱歉，我遇到了一些问题，请稍后再试~');
+        }
+      } catch (e) {
+        aiChatLoading = false;
+        addAIMessage('assistant', '网络好像出了点问题，请检查网络后再试~');
+      }
+    }
+    
+    function handleAIChatKeydown(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendAIMessage();
+      }
+    }
+    
+    function askQuickQuestion(question) {
+      document.getElementById('aiChatInput').value = question;
+      sendAIMessage();
+    }
+    
+    function clearAIChat() {
+      aiChatMessages = [];
+      renderAIChatMessages();
+      addAIMessage('assistant', '对话已清空~有什么新问题随时问我！😊');
+    }
+    
     init();
   </script>
+  
+  <!-- ==================== AI智能助手浮窗 ==================== -->
+  <div id="aiAssistantFab" class="ai-assistant-fab" onclick="toggleAIChat()">
+    <i class="fas fa-robot"></i>
+  </div>
+  
+  <div id="aiChatWindow" class="ai-chat-window hidden">
+    <!-- 头部 -->
+    <div class="ai-chat-header">
+      <div class="flex items-center">
+        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3">
+          <i class="fas fa-robot text-white text-lg"></i>
+        </div>
+        <div>
+          <h3 class="text-white font-bold">小融 AI助手</h3>
+          <p class="text-white/70 text-xs">随时为您解答</p>
+        </div>
+      </div>
+      <div class="flex items-center space-x-2">
+        <button onclick="clearAIChat()" class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors" title="清空对话">
+          <i class="fas fa-trash-alt text-white/80 text-sm"></i>
+        </button>
+        <button onclick="toggleAIChat()" class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors">
+          <i class="fas fa-minus text-white/80"></i>
+        </button>
+      </div>
+    </div>
+    
+    <!-- 消息区域 -->
+    <div id="aiChatMessagesContainer" class="ai-chat-messages">
+      <!-- 消息将通过JS渲染 -->
+    </div>
+    
+    <!-- 快捷问题 -->
+    <div class="ai-quick-questions">
+      <button class="ai-quick-btn" onclick="askQuickQuestion('如何创建新项目？')">如何创建项目</button>
+      <button class="ai-quick-btn" onclick="askQuickQuestion('怎么邀请对方协商？')">邀请协作</button>
+      <button class="ai-quick-btn" onclick="askQuickQuestion('如何修改合同条款？')">修改条款</button>
+      <button class="ai-quick-btn" onclick="askQuickQuestion('这个平台有什么功能？')">平台功能</button>
+    </div>
+    
+    <!-- 输入区域 -->
+    <div class="ai-chat-input-area">
+      <div class="ai-chat-input-wrapper">
+        <input 
+          type="text" 
+          id="aiChatInput" 
+          class="ai-chat-input" 
+          placeholder="问我任何问题..."
+          onkeydown="handleAIChatKeydown(event)"
+        >
+        <button class="ai-chat-send-btn" onclick="sendAIMessage()">
+          <i class="fas fa-paper-plane"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>`)
 })
