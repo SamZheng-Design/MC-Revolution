@@ -7,7 +7,11 @@ import {
   routeToAgents, 
   executeMultiAgentWorkflow,
   executeAgentTask,
-  type AgentTask
+  executeSmartChangeWorkflow,
+  executeSmartChangeAnalysis,
+  type AgentTask,
+  type SmartChange,
+  type SmartChangeResult
 } from './agents'
 
 type Bindings = {
@@ -1575,6 +1579,133 @@ app.post('/api/agents/:id/process', async (c) => {
   }
 })
 
+// ==================== 智能联动修改API ====================
+
+/**
+ * 智能变更分析API - 核心API
+ * 分析用户输入，返回直接修改和推断的联动修改
+ * 用户需要确认后才会应用修改
+ */
+app.post('/api/agents/smart-change', async (c) => {
+  const { 
+    message, 
+    templateId, 
+    currentParams, 
+    negotiationHistory,
+    perspective 
+  } = await c.req.json()
+  
+  const { apiKey, baseUrl } = getAIConfig(c)
+  
+  if (!apiKey) {
+    return c.json({ error: 'API key not configured' }, 500)
+  }
+  
+  const template = industryTemplates[templateId]
+  if (!template) {
+    return c.json({ error: 'Template not found' }, 404)
+  }
+  
+  const context = {
+    currentParams: currentParams || template.defaultParams,
+    templateId,
+    templateName: template.name,
+    negotiationHistory: negotiationHistory || [],
+    perspective: perspective || 'borrower'
+  }
+  
+  try {
+    const startTime = Date.now()
+    const result = await executeSmartChangeWorkflow(message, context, apiKey, baseUrl)
+    
+    return c.json({
+      success: result.success,
+      // 用户理解
+      understood: result.understood,
+      analysisExplanation: result.analysisExplanation,
+      // 直接修改（用户明确要求的）
+      primaryChanges: result.primaryChanges,
+      // 推断修改（AI分析的关联延申）
+      inferredChanges: result.inferredChanges,
+      // 警告信息
+      warnings: result.warnings,
+      // Agent详情（可选）
+      agentDetails: result.agentResponses?.map(r => ({
+        agentId: r.agentId,
+        agentName: r.agentName,
+        success: r.success,
+        processingTime: r.processingTime
+      })),
+      // 处理统计
+      stats: {
+        totalPrimaryChanges: result.primaryChanges.length,
+        totalInferredChanges: result.inferredChanges.length,
+        processingTime: result.processingTime,
+        totalTime: Date.now() - startTime
+      }
+    })
+  } catch (error) {
+    return c.json({ 
+      success: false, 
+      error: 'Smart change analysis failed: ' + (error as Error).message 
+    }, 500)
+  }
+})
+
+/**
+ * 确认并应用选中的修改
+ * 用户在前端勾选确认后调用此API应用修改
+ */
+app.post('/api/agents/smart-change/confirm', async (c) => {
+  const { 
+    projectId,
+    confirmedPrimaryChanges,
+    confirmedInferredChanges,
+    originalMessage,
+    perspective
+  } = await c.req.json()
+  
+  // 合并所有确认的修改
+  const allConfirmedChanges = [
+    ...(confirmedPrimaryChanges || []),
+    ...(confirmedInferredChanges || [])
+  ]
+  
+  if (allConfirmedChanges.length === 0) {
+    return c.json({ 
+      success: false, 
+      message: '没有选中任何修改'
+    })
+  }
+  
+  // 构建协商记录
+  const negotiation = {
+    id: 'neg_' + Date.now(),
+    input: originalMessage,
+    understood: `已确认 ${confirmedPrimaryChanges?.length || 0} 项直接修改，${confirmedInferredChanges?.length || 0} 项联动修改`,
+    changes: allConfirmedChanges.map((c: SmartChange) => ({
+      paramKey: c.key,
+      paramName: c.paramName,
+      oldValue: c.oldValue,
+      newValue: c.newValue,
+      clauseText: c.clauseText,
+      changeType: c.changeType,
+      confidence: c.confidence,
+      reason: c.reason
+    })),
+    perspective,
+    timestamp: new Date().toISOString(),
+    smartChangeMode: true // 标记为智能联动模式
+  }
+  
+  return c.json({
+    success: true,
+    negotiation,
+    appliedChanges: allConfirmedChanges,
+    message: `成功应用 ${allConfirmedChanges.length} 项修改`
+  })
+})
+
 // AI解析自然语言变动（保留原API兼容性）
 app.post('/api/parse-change', async (c) => {
   const { message, templateId, currentParams } = await c.req.json()
@@ -2076,6 +2207,46 @@ app.get('/', (c) => {
     .float-animation { animation: float 3s ease-in-out infinite; }
     @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+    
+    /* 智能联动修改面板样式 */
+    #smartChangePanel {
+      backdrop-filter: blur(8px);
+    }
+    #smartChangePanel > div {
+      animation: smartChangeSlideIn 0.3s ease-out;
+    }
+    @keyframes smartChangeSlideIn {
+      from { opacity: 0; transform: scale(0.95) translateY(20px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .smart-change-item {
+      transition: all 0.2s ease;
+    }
+    .smart-change-item:hover {
+      transform: translateX(4px);
+    }
+    .smart-change-item input[type="checkbox"] {
+      transition: all 0.2s;
+    }
+    .smart-change-item input[type="checkbox"]:checked {
+      transform: scale(1.1);
+    }
+    /* 置信度指示器动画 */
+    .confidence-high {
+      animation: confidencePulse 2s ease-in-out infinite;
+    }
+    @keyframes confidencePulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+      50% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+    }
+    /* 关联修改闪烁提示 */
+    .inferred-highlight {
+      animation: inferredBlink 1.5s ease-in-out 2;
+    }
+    @keyframes inferredBlink {
+      0%, 100% { background-color: rgba(251, 191, 36, 0.1); }
+      50% { background-color: rgba(251, 191, 36, 0.3); }
+    }
     .delay-100 { animation-delay: 0.1s; }
     .delay-200 { animation-delay: 0.2s; }
     .delay-300 { animation-delay: 0.3s; }
@@ -5648,6 +5819,10 @@ app.get('/', (c) => {
       'dispute-resolution': { bg: 'gray', icon: 'fa-balance-scale', name: '争议解决专家' }
     };
     
+    // 存储智能联动分析结果，供确认使用
+    let smartChangeResult = null;
+    let pendingMessage = '';
+    
     async function submitNegotiation() {
       const input = document.getElementById('negotiationInput');
       const message = input.value.trim();
@@ -5656,108 +5831,45 @@ app.get('/', (c) => {
       const btn = document.getElementById('btnSubmit');
       btn.disabled = true;
       activeAgentProcessing = true;
+      pendingMessage = message;
       
-      // 显示多Agent处理面板
-      showMultiAgentProcessingPanel(message);
+      // 显示智能分析面板
+      showSmartChangeAnalysisPanel(message);
       
       try {
-        // 第一步：路由分析 - 决定调用哪些Agent
-        updateAgentPanelStatus('routing', '正在分析意图，匹配专业Agent...');
+        // 调用智能联动分析API
+        updateSmartChangeStatus('analyzing', '正在分析您的修改意图...');
         
-        const routeRes = await fetch('/api/agents/route', {
+        const res = await fetch('/api/agents/smart-change', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message })
+          body: JSON.stringify({
+            message,
+            templateId: currentProject.templateId,
+            currentParams: currentProject.params,
+            negotiationHistory: currentProject.negotiations,
+            perspective: currentPerspective
+          })
         });
-        const routeResult = await routeRes.json();
         
-        if (routeResult.success && routeResult.targetAgents?.length > 0) {
-          // 显示匹配到的Agent
-          updateAgentPanelStatus('matched', \`已匹配 \${routeResult.targetAgents.length} 个专业Agent\`, routeResult);
-          
-          // 第二步：并行执行多Agent处理
-          updateAgentPanelStatus('processing', '多Agent并行处理中...');
-          showAgentProcessingCards(routeResult.targetAgents);
-          
-          const processRes = await fetch('/api/agents/process', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              message,
-              templateId: currentProject.templateId,
-              currentParams: currentProject.params,
-              negotiationHistory: currentProject.negotiations,
-              perspective: currentPerspective
-            })
-          });
-          
-          const result = await processRes.json();
-          agentProcessingResults = result;
-          
-          if (result.success && result.changes?.length > 0) {
-            // 显示处理结果
-            updateAgentPanelStatus('completed', '处理完成！', result);
-            showAgentProcessingResults(result);
-            
-            // 创建协商记录
-            const negotiation = {
-              id: 'neg_' + Date.now(),
-              input: message,
-              understood: result.understood,
-              changes: result.changes.map(c => ({
-                paramKey: c.key,
-                paramName: c.paramName,
-                oldValue: c.oldValue,
-                newValue: c.newValue,
-                clauseText: c.clauseText,
-                moduleId: c.moduleId || 'unknown',
-                moduleName: c.moduleName || '未知模块'
-              })),
-              agentDetails: result.agentDetails,
-              suggestions: result.suggestions,
-              warnings: result.warnings,
-              perspective: currentPerspective,
-              timestamp: new Date().toISOString(),
-              processingStats: result.stats
-            };
-            currentProject.negotiations.push(negotiation);
-            
-            // 更新参数
-            for (const change of result.changes) {
-              currentProject.params[change.key] = change.newValue;
-            }
-            
-            currentProject.updatedAt = new Date().toISOString();
-            saveProjects();
-            
-            // 延迟后关闭面板并更新UI
-            setTimeout(() => {
-              hideMultiAgentProcessingPanel();
-              input.value = '';
-              renderNegotiationHistory();
-              renderModuleCards();
-              renderContractText();
-              updateChangedBadge();
-            }, 2000);
-            
-          } else {
-            // 没有变更或处理失败
-            updateAgentPanelStatus('no-changes', result.warnings?.length > 0 
-              ? '提示: ' + result.warnings[0] 
-              : 'AI未能理解您的变动描述，请尝试更具体的表述');
-            setTimeout(() => hideMultiAgentProcessingPanel(), 3000);
-          }
+        const result = await res.json();
+        smartChangeResult = result;
+        
+        if (result.success && (result.primaryChanges?.length > 0 || result.inferredChanges?.length > 0)) {
+          // 显示分析结果，等待用户确认
+          updateSmartChangeStatus('confirm', '分析完成，请确认修改');
+          showSmartChangeConfirmPanel(result, message);
         } else {
-          // 路由失败，回退到单一API
-          updateAgentPanelStatus('fallback', '使用单一解析模式...');
-          await fallbackToSingleParse(message, input);
+          // 没有识别到修改
+          updateSmartChangeStatus('no-changes', result.warnings?.length > 0 
+            ? '提示: ' + result.warnings[0] 
+            : 'AI未能理解您的变动描述，请尝试更具体的表述');
+          setTimeout(() => hideSmartChangePanel(), 3000);
         }
       } catch (e) {
-        console.error('Multi-agent processing error:', e);
-        updateAgentPanelStatus('error', '处理失败: ' + e.message);
-        setTimeout(() => {
-          hideMultiAgentProcessingPanel();
-        }, 2000);
+        console.error('Smart change analysis error:', e);
+        updateSmartChangeStatus('error', '分析失败: ' + e.message);
+        setTimeout(() => hideSmartChangePanel(), 2000);
       } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>发送变更';
@@ -5765,7 +5877,405 @@ app.get('/', (c) => {
       }
     }
     
-    // 回退到单一解析模式
+    // 显示智能联动分析面板
+    function showSmartChangeAnalysisPanel(message) {
+      let panel = document.getElementById('smartChangePanel');
+      if (!panel) {
+        panel = document.createElement('div');
+        panel.id = 'smartChangePanel';
+        panel.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-50';
+        document.body.appendChild(panel);
+      }
+      
+      panel.innerHTML = \`
+        <div class="bg-white rounded-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl">
+          <div class="p-6 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center">
+                <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
+                  <i class="fas fa-wand-magic-sparkles text-white text-xl"></i>
+                </div>
+                <div>
+                  <h2 class="text-xl font-bold text-white">智能联动分析</h2>
+                  <p class="text-sm text-white/70">AI分析 · 关联推断 · 确认修改</p>
+                </div>
+              </div>
+              <button onclick="hideSmartChangePanel()" class="p-2 hover:bg-white/20 rounded-lg text-white/80 hover:text-white">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          
+          <!-- 用户输入 -->
+          <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 bg-violet-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-user text-violet-600 text-sm"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-xs text-gray-500 mb-1">您的输入</p>
+                <p class="text-gray-800 font-medium">\${escapeHtml(message)}</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 状态显示 -->
+          <div class="px-6 py-4 border-b border-gray-100">
+            <div id="smartChangeStatusArea" class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-violet-100 rounded-full flex items-center justify-center">
+                <i class="fas fa-spinner fa-spin text-violet-600"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium text-gray-800">正在分析...</p>
+                <p class="text-sm text-gray-500">智能识别直接修改和关联修改</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 结果区域 -->
+          <div id="smartChangeResultArea" class="p-6 overflow-y-auto max-h-[55vh]">
+            <div class="text-center text-gray-400 py-8">
+              <i class="fas fa-wand-magic-sparkles text-4xl mb-3 opacity-50"></i>
+              <p>正在分析中...</p>
+            </div>
+          </div>
+          
+          <!-- 操作按钮区域 -->
+          <div id="smartChangeActions" class="hidden px-6 py-4 border-t border-gray-100 bg-gray-50">
+            <!-- 动态填充 -->
+          </div>
+        </div>
+      \`;
+      
+      panel.classList.remove('hidden');
+    }
+    
+    // 更新状态
+    function updateSmartChangeStatus(status, message) {
+      const statusArea = document.getElementById('smartChangeStatusArea');
+      if (!statusArea) return;
+      
+      const configs = {
+        'analyzing': {
+          icon: '<i class="fas fa-spinner fa-spin text-violet-600"></i>',
+          bg: 'bg-violet-100',
+          title: '正在分析...',
+          desc: message
+        },
+        'confirm': {
+          icon: '<i class="fas fa-check-circle text-emerald-600"></i>',
+          bg: 'bg-emerald-100',
+          title: '分析完成',
+          desc: message
+        },
+        'no-changes': {
+          icon: '<i class="fas fa-info-circle text-amber-600"></i>',
+          bg: 'bg-amber-100',
+          title: '未识别到修改',
+          desc: message
+        },
+        'error': {
+          icon: '<i class="fas fa-exclamation-circle text-red-600"></i>',
+          bg: 'bg-red-100',
+          title: '分析出错',
+          desc: message
+        }
+      };
+      
+      const cfg = configs[status] || configs['analyzing'];
+      statusArea.innerHTML = \`
+        <div class="w-10 h-10 \${cfg.bg} rounded-full flex items-center justify-center">
+          \${cfg.icon}
+        </div>
+        <div class="flex-1">
+          <p class="font-medium text-gray-800">\${cfg.title}</p>
+          <p class="text-sm text-gray-500">\${cfg.desc}</p>
+        </div>
+      \`;
+    }
+    
+    // 显示智能联动确认面板
+    function showSmartChangeConfirmPanel(result, originalMessage) {
+      const resultArea = document.getElementById('smartChangeResultArea');
+      const actionsArea = document.getElementById('smartChangeActions');
+      
+      if (!resultArea || !actionsArea) return;
+      
+      // 渲染结果
+      let html = '';
+      
+      // AI理解
+      if (result.understood) {
+        html += \`
+          <div class="mb-6 p-4 bg-violet-50 rounded-xl border border-violet-200">
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-robot text-violet-600 mt-1"></i>
+              <div>
+                <p class="text-sm font-medium text-violet-800 mb-1">AI理解</p>
+                <p class="text-gray-700">\${escapeHtml(result.understood)}</p>
+                \${result.analysisExplanation ? \`<p class="text-sm text-gray-500 mt-2">\${escapeHtml(result.analysisExplanation)}</p>\` : ''}
+              </div>
+            </div>
+          </div>
+        \`;
+      }
+      
+      // 直接修改（Primary Changes）
+      if (result.primaryChanges?.length > 0) {
+        html += \`
+          <div class="mb-6">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
+                <i class="fas fa-bullseye text-emerald-600"></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-800">直接修改</h3>
+                <p class="text-xs text-gray-500">您明确要求的修改，默认选中</p>
+              </div>
+              <span class="ml-auto px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs font-medium">
+                \${result.primaryChanges.length} 项
+              </span>
+            </div>
+            <div class="space-y-3">
+              \${result.primaryChanges.map((c, i) => renderSmartChangeItem(c, 'primary', i)).join('')}
+            </div>
+          </div>
+        \`;
+      }
+      
+      // 推断修改（Inferred Changes）
+      if (result.inferredChanges?.length > 0) {
+        html += \`
+          <div class="mb-4">
+            <div class="flex items-center mb-3">
+              <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center mr-3">
+                <i class="fas fa-lightbulb text-amber-600"></i>
+              </div>
+              <div>
+                <h3 class="font-semibold text-gray-800">关联修改建议</h3>
+                <p class="text-xs text-gray-500">AI推断的延申修改，请勾选确认需要的</p>
+              </div>
+              <span class="ml-auto px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
+                \${result.inferredChanges.length} 项
+              </span>
+            </div>
+            <div class="space-y-3">
+              \${result.inferredChanges.map((c, i) => renderSmartChangeItem(c, 'inferred', i)).join('')}
+            </div>
+          </div>
+        \`;
+      }
+      
+      // 警告信息
+      if (result.warnings?.length > 0) {
+        html += \`
+          <div class="p-4 bg-red-50 rounded-xl border border-red-200">
+            <div class="flex items-start space-x-3">
+              <i class="fas fa-exclamation-triangle text-red-600 mt-1"></i>
+              <div>
+                <p class="text-sm font-medium text-red-800 mb-1">风险提示</p>
+                \${result.warnings.map(w => \`<p class="text-sm text-red-700">\${escapeHtml(w)}</p>\`).join('')}
+              </div>
+            </div>
+          </div>
+        \`;
+      }
+      
+      resultArea.innerHTML = html;
+      
+      // 操作按钮
+      actionsArea.innerHTML = \`
+        <div class="flex items-center justify-between">
+          <div class="text-sm text-gray-500">
+            <span id="selectedCount">已选 <strong>\${result.primaryChanges?.length || 0}</strong> 项直接修改，<strong>0</strong> 项关联修改</span>
+          </div>
+          <div class="flex space-x-3">
+            <button onclick="hideSmartChangePanel()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">
+              取消
+            </button>
+            <button onclick="confirmSmartChanges()" class="px-6 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg hover:from-violet-700 hover:to-purple-700 transition shadow-lg">
+              <i class="fas fa-check mr-2"></i>确认修改
+            </button>
+          </div>
+        </div>
+      \`;
+      actionsArea.classList.remove('hidden');
+    }
+    
+    // 渲染单个修改项
+    function renderSmartChangeItem(change, type, index) {
+      const isInferred = type === 'inferred';
+      const checked = change.selected !== false;
+      const bgColor = isInferred ? 'bg-amber-50 border-amber-200' : 'bg-emerald-50 border-emerald-200';
+      const checkColor = isInferred ? 'text-amber-600' : 'text-emerald-600';
+      
+      // 置信度标签
+      let confidenceBadge = '';
+      if (isInferred && change.confidence) {
+        const confColors = {
+          'high': 'bg-emerald-100 text-emerald-700',
+          'medium': 'bg-amber-100 text-amber-700',
+          'low': 'bg-gray-100 text-gray-600'
+        };
+        const confLabels = { 'high': '高', 'medium': '中', 'low': '低' };
+        confidenceBadge = \`<span class="px-2 py-0.5 \${confColors[change.confidence] || confColors.medium} rounded text-xs">置信度：\${confLabels[change.confidence] || '中'}</span>\`;
+      }
+      
+      // 分类标签
+      let categoryBadge = '';
+      if (change.category) {
+        const categoryLabels = {
+          'unit_conversion': '单位换算',
+          'calculation_method': '计算方式',
+          'formula_update': '公式更新',
+          'related_term': '关联条款'
+        };
+        categoryBadge = \`<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">\${categoryLabels[change.category] || change.category}</span>\`;
+      }
+      
+      return \`
+        <div class="p-4 \${bgColor} rounded-xl border transition-all hover:shadow-md" data-change-type="\${type}" data-index="\${index}">
+          <div class="flex items-start">
+            <label class="flex items-center cursor-pointer mr-3 mt-1">
+              <input type="checkbox" 
+                     \${checked ? 'checked' : ''} 
+                     onchange="toggleSmartChange('\${type}', \${index}, this.checked)"
+                     class="w-5 h-5 \${checkColor} rounded border-gray-300 focus:ring-violet-500">
+            </label>
+            <div class="flex-1">
+              <div class="flex items-center flex-wrap gap-2 mb-2">
+                <span class="font-semibold text-gray-800">\${escapeHtml(change.paramName || change.key)}</span>
+                \${confidenceBadge}
+                \${categoryBadge}
+              </div>
+              <div class="flex items-center text-sm mb-2">
+                <span class="text-gray-500 line-through mr-2">\${escapeHtml(change.oldValue || '-')}</span>
+                <i class="fas fa-arrow-right text-gray-400 mx-2"></i>
+                <span class="font-semibold text-emerald-600">\${escapeHtml(change.newValue)}</span>
+              </div>
+              \${change.clauseText ? \`<p class="text-sm text-gray-600 bg-white/50 rounded p-2 mb-2">\${escapeHtml(change.clauseText)}</p>\` : ''}
+              \${change.reason ? \`
+                <div class="flex items-start text-sm text-gray-500 mt-2">
+                  <i class="fas fa-info-circle mr-2 mt-0.5 text-amber-500"></i>
+                  <span>\${escapeHtml(change.reason)}</span>
+                </div>
+              \` : ''}
+              \${change.relatedTo ? \`
+                <div class="text-xs text-gray-400 mt-1">
+                  <i class="fas fa-link mr-1"></i>关联自：\${escapeHtml(change.relatedTo)}
+                </div>
+              \` : ''}
+            </div>
+          </div>
+        </div>
+      \`;
+    }
+    
+    // 切换修改项选中状态
+    function toggleSmartChange(type, index, checked) {
+      if (!smartChangeResult) return;
+      
+      const list = type === 'primary' ? smartChangeResult.primaryChanges : smartChangeResult.inferredChanges;
+      if (list && list[index]) {
+        list[index].selected = checked;
+      }
+      
+      updateSelectedCount();
+    }
+    
+    // 更新选中计数
+    function updateSelectedCount() {
+      if (!smartChangeResult) return;
+      
+      const primarySelected = (smartChangeResult.primaryChanges || []).filter(c => c.selected !== false).length;
+      const inferredSelected = (smartChangeResult.inferredChanges || []).filter(c => c.selected === true).length;
+      
+      const countEl = document.getElementById('selectedCount');
+      if (countEl) {
+        countEl.innerHTML = \`已选 <strong>\${primarySelected}</strong> 项直接修改，<strong>\${inferredSelected}</strong> 项关联修改\`;
+      }
+    }
+    
+    // 确认智能修改
+    async function confirmSmartChanges() {
+      if (!smartChangeResult || !currentProject) return;
+      
+      const confirmedPrimary = (smartChangeResult.primaryChanges || []).filter(c => c.selected !== false);
+      const confirmedInferred = (smartChangeResult.inferredChanges || []).filter(c => c.selected === true);
+      
+      const allConfirmed = [...confirmedPrimary, ...confirmedInferred];
+      
+      if (allConfirmed.length === 0) {
+        alert('请至少选择一项修改');
+        return;
+      }
+      
+      // 创建协商记录
+      const negotiation = {
+        id: 'neg_' + Date.now(),
+        input: pendingMessage,
+        understood: smartChangeResult.understood,
+        changes: allConfirmed.map(c => ({
+          paramKey: c.key,
+          paramName: c.paramName,
+          oldValue: c.oldValue,
+          newValue: c.newValue,
+          clauseText: c.clauseText,
+          changeType: c.changeType,
+          confidence: c.confidence,
+          reason: c.reason,
+          category: c.category
+        })),
+        smartChangeMode: true,
+        primaryCount: confirmedPrimary.length,
+        inferredCount: confirmedInferred.length,
+        analysisExplanation: smartChangeResult.analysisExplanation,
+        warnings: smartChangeResult.warnings,
+        perspective: currentPerspective,
+        timestamp: new Date().toISOString()
+      };
+      currentProject.negotiations.push(negotiation);
+      
+      // 更新参数
+      for (const change of allConfirmed) {
+        currentProject.params[change.key] = change.newValue;
+      }
+      
+      currentProject.updatedAt = new Date().toISOString();
+      saveProjects();
+      
+      // 关闭面板并更新UI
+      hideSmartChangePanel();
+      document.getElementById('negotiationInput').value = '';
+      renderNegotiationHistory();
+      renderModuleCards();
+      renderContractText();
+      updateChangedBadge();
+      
+      // 显示成功提示
+      showToast(\`成功应用 \${confirmedPrimary.length} 项直接修改\${confirmedInferred.length > 0 ? \`，\${confirmedInferred.length} 项关联修改\` : ''}\`);
+    }
+    
+    // 隐藏智能联动面板
+    function hideSmartChangePanel() {
+      const panel = document.getElementById('smartChangePanel');
+      if (panel) {
+        panel.classList.add('hidden');
+      }
+      smartChangeResult = null;
+      pendingMessage = '';
+    }
+    
+    // Toast提示
+    function showToast(message) {
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-gray-800 text-white rounded-lg shadow-xl z-50 animate-in';
+      toast.innerHTML = \`<i class="fas fa-check-circle mr-2 text-emerald-400"></i>\${escapeHtml(message)}\`;
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 3000);
+    }
+    
+    // 回退到单一解析模式（保留兼容）
     async function fallbackToSingleParse(message, input) {
       const res = await fetch('/api/parse-change', {
         method: 'POST',
@@ -5798,15 +6308,15 @@ app.get('/', (c) => {
         currentProject.updatedAt = new Date().toISOString();
         saveProjects();
         
-        hideMultiAgentProcessingPanel();
+        hideSmartChangePanel();
         input.value = '';
         renderNegotiationHistory();
         renderModuleCards();
         renderContractText();
         updateChangedBadge();
       } else {
-        updateAgentPanelStatus('no-changes', 'AI未能理解您的变动描述，请尝试更具体的表述');
-        setTimeout(() => hideMultiAgentProcessingPanel(), 3000);
+        updateSmartChangeStatus('no-changes', 'AI未能理解您的变动描述，请尝试更具体的表述');
+        setTimeout(() => hideSmartChangePanel(), 3000);
       }
     }
     
@@ -6137,29 +6647,46 @@ app.get('/', (c) => {
         const agentCount = hasAgentDetails ? n.agentDetails.length : 0;
         const respondedAgents = hasAgentDetails ? n.agentDetails.filter(a => a.success).length : 0;
         
+        // 检查是否是智能联动模式
+        const isSmartChange = n.smartChangeMode === true;
+        const primaryCount = n.primaryCount || 0;
+        const inferredCount = n.inferredCount || 0;
+        
         return \`
-          <div class="negotiation-item bg-gray-50 rounded-xl p-4 animate-in relative group">
+          <div class="negotiation-item bg-gray-50 rounded-xl p-4 animate-in relative group \${isSmartChange ? 'border-l-4 border-violet-400' : ''}">
             <!-- 删除按钮（悬停显示） -->
             <button onclick="showDeleteNegotiationModal('\${n.id}')" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-white hover:bg-red-50 rounded-lg border border-gray-200 shadow-sm" title="删除此协商记录">
               <i class="fas fa-trash-alt text-red-400 hover:text-red-600 text-xs"></i>
             </button>
             <div class="flex items-center justify-between mb-2">
-              <div class="flex items-center space-x-2">
+              <div class="flex items-center space-x-2 flex-wrap gap-1">
                 <span class="w-6 h-6 rounded-full bg-\${pColor}-100 flex items-center justify-center">
                   <i class="fas \${pIcon} text-\${pColor}-600 text-xs"></i>
                 </span>
                 <span class="text-xs text-\${pColor}-600 font-medium">\${pText}</span>
                 <span class="change-badge">#\${negotiations.length - i}</span>
                 \${n.isDirectEdit ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs"><i class="fas fa-pen mr-1"></i>直接编辑</span>' : ''}
-                \${hasAgentDetails ? \`
+                \${isSmartChange ? \`
+                  <span class="px-2 py-0.5 bg-violet-100 text-violet-700 rounded-full text-xs flex items-center">
+                    <i class="fas fa-wand-magic-sparkles mr-1"></i>智能联动
+                  </span>
+                  \${primaryCount > 0 ? \`<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs">\${primaryCount}直接</span>\` : ''}
+                  \${inferredCount > 0 ? \`<span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs">\${inferredCount}联动</span>\` : ''}
+                \` : (hasAgentDetails ? \`
                   <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs flex items-center">
                     <i class="fas fa-robot mr-1"></i>\${respondedAgents} Agent
                   </span>
-                \` : ''}
+                \` : '')}
               </div>
               <span class="text-xs text-gray-400 mr-6">\${formatTime(n.timestamp)}</span>
             </div>
             <p class="text-sm text-gray-800 mb-2">"\${n.input}"</p>
+            
+            \${isSmartChange && n.analysisExplanation ? \`
+              <div class="bg-violet-50 rounded-lg p-2 mb-3 border border-violet-100">
+                <p class="text-xs text-violet-700"><i class="fas fa-brain mr-1"></i>\${n.analysisExplanation}</p>
+              </div>
+            \` : ''}
             
             \${hasAgentDetails ? \`
               <!-- 多Agent处理详情展开/收起 -->
@@ -6192,17 +6719,37 @@ app.get('/', (c) => {
             \` : ''}
             
             <div class="space-y-2">
-              \${n.changes.map(c => \`
-                <div class="bg-white rounded-lg p-2 border border-gray-100">
-                  <div class="flex items-center text-xs text-gray-500 mb-1"><i class="fas fa-folder-open mr-1"></i>\${c.moduleName || '模块'}</div>
-                  <div class="flex items-center text-sm">
-                    <span class="text-gray-600">\${c.paramName}:</span>
-                    <span class="value-old ml-2">\${c.oldValue}</span>
-                    <i class="fas fa-arrow-right mx-2 text-emerald-500 text-xs"></i>
-                    <span class="value-changed">\${c.newValue}</span>
+              \${n.changes.map(c => {
+                const isInferred = c.changeType === 'inferred';
+                const borderColor = isInferred ? 'border-amber-200' : 'border-gray-100';
+                const bgColor = isInferred ? 'bg-amber-50' : 'bg-white';
+                const categoryLabels = {
+                  'unit_conversion': '单位换算',
+                  'calculation_method': '计算方式',
+                  'formula_update': '公式更新',
+                  'related_term': '关联条款'
+                };
+                return \`
+                  <div class="\${bgColor} rounded-lg p-2 border \${borderColor}">
+                    <div class="flex items-center text-xs text-gray-500 mb-1">
+                      <i class="fas fa-folder-open mr-1"></i>\${c.moduleName || '模块'}
+                      \${isInferred ? \`
+                        <span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px]">
+                          <i class="fas fa-link mr-0.5"></i>联动修改
+                        </span>
+                        \${c.category ? \`<span class="ml-1 px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px]">\${categoryLabels[c.category] || c.category}</span>\` : ''}
+                      \` : ''}
+                    </div>
+                    <div class="flex items-center text-sm">
+                      <span class="text-gray-600">\${c.paramName}:</span>
+                      <span class="value-old ml-2">\${c.oldValue}</span>
+                      <i class="fas fa-arrow-right mx-2 text-emerald-500 text-xs"></i>
+                      <span class="value-changed">\${c.newValue}</span>
+                    </div>
+                    \${c.reason ? \`<p class="text-xs text-gray-400 mt-1"><i class="fas fa-info-circle mr-1"></i>\${c.reason}</p>\` : ''}
                   </div>
-                </div>
-              \`).join('')}
+                \`;
+              }).join('')}
               
               \${n.suggestions?.length > 0 ? \`
                 <div class="bg-indigo-50 rounded-lg p-2 border border-indigo-100">

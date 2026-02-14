@@ -80,6 +80,64 @@ export interface ParamChange {
   impact?: string
 }
 
+// ==================== 智能联动修改系统类型 ====================
+
+/**
+ * 变更类型枚举
+ */
+export type ChangeType = 'primary' | 'inferred'
+
+/**
+ * 推断修改的置信度
+ */
+export type ConfidenceLevel = 'high' | 'medium' | 'low'
+
+/**
+ * 智能变更项 - 包含直接修改和推断修改
+ */
+export interface SmartChange extends ParamChange {
+  changeType: ChangeType           // 'primary' 直接修改, 'inferred' 推断修改
+  confidence?: ConfidenceLevel     // 推断修改的置信度
+  reason?: string                  // 推断修改的理由
+  relatedTo?: string               // 关联的直接修改key
+  selected?: boolean               // 用户是否确认选中（默认：直接修改true，推断修改false）
+  category?: string                // 分类：unit_conversion | calculation_method | formula_update | related_term
+}
+
+/**
+ * 智能变更分析结果
+ */
+export interface SmartChangeResult {
+  success: boolean
+  understood: string               // AI理解的用户意图
+  primaryChanges: SmartChange[]    // 直接修改（用户明确要求的）
+  inferredChanges: SmartChange[]   // 推断修改（AI分析出的关联延申）
+  analysisExplanation: string      // AI对整体分析的解释
+  warnings: string[]               // 风险警告
+  agentResponses?: AgentResponse[] // 各Agent响应详情
+  processingTime: number
+}
+
+/**
+ * 用户确认的变更结果
+ */
+export interface ConfirmedChanges {
+  primaryChanges: SmartChange[]    // 确认的直接修改
+  inferredChanges: SmartChange[]   // 确认的推断修改
+  rejectedChanges: SmartChange[]   // 用户拒绝的修改
+}
+
+/**
+ * 参数关联规则 - 定义参数之间的逻辑关系
+ */
+export interface ParamRelation {
+  sourceParam: string              // 源参数
+  targetParam: string              // 目标参数
+  relationType: 'conversion' | 'calculation' | 'dependency' | 'constraint'
+  rule: string                     // 关系规则描述
+  autoInfer: boolean               // 是否自动推断
+}
+
 export interface RouterResult {
   understood: string
   targetAgents: string[]
@@ -789,4 +847,583 @@ export function getAgentByParamKey(paramKey: string): ContractAgent | null {
     }
   }
   return null
+}
+
+// ==================== 智能联动修改系统 ====================
+
+/**
+ * 规则引擎：基于明确规则检测联动修改
+ * 这是LLM分析的补充，确保关键联动不会遗漏
+ */
+function detectRuleBasedInferredChanges(
+  message: string,
+  primaryChanges: SmartChange[],
+  currentParams: Record<string, any>,
+  existingInferred: SmartChange[]
+): SmartChange[] {
+  const result: SmartChange[] = []
+  const lowerMessage = message.toLowerCase()
+  
+  // 已存在的推断修改key，避免重复
+  const existingKeys = new Set(existingInferred.map(c => c.key))
+  
+  // 规则1：检测月度利率设置 → 资金成本计算方式联动
+  const monthlyRatePattern = /按.{0,2}月.{0,5}(\d+\.?\d*)%|月.{0,2}(\d+\.?\d*)%|每月.{0,5}(\d+\.?\d*)%/
+  const monthlyMatch = message.match(monthlyRatePattern)
+  
+  if (monthlyMatch || lowerMessage.includes('按月') || lowerMessage.includes('每月')) {
+    // 检查是否涉及收益/利率相关的直接修改
+    const hasRateChange = primaryChanges.some(c => 
+      ['annualYieldRate', 'monthlyReturnRate', 'revenueShareRatio'].includes(c.key) ||
+      c.paramName?.includes('收益') || c.paramName?.includes('利率') || c.paramName?.includes('分成')
+    )
+    
+    // 检查当前资金成本计算方式
+    const currentCalcMethod = currentParams.fundCostCalculation || '按日计算'
+    
+    if (hasRateChange && !existingKeys.has('fundCostCalculation') && !currentCalcMethod.includes('按月')) {
+      result.push({
+        key: 'fundCostCalculation',
+        paramName: '资金成本计算方式',
+        oldValue: currentCalcMethod,
+        newValue: '按月计算',
+        clauseText: '资金成本按月度计算，每月固定日期结算，不足一月按比例折算',
+        changeType: 'inferred',
+        confidence: 'high',
+        reason: '用户指定按月计算收益，资金成本计算方式应与收益计算口径保持一致，改为按月计算',
+        relatedTo: primaryChanges.find(c => c.paramName?.includes('收益'))?.key || 'annualYieldRate',
+        category: 'calculation_method',
+        selected: false
+      })
+    }
+  }
+  
+  // 规则2：检测日度利率设置 → 资金成本计算方式联动
+  const dailyRatePattern = /按.{0,2}日.{0,5}(\d+\.?\d*)%|日.{0,2}(\d+\.?\d*)%|每日.{0,5}(\d+\.?\d*)%/
+  
+  if (message.match(dailyRatePattern) || lowerMessage.includes('按日') || lowerMessage.includes('每天')) {
+    const hasRateChange = primaryChanges.some(c => 
+      ['annualYieldRate', 'dailyReturnRate'].includes(c.key) ||
+      c.paramName?.includes('收益') || c.paramName?.includes('利率')
+    )
+    
+    const currentCalcMethod = currentParams.fundCostCalculation || ''
+    
+    if (hasRateChange && !existingKeys.has('fundCostCalculation') && !currentCalcMethod.includes('按日')) {
+      result.push({
+        key: 'fundCostCalculation',
+        paramName: '资金成本计算方式',
+        oldValue: currentCalcMethod || '未设置',
+        newValue: '按日计算',
+        clauseText: '资金成本按日计算，以实际占用天数为准',
+        changeType: 'inferred',
+        confidence: 'high',
+        reason: '用户指定按日计算收益，资金成本计算方式应同步调整为按日计算',
+        relatedTo: 'annualYieldRate',
+        category: 'calculation_method',
+        selected: false
+      })
+    }
+  }
+  
+  // 规则3：月利率 → 年化利率换算提示
+  if (monthlyMatch) {
+    const monthlyRate = parseFloat(monthlyMatch[1] || monthlyMatch[2] || monthlyMatch[3])
+    if (monthlyRate > 0) {
+      const annualRate = (monthlyRate * 12).toFixed(2)
+      const hasAnnualRateChange = primaryChanges.some(c => 
+        c.key === 'annualYieldRate' && c.newValue.includes(annualRate)
+      )
+      
+      if (!hasAnnualRateChange && !existingKeys.has('annualYieldRate')) {
+        // 检查是否直接修改中已经有年化利率的设置
+        const existingAnnualChange = primaryChanges.find(c => c.key === 'annualYieldRate')
+        if (!existingAnnualChange || !existingAnnualChange.newValue.includes(annualRate)) {
+          result.push({
+            key: 'annualYieldRateDisplay',
+            paramName: '年化收益率换算',
+            oldValue: currentParams.annualYieldRate || '未设置',
+            newValue: `${annualRate}%（月${monthlyRate}%×12）`,
+            clauseText: `按月度收益率${monthlyRate}%换算，年化收益率约为${annualRate}%`,
+            changeType: 'inferred',
+            confidence: 'high',
+            reason: `月度收益率${monthlyRate}%乘以12个月，年化收益率为${annualRate}%`,
+            relatedTo: 'monthlyReturnRate',
+            category: 'unit_conversion',
+            selected: false
+          })
+        }
+      }
+    }
+  }
+  
+  // 规则4：投资金额变化 → 违约金联动提示
+  const amountChange = primaryChanges.find(c => c.key === 'investmentAmount')
+  if (amountChange && !existingKeys.has('breachPenaltyAmount')) {
+    const currentPenalty = currentParams.breachPenalty || currentParams.breachPenaltyRate || '20%'
+    if (currentPenalty.includes('%')) {
+      result.push({
+        key: 'breachPenaltyCalculation',
+        paramName: '违约金金额',
+        oldValue: '基于原投资金额计算',
+        newValue: `基于新投资金额（${amountChange.newValue}）重新计算`,
+        clauseText: `违约金为投资金额的${currentPenalty}，约为${amountChange.newValue}的${currentPenalty}`,
+        changeType: 'inferred',
+        confidence: 'medium',
+        reason: '投资金额变更后，违约金金额应按新投资金额的固定比例重新计算',
+        relatedTo: 'investmentAmount',
+        category: 'formula_update',
+        selected: false
+      })
+    }
+  }
+  
+  return result
+}
+
+/**
+ * 参数关联规则表 - 定义参数之间的逻辑依赖关系
+ * 当一个参数变化时，相关参数可能需要联动调整
+ */
+export const PARAM_RELATIONS: ParamRelation[] = [
+  // 收益率相关换算
+  {
+    sourceParam: 'monthlyReturnRate',
+    targetParam: 'annualYieldRate', 
+    relationType: 'conversion',
+    rule: '月利率 × 12 = 年化利率',
+    autoInfer: true
+  },
+  {
+    sourceParam: 'annualYieldRate',
+    targetParam: 'monthlyReturnRate',
+    relationType: 'conversion', 
+    rule: '年化利率 ÷ 12 = 月利率',
+    autoInfer: true
+  },
+  // 分成比例与年化回报
+  {
+    sourceParam: 'revenueShareRatio',
+    targetParam: 'annualYieldRate',
+    relationType: 'dependency',
+    rule: '分成比例变化可能影响预期年化回报率',
+    autoInfer: false
+  },
+  // 资金成本计算方式
+  {
+    sourceParam: 'monthlyReturnRate',
+    targetParam: 'fundCostCalculation',
+    relationType: 'calculation',
+    rule: '月利率确定时，资金成本计算应按月而非按日',
+    autoInfer: true
+  },
+  {
+    sourceParam: 'dailyReturnRate',
+    targetParam: 'fundCostCalculation',
+    relationType: 'calculation',
+    rule: '日利率确定时，资金成本计算应按日',
+    autoInfer: true
+  },
+  // 投资金额与违约金
+  {
+    sourceParam: 'investmentAmount',
+    targetParam: 'breachPenaltyAmount',
+    relationType: 'calculation',
+    rule: '违约金通常按投资金额的固定比例计算',
+    autoInfer: false
+  },
+  // 分成期限相关
+  {
+    sourceParam: 'sharingPeriodMonths',
+    targetParam: 'sharingEndDate',
+    relationType: 'calculation',
+    rule: '分成期限变化需要更新截止日期',
+    autoInfer: true
+  },
+  // 亏损闭店阈值
+  {
+    sourceParam: 'lossThresholdRatio',
+    targetParam: 'lossThresholdAmount',
+    relationType: 'calculation',
+    rule: '亏损比例变化时，对应金额阈值需重新计算',
+    autoInfer: true
+  },
+  // 数据传输频率与对账周期
+  {
+    sourceParam: 'dataReportFrequency',
+    targetParam: 'reconciliationCycle',
+    relationType: 'dependency',
+    rule: '数据上报频率变化可能需要调整对账周期',
+    autoInfer: false
+  }
+]
+
+/**
+ * 智能联动分析Agent的系统提示词
+ */
+const SMART_CHANGE_ANALYST_PROMPT = `你是一个专业的合同条款联动分析专家，负责分析用户的修改请求并推断可能的关联修改。
+
+## 你的任务
+1. 理解用户的直接修改意图（Primary Changes）
+2. 基于合同条款的逻辑关系，推断可能需要联动修改的相关条款（Inferred Changes）
+3. 为每个推断修改提供理由和置信度
+
+## 重要的联动关系规则
+
+### 利率/收益率换算
+- 月利率 2.75% → 年化利率 33%（2.75% × 12）
+- 日利率 0.1% → 年化利率 36.5%（0.1% × 365）
+- 当用户提到"按月X%计算"时，需要：
+  1. 直接修改：设置月利率
+  2. 联动修改：年化利率换算
+  3. 联动修改：资金成本计算方式改为"按月"
+
+### 资金成本计算方式联动
+- 如果设置月利率 → 资金成本计算应改为"按月计算"
+- 如果设置日利率 → 资金成本计算应改为"按日计算"
+- 如果设置年利率 → 资金成本计算可保持"按年计算"或"按日计算"
+
+### 金额相关联动
+- 投资金额变化 → 可能影响违约金金额（按比例）
+- 投资金额变化 → 可能影响分成金额上限
+
+### 期限相关联动
+- 分成期限月数变化 → 截止日期需要重新计算
+- 分成期限变化 → 可能影响预期总回报计算
+
+## 输出格式（严格JSON）
+{
+  "understood": "对用户意图的简要理解",
+  "analysisExplanation": "对整体分析的解释，为什么推断这些联动修改",
+  "primaryChanges": [
+    {
+      "key": "参数key",
+      "paramName": "参数中文名",
+      "oldValue": "原值",
+      "newValue": "新值",
+      "clauseText": "合同条款语言",
+      "changeType": "primary",
+      "selected": true
+    }
+  ],
+  "inferredChanges": [
+    {
+      "key": "参数key",
+      "paramName": "参数中文名",
+      "oldValue": "原值",
+      "newValue": "推断的新值",
+      "clauseText": "合同条款语言",
+      "changeType": "inferred",
+      "confidence": "high/medium/low",
+      "reason": "为什么需要这个联动修改",
+      "relatedTo": "关联的直接修改key",
+      "category": "unit_conversion/calculation_method/formula_update/related_term",
+      "selected": false
+    }
+  ],
+  "warnings": ["风险警告（如有）"]
+}
+
+## 置信度说明
+- high: 逻辑必然，如利率换算
+- medium: 强烈建议，如计算方式匹配
+- low: 可选建议，供参考`
+
+/**
+ * 执行智能联动分析
+ */
+export async function executeSmartChangeAnalysis(
+  message: string,
+  context: {
+    currentParams: Record<string, any>
+    templateId: string
+    templateName: string
+    perspective?: string
+  },
+  apiKey: string,
+  baseUrl: string
+): Promise<SmartChangeResult> {
+  const startTime = Date.now()
+
+  // 构建完整提示词
+  const userPrompt = `## 用户请求
+"${message}"
+
+## 当前合同参数
+${JSON.stringify(context.currentParams, null, 2)}
+
+## 行业
+${context.templateName}
+
+## 视角
+${context.perspective === 'investor' ? '投资方' : '融资方'}
+
+请分析这个修改请求，识别直接修改和可能的联动修改。直接输出JSON（不要代码块）：`
+
+  try {
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: CONFIG.MODEL_QUALITY, // 使用高质量模型进行复杂分析
+        messages: [
+          { role: 'system', content: SMART_CHANGE_ANALYST_PROMPT },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 1500
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error('API request failed')
+    }
+
+    const data = await response.json()
+    const content = data.choices?.[0]?.message?.content || ''
+
+    // 解析JSON
+    let result: any = null
+    
+    // 尝试多种方式提取JSON
+    const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/)
+    if (codeBlockMatch) {
+      try {
+        result = JSON.parse(codeBlockMatch[1].trim())
+      } catch (e) {}
+    }
+    
+    if (!result) {
+      const jsonMatch = content.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        try {
+          result = JSON.parse(jsonMatch[0])
+        } catch (e) {}
+      }
+    }
+
+    if (result) {
+      // 标准化结果
+      const primaryChanges: SmartChange[] = (result.primaryChanges || []).map((c: any) => ({
+        ...c,
+        changeType: 'primary' as ChangeType,
+        selected: true
+      }))
+
+      const inferredChanges: SmartChange[] = (result.inferredChanges || []).map((c: any) => ({
+        ...c,
+        changeType: 'inferred' as ChangeType,
+        selected: false, // 推断修改默认不选中，需要用户确认
+        confidence: c.confidence || 'medium'
+      }))
+
+      return {
+        success: true,
+        understood: result.understood || message,
+        primaryChanges,
+        inferredChanges,
+        analysisExplanation: result.analysisExplanation || '',
+        warnings: result.warnings || [],
+        processingTime: Date.now() - startTime
+      }
+    }
+
+    return {
+      success: false,
+      understood: message,
+      primaryChanges: [],
+      inferredChanges: [],
+      analysisExplanation: '无法解析AI响应',
+      warnings: ['分析失败，请重试'],
+      processingTime: Date.now() - startTime
+    }
+
+  } catch (error) {
+    return {
+      success: false,
+      understood: message,
+      primaryChanges: [],
+      inferredChanges: [],
+      analysisExplanation: '',
+      warnings: [`分析错误: ${(error as Error).message}`],
+      processingTime: Date.now() - startTime
+    }
+  }
+}
+
+/**
+ * 组合多Agent处理结果与智能联动分析
+ * 先执行多Agent并行处理获取直接修改，然后分析联动修改
+ */
+export async function executeSmartChangeWorkflow(
+  message: string,
+  context: {
+    currentParams: Record<string, any>
+    templateId: string
+    templateName: string
+    negotiationHistory?: any[]
+    perspective?: string
+  },
+  apiKey: string,
+  baseUrl: string
+): Promise<SmartChangeResult> {
+  const startTime = Date.now()
+
+  // Step 1: 执行多Agent并行工作流获取直接修改
+  const multiAgentResult = await executeMultiAgentWorkflow(message, context, apiKey, baseUrl)
+
+  if (!multiAgentResult.success || multiAgentResult.allChanges.length === 0) {
+    // 如果多Agent没有识别到修改，尝试直接用智能分析
+    return executeSmartChangeAnalysis(message, context, apiKey, baseUrl)
+  }
+
+  // Step 2: 基于多Agent结果，分析联动修改
+  const primaryChanges: SmartChange[] = multiAgentResult.allChanges.map(c => ({
+    ...c,
+    changeType: 'primary' as ChangeType,
+    selected: true
+  }))
+
+  // 构建联动分析的提示词 - 增强版
+  const inferPrompt = `你是合同条款联动分析专家。基于已识别的直接修改，分析可能需要联动调整的相关参数。
+
+## 已识别的直接修改
+${JSON.stringify(primaryChanges.map(c => ({ key: c.key, paramName: c.paramName, oldValue: c.oldValue, newValue: c.newValue })), null, 2)}
+
+## 当前所有合同参数
+${JSON.stringify(context.currentParams, null, 2)}
+
+## 原始用户请求
+"${message}"
+
+## 重要的联动规则（必须检查）
+
+### 1. 利率/收益计算时间单位联动
+当设置了月度收益率时：
+- 如果fundCostCalculation当前是"按日计算"，应该联动改为"按月计算"
+- 如果月利率X%，年化利率应该是X%×12
+
+当设置了日度收益率时：
+- fundCostCalculation应该是"按日计算"
+- 年化利率应该是日利率×365
+
+### 2. 投资金额联动
+当investmentAmount变化时：
+- 违约金（breachPenaltyAmount）如果是固定金额可能需要按比例调整
+- 资金成本上限可能需要联动
+
+### 3. 分成期限联动
+当sharingPeriodMonths变化时：
+- sharingEndDate需要重新计算
+
+## 特别注意
+用户提到"按月X%"时，几乎一定需要将fundCostCalculation改为"按月计算"！
+
+## 输出要求
+只输出推断的联动修改，不要重复直接修改。JSON格式（不要代码块）：
+{
+  "analysisExplanation": "简述为什么需要这些联动修改",
+  "inferredChanges": [
+    {
+      "key": "fundCostCalculation",
+      "paramName": "资金成本计算方式",
+      "oldValue": "按日计算",
+      "newValue": "按月计算",
+      "clauseText": "资金成本按月度计算，每月固定日期结算",
+      "changeType": "inferred",
+      "confidence": "high",
+      "reason": "用户要求按月2.75%计算收益，因此资金成本计算方式应从按日改为按月，以保持计算口径一致",
+      "relatedTo": "annualYieldRate",
+      "category": "calculation_method",
+      "selected": false
+    }
+  ],
+  "warnings": []
+}`
+
+  try {
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: CONFIG.MODEL_FAST, // 联动分析使用快速模型
+        messages: [
+          { role: 'system', content: SMART_CHANGE_ANALYST_PROMPT },
+          { role: 'user', content: inferPrompt }
+        ],
+        temperature: 0.2,
+        max_tokens: 1000
+      })
+    })
+
+    let inferredChanges: SmartChange[] = []
+    let analysisExplanation = '基于直接修改分析可能的联动影响'
+
+    if (response.ok) {
+      const data = await response.json()
+      const content = data.choices?.[0]?.message?.content || ''
+
+      // 解析JSON
+      const jsonMatch = content.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        try {
+          const result = JSON.parse(jsonMatch[0])
+          inferredChanges = (result.inferredChanges || []).map((c: any) => ({
+            ...c,
+            changeType: 'inferred' as ChangeType,
+            selected: false
+          }))
+          analysisExplanation = result.analysisExplanation || analysisExplanation
+        } catch (e) {
+          console.error('Failed to parse inferred changes:', e)
+        }
+      }
+    }
+
+    // ========== 规则引擎补充：基于明确规则的联动检测 ==========
+    // 如果LLM没有检测到某些关键联动，用规则引擎补充
+    const ruleBasedInferred = detectRuleBasedInferredChanges(
+      message, 
+      primaryChanges, 
+      context.currentParams,
+      inferredChanges
+    )
+    
+    if (ruleBasedInferred.length > 0) {
+      inferredChanges = [...inferredChanges, ...ruleBasedInferred]
+      if (ruleBasedInferred.length > 0) {
+        analysisExplanation = `${analysisExplanation}。基于合同条款联动规则，还检测到${ruleBasedInferred.length}项建议修改。`
+      }
+    }
+
+    return {
+      success: true,
+      understood: multiAgentResult.understood,
+      primaryChanges,
+      inferredChanges,
+      analysisExplanation,
+      warnings: [...multiAgentResult.allWarnings],
+      agentResponses: multiAgentResult.agentResponses,
+      processingTime: Date.now() - startTime
+    }
+
+  } catch (error) {
+    // 如果联动分析失败，仍然返回直接修改结果
+    return {
+      success: true,
+      understood: multiAgentResult.understood,
+      primaryChanges,
+      inferredChanges: [],
+      analysisExplanation: '联动分析暂时不可用',
+      warnings: [...multiAgentResult.allWarnings, '联动分析失败，仅显示直接修改'],
+      agentResponses: multiAgentResult.agentResponses,
+      processingTime: Date.now() - startTime
+    }
+  }
 }
