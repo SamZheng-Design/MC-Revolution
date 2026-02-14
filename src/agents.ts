@@ -104,13 +104,13 @@ export interface WorkflowResult {
 // ==================== 配置常量 ====================
 
 const CONFIG = {
-  AGENT_TIMEOUT_MS: 30000,      // 单Agent超时：30秒
+  AGENT_TIMEOUT_MS: 20000,      // 单Agent超时：20秒
   ROUTER_TIMEOUT_MS: 10000,     // 路由器超时：10秒
   MAX_PARALLEL_AGENTS: 3,       // 最大并行Agent数
-  MODEL_FAST: 'gpt-5',          // 主模型（gpt-5-mini的max_tokens不够）
-  MODEL_QUALITY: 'gpt-5',       // 高质量模型
-  MAX_TOKENS: 1000,             // Agent最大token数
-  ROUTER_MAX_TOKENS: 300,       // 路由器最大token数
+  MODEL_FAST: 'claude-haiku-4-5', // 快速非reasoning模型（速度快，无reasoning延迟）
+  MODEL_QUALITY: 'claude-sonnet-4-5', // 高质量模型（需要更复杂分析时使用）
+  MAX_TOKENS: 800,              // Agent最大token数
+  ROUTER_MAX_TOKENS: 400,       // 路由器最大token数
 }
 
 // ==================== Agent定义 ====================
