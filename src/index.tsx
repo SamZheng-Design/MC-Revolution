@@ -747,6 +747,341 @@ app.post('/api/custom-templates/from-project', async (c) => {
   })
 })
 
+// ==================== 个人账户体系API ====================
+// 模拟个人账户系统，预留对接公司整体账户系统的接口
+
+// 内存存储用户数据（生产环境应使用D1/KV + 公司SSO）
+const userStore = new Map<string, {
+  id: string
+  username: string
+  email: string
+  phone: string
+  displayName: string
+  avatar?: string
+  company?: string
+  title?: string
+  bio?: string
+  defaultRole: 'investor' | 'borrower' | 'both'  // 默认角色
+  createdAt: string
+  updatedAt: string
+  // 预留字段：对接公司账户系统
+  externalId?: string  // 公司系统用户ID
+  externalToken?: string  // 公司系统Token
+  ssoProvider?: string  // SSO提供方
+}>()
+
+// 内存存储会话（生产环境应使用JWT/公司SSO）
+const sessionStore = new Map<string, {
+  userId: string
+  token: string
+  expiresAt: string
+  // 预留：公司SSO会话信息
+  ssoSessionId?: string
+}>()
+
+// ========== 预留：公司账户系统对接接口 ==========
+// 这些接口在对接公司SSO时实现
+
+// 预留：公司SSO登录回调
+app.get('/api/auth/sso/callback', async (c) => {
+  // TODO: 处理公司SSO回调
+  // 1. 验证SSO token
+  // 2. 获取用户信息
+  // 3. 创建或更新本地用户
+  // 4. 创建会话
+  return c.json({
+    success: false,
+    message: '公司SSO对接接口预留，待实现',
+    integrationGuide: {
+      step1: '配置公司SSO服务端点',
+      step2: '实现token验证逻辑',
+      step3: '映射用户字段',
+      step4: '同步用户权限'
+    }
+  })
+})
+
+// 预留：公司SSO登出
+app.post('/api/auth/sso/logout', async (c) => {
+  // TODO: 通知公司SSO系统登出
+  return c.json({
+    success: false,
+    message: '公司SSO登出接口预留，待实现'
+  })
+})
+
+// 预留：同步公司用户数据
+app.post('/api/auth/sync-company-user', async (c) => {
+  // TODO: 从公司系统同步用户数据
+  return c.json({
+    success: false,
+    message: '公司用户同步接口预留，待实现'
+  })
+})
+
+// ========== 本地模拟账户系统 ==========
+
+// 用户注册
+app.post('/api/auth/register', async (c) => {
+  const { username, email, phone, password, displayName, defaultRole, company, title } = await c.req.json()
+  
+  // 验证必填字段
+  if (!username || !email || !password) {
+    return c.json({ success: false, message: '请填写用户名、邮箱和密码' }, 400)
+  }
+  
+  // 检查用户名是否已存在
+  for (const [_, user] of userStore) {
+    if (user.username === username) {
+      return c.json({ success: false, message: '用户名已被注册' }, 400)
+    }
+    if (user.email === email) {
+      return c.json({ success: false, message: '邮箱已被注册' }, 400)
+    }
+  }
+  
+  // 创建用户
+  const userId = 'user_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 6)
+  const now = new Date().toISOString()
+  
+  const newUser = {
+    id: userId,
+    username,
+    email,
+    phone: phone || '',
+    displayName: displayName || username,
+    company: company || '',
+    title: title || '',
+    bio: '',
+    defaultRole: (defaultRole as 'investor' | 'borrower' | 'both') || 'both',
+    createdAt: now,
+    updatedAt: now
+  }
+  
+  userStore.set(userId, newUser)
+  
+  // 创建会话
+  const token = 'tok_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10)
+  const expiresAt = new Date(Date.now() + 7 * 24 * 3600000).toISOString() // 7天有效
+  
+  sessionStore.set(token, {
+    userId,
+    token,
+    expiresAt
+  })
+  
+  return c.json({
+    success: true,
+    message: '注册成功',
+    user: {
+      id: newUser.id,
+      username: newUser.username,
+      email: newUser.email,
+      displayName: newUser.displayName,
+      defaultRole: newUser.defaultRole
+    },
+    token,
+    expiresAt
+  })
+})
+
+// 用户登录
+app.post('/api/auth/login', async (c) => {
+  const { username, email, password } = await c.req.json()
+  
+  const loginId = username || email
+  if (!loginId || !password) {
+    return c.json({ success: false, message: '请输入用户名/邮箱和密码' }, 400)
+  }
+  
+  // 查找用户（模拟验证，生产环境需要密码哈希验证）
+  let foundUser = null
+  for (const [_, user] of userStore) {
+    if (user.username === loginId || user.email === loginId) {
+      foundUser = user
+      break
+    }
+  }
+  
+  if (!foundUser) {
+    return c.json({ success: false, message: '用户不存在' }, 401)
+  }
+  
+  // 模拟密码验证（演示模式：任意密码都可登录）
+  // TODO: 生产环境需要真实密码验证
+  
+  // 创建会话
+  const token = 'tok_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10)
+  const expiresAt = new Date(Date.now() + 7 * 24 * 3600000).toISOString()
+  
+  sessionStore.set(token, {
+    userId: foundUser.id,
+    token,
+    expiresAt
+  })
+  
+  return c.json({
+    success: true,
+    message: '登录成功',
+    user: {
+      id: foundUser.id,
+      username: foundUser.username,
+      email: foundUser.email,
+      displayName: foundUser.displayName,
+      phone: foundUser.phone,
+      company: foundUser.company,
+      title: foundUser.title,
+      bio: foundUser.bio,
+      defaultRole: foundUser.defaultRole,
+      avatar: foundUser.avatar
+    },
+    token,
+    expiresAt
+  })
+})
+
+// 登出
+app.post('/api/auth/logout', async (c) => {
+  const authHeader = c.req.header('Authorization')
+  const token = authHeader?.replace('Bearer ', '')
+  
+  if (token) {
+    sessionStore.delete(token)
+  }
+  
+  return c.json({ success: true, message: '已登出' })
+})
+
+// 验证会话/获取当前用户
+app.get('/api/auth/me', async (c) => {
+  const authHeader = c.req.header('Authorization')
+  const token = authHeader?.replace('Bearer ', '')
+  
+  if (!token) {
+    return c.json({ success: false, message: '未登录' }, 401)
+  }
+  
+  const session = sessionStore.get(token)
+  if (!session || new Date(session.expiresAt) < new Date()) {
+    sessionStore.delete(token)
+    return c.json({ success: false, message: '会话已过期，请重新登录' }, 401)
+  }
+  
+  const user = userStore.get(session.userId)
+  if (!user) {
+    return c.json({ success: false, message: '用户不存在' }, 404)
+  }
+  
+  return c.json({
+    success: true,
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      displayName: user.displayName,
+      phone: user.phone,
+      company: user.company,
+      title: user.title,
+      bio: user.bio,
+      defaultRole: user.defaultRole,
+      avatar: user.avatar,
+      createdAt: user.createdAt
+    }
+  })
+})
+
+// 更新个人信息
+app.put('/api/auth/profile', async (c) => {
+  const authHeader = c.req.header('Authorization')
+  const token = authHeader?.replace('Bearer ', '')
+  
+  if (!token) {
+    return c.json({ success: false, message: '未登录' }, 401)
+  }
+  
+  const session = sessionStore.get(token)
+  if (!session || new Date(session.expiresAt) < new Date()) {
+    return c.json({ success: false, message: '会话已过期' }, 401)
+  }
+  
+  const user = userStore.get(session.userId)
+  if (!user) {
+    return c.json({ success: false, message: '用户不存在' }, 404)
+  }
+  
+  const updates = await c.req.json()
+  const allowedFields = ['displayName', 'phone', 'company', 'title', 'bio', 'avatar', 'defaultRole']
+  
+  for (const field of allowedFields) {
+    if (updates[field] !== undefined) {
+      (user as any)[field] = updates[field]
+    }
+  }
+  user.updatedAt = new Date().toISOString()
+  
+  userStore.set(session.userId, user)
+  
+  return c.json({
+    success: true,
+    message: '个人信息已更新',
+    user: {
+      id: user.id,
+      username: user.username,
+      email: user.email,
+      displayName: user.displayName,
+      phone: user.phone,
+      company: user.company,
+      title: user.title,
+      bio: user.bio,
+      defaultRole: user.defaultRole,
+      avatar: user.avatar
+    }
+  })
+})
+
+// 获取用户的项目统计（按角色区分）
+app.get('/api/auth/my-stats', async (c) => {
+  const authHeader = c.req.header('Authorization')
+  const token = authHeader?.replace('Bearer ', '')
+  
+  if (!token) {
+    return c.json({ success: false, message: '未登录' }, 401)
+  }
+  
+  const session = sessionStore.get(token)
+  if (!session) {
+    return c.json({ success: false, message: '会话无效' }, 401)
+  }
+  
+  const user = userStore.get(session.userId)
+  if (!user) {
+    return c.json({ success: false, message: '用户不存在' }, 404)
+  }
+  
+  // 返回统计信息（实际数据从前端localStorage获取并传入，这里返回结构）
+  return c.json({
+    success: true,
+    userId: user.id,
+    stats: {
+      asBorrower: {
+        totalProjects: 0,
+        negotiating: 0,
+        completed: 0,
+        signed: 0,
+        totalAmount: 0
+      },
+      asInvestor: {
+        totalProjects: 0,
+        negotiating: 0,
+        completed: 0,
+        signed: 0,
+        totalAmount: 0
+      }
+    },
+    message: '统计数据需从本地存储计算'
+  })
+})
+
 // ==================== AI谈判助手API ====================
 
 // 辅助函数：获取API配置
@@ -1376,8 +1711,386 @@ app.get('/', (c) => {
     </div>
   </div>
   
+  <!-- ==================== 页面0: 登录/注册页 ==================== -->
+  <div id="pageAuth" class="page active flex-col min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
+    <div class="flex-1 flex items-center justify-center p-4">
+      <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
+        <!-- Logo区域 -->
+        <div class="p-8 text-center border-b border-gray-100">
+          <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <i class="fas fa-handshake text-white text-2xl"></i>
+          </div>
+          <h1 class="text-2xl font-bold text-gray-900">收入分成融资协商平台</h1>
+          <p class="text-gray-500 text-sm mt-1">Revenue-Based Financing Negotiation</p>
+        </div>
+        
+        <!-- 登录/注册切换 -->
+        <div class="flex border-b border-gray-100">
+          <button onclick="switchAuthTab('login')" id="tabLogin" class="flex-1 py-3 text-center font-medium text-indigo-600 border-b-2 border-indigo-600">登录</button>
+          <button onclick="switchAuthTab('register')" id="tabRegister" class="flex-1 py-3 text-center font-medium text-gray-500 hover:text-gray-700">注册</button>
+        </div>
+        
+        <!-- 登录表单 -->
+        <div id="formLogin" class="p-6">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">用户名 / 邮箱</label>
+              <input type="text" id="loginUsername" placeholder="请输入用户名或邮箱" 
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">密码</label>
+              <input type="password" id="loginPassword" placeholder="请输入密码" 
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div class="flex items-center justify-between text-sm">
+              <label class="flex items-center text-gray-600">
+                <input type="checkbox" id="rememberMe" class="mr-2 rounded">记住我
+              </label>
+              <a href="#" class="text-indigo-600 hover:text-indigo-700">忘记密码？</a>
+            </div>
+            <button onclick="handleLogin()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-lg">
+              <i class="fas fa-sign-in-alt mr-2"></i>登录
+            </button>
+            <button onclick="handleGuestLogin()" class="w-full py-3 border border-gray-200 text-gray-600 rounded-xl font-medium hover:bg-gray-50 transition-colors">
+              <i class="fas fa-user-secret mr-2"></i>游客模式（体验功能）
+            </button>
+          </div>
+          <p id="loginError" class="hidden mt-4 text-sm text-red-500 text-center"></p>
+          
+          <!-- 预留：公司SSO登录入口 -->
+          <div class="mt-6 pt-6 border-t border-gray-100">
+            <p class="text-xs text-gray-400 text-center mb-3">企业用户</p>
+            <button onclick="handleSSOLogin()" class="w-full py-3 bg-gray-100 text-gray-500 rounded-xl font-medium hover:bg-gray-200 transition-colors flex items-center justify-center">
+              <i class="fas fa-building mr-2"></i>公司SSO登录（即将上线）
+            </button>
+          </div>
+        </div>
+        
+        <!-- 注册表单 -->
+        <div id="formRegister" class="hidden p-6">
+          <div class="space-y-4">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">用户名 <span class="text-red-500">*</span></label>
+                <input type="text" id="regUsername" placeholder="用于登录" 
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">姓名</label>
+                <input type="text" id="regDisplayName" placeholder="显示名称" 
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">邮箱 <span class="text-red-500">*</span></label>
+              <input type="email" id="regEmail" placeholder="your@email.com" 
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+              <input type="tel" id="regPhone" placeholder="13800138000" 
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">密码 <span class="text-red-500">*</span></label>
+              <input type="password" id="regPassword" placeholder="至少6位" 
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">默认角色</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" onclick="selectRegRole('investor')" id="regRoleInvestor" class="py-2 px-3 border-2 border-gray-200 rounded-lg text-sm hover:border-indigo-300 text-center">
+                  <i class="fas fa-landmark text-indigo-500 block mb-1"></i>投资方
+                </button>
+                <button type="button" onclick="selectRegRole('borrower')" id="regRoleBorrower" class="py-2 px-3 border-2 border-gray-200 rounded-lg text-sm hover:border-amber-300 text-center">
+                  <i class="fas fa-store text-amber-500 block mb-1"></i>融资方
+                </button>
+                <button type="button" onclick="selectRegRole('both')" id="regRoleBoth" class="py-2 px-3 border-2 border-indigo-500 bg-indigo-50 rounded-lg text-sm text-center">
+                  <i class="fas fa-exchange-alt text-purple-500 block mb-1"></i>两者皆可
+                </button>
+              </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">公司</label>
+                <input type="text" id="regCompany" placeholder="所属公司" 
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">职位</label>
+                <input type="text" id="regTitle" placeholder="您的职位" 
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+              </div>
+            </div>
+            <button onclick="handleRegister()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-lg">
+              <i class="fas fa-user-plus mr-2"></i>注册
+            </button>
+          </div>
+          <p id="registerError" class="hidden mt-4 text-sm text-red-500 text-center"></p>
+        </div>
+      </div>
+    </div>
+    <p class="text-center text-white/60 text-sm pb-4">© 2024 RBF协商平台 · 预留公司系统对接接口</p>
+  </div>
+  
+  <!-- ==================== 页面0.5: 个人主页 ==================== -->
+  <div id="pageProfile" class="page flex-col min-h-screen">
+    <!-- 顶部导航 -->
+    <nav class="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center cursor-pointer" onclick="goToMyProjects()">
+            <i class="fas fa-handshake text-white"></i>
+          </div>
+          <div>
+            <h1 class="text-xl font-bold text-gray-900">个人中心</h1>
+            <p class="text-xs text-gray-500">My Profile</p>
+          </div>
+        </div>
+        <div class="flex items-center space-x-3">
+          <button onclick="goToMyProjects()" class="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-lg flex items-center">
+            <i class="fas fa-folder-open mr-2"></i>我的项目
+          </button>
+          <button onclick="handleLogout()" class="px-4 py-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg flex items-center">
+            <i class="fas fa-sign-out-alt mr-2"></i>退出
+          </button>
+        </div>
+      </div>
+    </nav>
+    
+    <!-- 主内容区 -->
+    <div class="flex-1 p-6 bg-gray-50">
+      <div class="max-w-7xl mx-auto">
+        <!-- 个人信息卡片 -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+          <div class="h-32 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 relative">
+            <button onclick="showEditProfileModal()" class="absolute top-4 right-4 px-3 py-1.5 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 text-sm">
+              <i class="fas fa-edit mr-1"></i>编辑资料
+            </button>
+          </div>
+          <div class="px-6 pb-6 relative">
+            <div class="flex items-end space-x-4 -mt-12">
+              <div id="profileAvatar" class="w-24 h-24 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-2xl flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg">
+                U
+              </div>
+              <div class="pb-2">
+                <h2 id="profileName" class="text-2xl font-bold text-gray-900">用户名</h2>
+                <p id="profileMeta" class="text-gray-500">
+                  <span id="profileCompany">-</span> · <span id="profileTitle">-</span>
+                </p>
+              </div>
+            </div>
+            <div class="mt-6 grid grid-cols-4 gap-4">
+              <div class="text-center p-4 bg-gray-50 rounded-xl">
+                <p class="text-2xl font-bold text-indigo-600" id="profileStatProjects">0</p>
+                <p class="text-sm text-gray-500">总项目</p>
+              </div>
+              <div class="text-center p-4 bg-gray-50 rounded-xl">
+                <p class="text-2xl font-bold text-amber-600" id="profileStatNegotiating">0</p>
+                <p class="text-sm text-gray-500">协商中</p>
+              </div>
+              <div class="text-center p-4 bg-gray-50 rounded-xl">
+                <p class="text-2xl font-bold text-emerald-600" id="profileStatSigned">0</p>
+                <p class="text-sm text-gray-500">已签署</p>
+              </div>
+              <div class="text-center p-4 bg-gray-50 rounded-xl">
+                <p class="text-2xl font-bold text-purple-600" id="profileStatAmount">¥0</p>
+                <p class="text-sm text-gray-500">总金额</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 角色切换标签 -->
+        <div class="flex items-center space-x-4 mb-6">
+          <button onclick="switchProfileRole('borrower')" id="profileRoleBorrower" class="flex-1 py-4 bg-white rounded-xl border-2 border-amber-500 text-amber-700 font-medium flex items-center justify-center shadow-sm">
+            <i class="fas fa-store mr-2 text-xl"></i>
+            <div class="text-left">
+              <p class="font-bold">作为融资方</p>
+              <p class="text-xs opacity-70">我发起的项目</p>
+            </div>
+          </button>
+          <button onclick="switchProfileRole('investor')" id="profileRoleInvestor" class="flex-1 py-4 bg-white rounded-xl border-2 border-gray-200 text-gray-600 font-medium flex items-center justify-center hover:border-indigo-300">
+            <i class="fas fa-landmark mr-2 text-xl"></i>
+            <div class="text-left">
+              <p class="font-bold">作为投资方</p>
+              <p class="text-xs opacity-70">我参与的项目</p>
+            </div>
+          </button>
+        </div>
+        
+        <!-- 融资方视角内容 -->
+        <div id="borrowerView" class="space-y-6">
+          <!-- 我发起的项目 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 class="font-bold text-gray-800 flex items-center">
+                <i class="fas fa-folder text-amber-500 mr-2"></i>
+                我发起的项目
+                <span id="borrowerProjectCount" class="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs">0</span>
+              </h3>
+              <button onclick="goToMyProjects()" class="text-sm text-indigo-600 hover:text-indigo-700">
+                查看全部 <i class="fas fa-arrow-right ml-1"></i>
+              </button>
+            </div>
+            <div id="borrowerProjectList" class="divide-y divide-gray-50">
+              <div class="p-8 text-center text-gray-400">
+                <i class="fas fa-inbox text-4xl mb-3 opacity-50"></i>
+                <p>暂无发起的项目</p>
+                <button onclick="goToMyProjects(); setTimeout(showNewProjectModal, 300)" class="mt-3 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600">
+                  <i class="fas fa-plus mr-1"></i>发起新项目
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 项目讨论 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+              <h3 class="font-bold text-gray-800 flex items-center">
+                <i class="fas fa-comments text-amber-500 mr-2"></i>
+                项目讨论
+                <span id="borrowerDiscussionCount" class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">0</span>
+              </h3>
+            </div>
+            <div id="borrowerDiscussionList" class="divide-y divide-gray-50">
+              <div class="p-6 text-center text-gray-400">
+                <p class="text-sm">项目协商记录将在这里显示</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 相关合同 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+              <h3 class="font-bold text-gray-800 flex items-center">
+                <i class="fas fa-file-contract text-amber-500 mr-2"></i>
+                相关合同
+                <span id="borrowerContractCount" class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">0</span>
+              </h3>
+            </div>
+            <div id="borrowerContractList" class="divide-y divide-gray-50">
+              <div class="p-6 text-center text-gray-400">
+                <p class="text-sm">签署的合同将在这里显示</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- 投资方视角内容 -->
+        <div id="investorView" class="hidden space-y-6">
+          <!-- 我参与的项目 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
+              <h3 class="font-bold text-gray-800 flex items-center">
+                <i class="fas fa-folder text-indigo-500 mr-2"></i>
+                我参与的项目
+                <span id="investorProjectCount" class="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs">0</span>
+              </h3>
+              <button onclick="showJoinCollabModal()" class="text-sm text-indigo-600 hover:text-indigo-700">
+                <i class="fas fa-user-plus mr-1"></i>加入新项目
+              </button>
+            </div>
+            <div id="investorProjectList" class="divide-y divide-gray-50">
+              <div class="p-8 text-center text-gray-400">
+                <i class="fas fa-inbox text-4xl mb-3 opacity-50"></i>
+                <p>暂无参与的项目</p>
+                <button onclick="showJoinCollabModal()" class="mt-3 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm hover:bg-indigo-600">
+                  <i class="fas fa-link mr-1"></i>通过邀请码加入
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 项目讨论 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+              <h3 class="font-bold text-gray-800 flex items-center">
+                <i class="fas fa-comments text-indigo-500 mr-2"></i>
+                项目讨论
+                <span id="investorDiscussionCount" class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">0</span>
+              </h3>
+            </div>
+            <div id="investorDiscussionList" class="divide-y divide-gray-50">
+              <div class="p-6 text-center text-gray-400">
+                <p class="text-sm">参与的项目协商记录将在这里显示</p>
+              </div>
+            </div>
+          </div>
+          
+          <!-- 相关合同 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-100">
+              <h3 class="font-bold text-gray-800 flex items-center">
+                <i class="fas fa-file-contract text-indigo-500 mr-2"></i>
+                相关合同
+                <span id="investorContractCount" class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">0</span>
+              </h3>
+            </div>
+            <div id="investorContractList" class="divide-y divide-gray-50">
+              <div class="p-6 text-center text-gray-400">
+                <p class="text-sm">签署的合同将在这里显示</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- ==================== 弹窗: 编辑个人资料 ==================== -->
+  <div id="editProfileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-user-edit mr-2 text-indigo-600"></i>编辑个人资料</h2>
+          <button onclick="hideEditProfileModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+            <i class="fas fa-times text-gray-500"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">显示名称</label>
+          <input type="text" id="editDisplayName" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+          <input type="tel" id="editPhone" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">公司</label>
+            <input type="text" id="editCompany" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">职位</label>
+            <input type="text" id="editTitle" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">个人简介</label>
+          <textarea id="editBio" rows="2" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">默认角色</label>
+          <select id="editDefaultRole" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="both">两者皆可</option>
+            <option value="investor">投资方</option>
+            <option value="borrower">融资方</option>
+          </select>
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
+        <button onclick="hideEditProfileModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+        <button onclick="saveProfile()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">保存</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- ==================== 页面1: 项目列表 ==================== -->
-  <div id="pageProjects" class="page active flex-col min-h-screen">
+  <div id="pageProjects" class="page flex-col min-h-screen">
     <nav class="bg-white border-b border-gray-200 px-6 py-4">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center space-x-3">
@@ -1412,6 +2125,16 @@ app.get('/', (c) => {
           <button onclick="showNewProjectModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center">
             <i class="fas fa-plus mr-2"></i>新建项目
           </button>
+          <!-- 用户头像/登录入口 -->
+          <div class="border-l border-gray-200 pl-3 ml-1">
+            <button onclick="goToProfile()" id="navUserBtn" class="flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded-lg">
+              <div id="navUserAvatar" class="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+                U
+              </div>
+              <span id="navUserName" class="text-sm font-medium text-gray-700 max-w-[80px] truncate">用户</span>
+              <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+            </button>
+          </div>
         </div>
       </div>
     </nav>
@@ -2747,6 +3470,422 @@ app.get('/', (c) => {
     let selectedTemplateId = null;
     let currentPerspective = 'investor';
     let contractView = 'card';
+    
+    // ==================== 账户状态管理 ====================
+    let currentUser = JSON.parse(localStorage.getItem('rbf_current_user') || 'null');
+    let authToken = localStorage.getItem('rbf_auth_token') || null;
+    let selectedRegRole = 'both';
+    let profileViewRole = 'borrower'; // 个人主页当前查看角色
+    
+    // ==================== 账户功能 ====================
+    function switchAuthTab(tab) {
+      document.getElementById('tabLogin').className = tab === 'login' 
+        ? 'flex-1 py-3 text-center font-medium text-indigo-600 border-b-2 border-indigo-600' 
+        : 'flex-1 py-3 text-center font-medium text-gray-500 hover:text-gray-700';
+      document.getElementById('tabRegister').className = tab === 'register' 
+        ? 'flex-1 py-3 text-center font-medium text-indigo-600 border-b-2 border-indigo-600' 
+        : 'flex-1 py-3 text-center font-medium text-gray-500 hover:text-gray-700';
+      document.getElementById('formLogin').classList.toggle('hidden', tab !== 'login');
+      document.getElementById('formRegister').classList.toggle('hidden', tab !== 'register');
+    }
+    
+    function selectRegRole(role) {
+      selectedRegRole = role;
+      ['investor', 'borrower', 'both'].forEach(r => {
+        const btn = document.getElementById('regRole' + r.charAt(0).toUpperCase() + r.slice(1));
+        if (btn) {
+          btn.className = r === role 
+            ? 'py-2 px-3 border-2 border-indigo-500 bg-indigo-50 rounded-lg text-sm text-center'
+            : 'py-2 px-3 border-2 border-gray-200 rounded-lg text-sm hover:border-gray-300 text-center';
+        }
+      });
+    }
+    
+    async function handleLogin() {
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value;
+      const errorEl = document.getElementById('loginError');
+      
+      if (!username || !password) {
+        errorEl.textContent = '请输入用户名和密码';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          currentUser = data.user;
+          authToken = data.token;
+          localStorage.setItem('rbf_current_user', JSON.stringify(currentUser));
+          localStorage.setItem('rbf_auth_token', authToken);
+          errorEl.classList.add('hidden');
+          onLoginSuccess();
+        } else {
+          errorEl.textContent = data.message || '登录失败';
+          errorEl.classList.remove('hidden');
+        }
+      } catch (e) {
+        errorEl.textContent = '网络错误，请重试';
+        errorEl.classList.remove('hidden');
+      }
+    }
+    
+    async function handleRegister() {
+      const username = document.getElementById('regUsername').value.trim();
+      const email = document.getElementById('regEmail').value.trim();
+      const password = document.getElementById('regPassword').value;
+      const displayName = document.getElementById('regDisplayName').value.trim();
+      const phone = document.getElementById('regPhone').value.trim();
+      const company = document.getElementById('regCompany').value.trim();
+      const title = document.getElementById('regTitle').value.trim();
+      const errorEl = document.getElementById('registerError');
+      
+      if (!username || !email || !password) {
+        errorEl.textContent = '请填写必填项（用户名、邮箱、密码）';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      
+      if (password.length < 6) {
+        errorEl.textContent = '密码至少6位';
+        errorEl.classList.remove('hidden');
+        return;
+      }
+      
+      try {
+        const res = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password, displayName, phone, company, title, defaultRole: selectedRegRole })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+          currentUser = data.user;
+          authToken = data.token;
+          localStorage.setItem('rbf_current_user', JSON.stringify(currentUser));
+          localStorage.setItem('rbf_auth_token', authToken);
+          errorEl.classList.add('hidden');
+          onLoginSuccess();
+        } else {
+          errorEl.textContent = data.message || '注册失败';
+          errorEl.classList.remove('hidden');
+        }
+      } catch (e) {
+        errorEl.textContent = '网络错误，请重试';
+        errorEl.classList.remove('hidden');
+      }
+    }
+    
+    function handleGuestLogin() {
+      // 游客模式：创建临时用户
+      currentUser = {
+        id: 'guest_' + Date.now(),
+        username: 'guest',
+        displayName: '游客用户',
+        email: '',
+        defaultRole: 'both',
+        isGuest: true
+      };
+      authToken = 'guest_token';
+      localStorage.setItem('rbf_current_user', JSON.stringify(currentUser));
+      localStorage.setItem('rbf_auth_token', authToken);
+      onLoginSuccess();
+    }
+    
+    function handleSSOLogin() {
+      alert('公司SSO登录功能即将上线，敬请期待！\\n\\n接口已预留，可对接企业统一认证系统。');
+    }
+    
+    function handleLogout() {
+      if (confirm('确定要退出登录吗？')) {
+        currentUser = null;
+        authToken = null;
+        localStorage.removeItem('rbf_current_user');
+        localStorage.removeItem('rbf_auth_token');
+        showPage('pageAuth');
+      }
+    }
+    
+    function onLoginSuccess() {
+      updateNavUserInfo();
+      showPage('pageProjects');
+      checkShowOnboarding();
+    }
+    
+    function updateNavUserInfo() {
+      if (currentUser) {
+        const initial = (currentUser.displayName || currentUser.username || 'U').charAt(0).toUpperCase();
+        document.getElementById('navUserAvatar').textContent = initial;
+        document.getElementById('navUserName').textContent = currentUser.displayName || currentUser.username || '用户';
+      }
+    }
+    
+    function goToProfile() {
+      updateProfilePage();
+      showPage('pageProfile');
+    }
+    
+    function goToMyProjects() {
+      showPage('pageProjects');
+    }
+    
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
+    
+    function switchProfileRole(role) {
+      profileViewRole = role;
+      document.getElementById('profileRoleBorrower').className = role === 'borrower'
+        ? 'flex-1 py-4 bg-white rounded-xl border-2 border-amber-500 text-amber-700 font-medium flex items-center justify-center shadow-sm'
+        : 'flex-1 py-4 bg-white rounded-xl border-2 border-gray-200 text-gray-600 font-medium flex items-center justify-center hover:border-amber-300';
+      document.getElementById('profileRoleInvestor').className = role === 'investor'
+        ? 'flex-1 py-4 bg-white rounded-xl border-2 border-indigo-500 text-indigo-700 font-medium flex items-center justify-center shadow-sm'
+        : 'flex-1 py-4 bg-white rounded-xl border-2 border-gray-200 text-gray-600 font-medium flex items-center justify-center hover:border-indigo-300';
+      document.getElementById('borrowerView').classList.toggle('hidden', role !== 'borrower');
+      document.getElementById('investorView').classList.toggle('hidden', role !== 'investor');
+      renderProfileProjects();
+    }
+    
+    function updateProfilePage() {
+      if (!currentUser) return;
+      
+      const initial = (currentUser.displayName || currentUser.username || 'U').charAt(0).toUpperCase();
+      document.getElementById('profileAvatar').textContent = initial;
+      document.getElementById('profileName').textContent = currentUser.displayName || currentUser.username || '用户';
+      document.getElementById('profileCompany').textContent = currentUser.company || '未填写公司';
+      document.getElementById('profileTitle').textContent = currentUser.title || '未填写职位';
+      
+      // 计算统计
+      const myProjects = projects.filter(p => p.createdBy === currentUser.id || !p.createdBy);
+      const participatedProjects = projects.filter(p => 
+        p.collaborators?.some(c => c.id === currentUser.id || c.email === currentUser.email)
+      );
+      const allProjects = [...new Set([...myProjects, ...participatedProjects])];
+      
+      document.getElementById('profileStatProjects').textContent = allProjects.length;
+      document.getElementById('profileStatNegotiating').textContent = allProjects.filter(p => p.status === 'negotiating').length;
+      document.getElementById('profileStatSigned').textContent = allProjects.filter(p => p.status === 'signed').length;
+      
+      const totalAmount = allProjects.reduce((sum, p) => {
+        const amount = parseFloat((p.params?.investmentAmount || '0').replace(/[^0-9.]/g, ''));
+        return sum + (isNaN(amount) ? 0 : amount);
+      }, 0);
+      document.getElementById('profileStatAmount').textContent = '¥' + totalAmount.toLocaleString() + '万';
+      
+      renderProfileProjects();
+    }
+    
+    function renderProfileProjects() {
+      // 融资方视角：我发起的项目
+      const myProjects = projects.filter(p => p.createdBy === currentUser?.id || (!p.createdBy && !p.isParticipated));
+      document.getElementById('borrowerProjectCount').textContent = myProjects.length;
+      
+      const borrowerListEl = document.getElementById('borrowerProjectList');
+      if (myProjects.length === 0) {
+        borrowerListEl.innerHTML = '<div class="p-8 text-center text-gray-400"><i class="fas fa-inbox text-4xl mb-3 opacity-50"></i><p>暂无发起的项目</p><button onclick="goToMyProjects(); setTimeout(showNewProjectModal, 300)" class="mt-3 px-4 py-2 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600"><i class="fas fa-plus mr-1"></i>发起新项目</button></div>';
+      } else {
+        borrowerListEl.innerHTML = myProjects.slice(0, 5).map(p => renderProfileProjectItem(p, 'borrower')).join('');
+      }
+      
+      // 投资方视角：我参与的项目（通过邀请加入的）
+      const participatedProjects = projects.filter(p => p.isParticipated || 
+        p.collaborators?.some(c => c.id === currentUser?.id || c.email === currentUser?.email)
+      );
+      document.getElementById('investorProjectCount').textContent = participatedProjects.length;
+      
+      const investorListEl = document.getElementById('investorProjectList');
+      if (participatedProjects.length === 0) {
+        investorListEl.innerHTML = '<div class="p-8 text-center text-gray-400"><i class="fas fa-inbox text-4xl mb-3 opacity-50"></i><p>暂无参与的项目</p><button onclick="showJoinCollabModal()" class="mt-3 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm hover:bg-indigo-600"><i class="fas fa-link mr-1"></i>通过邀请码加入</button></div>';
+      } else {
+        investorListEl.innerHTML = participatedProjects.slice(0, 5).map(p => renderProfileProjectItem(p, 'investor')).join('');
+      }
+      
+      // 讨论和合同统计
+      const borrowerDiscussions = myProjects.reduce((sum, p) => sum + (p.negotiations?.length || 0), 0);
+      const investorDiscussions = participatedProjects.reduce((sum, p) => sum + (p.negotiations?.length || 0), 0);
+      document.getElementById('borrowerDiscussionCount').textContent = borrowerDiscussions;
+      document.getElementById('investorDiscussionCount').textContent = investorDiscussions;
+      
+      const borrowerContracts = myProjects.filter(p => p.status === 'signed' || p.status === 'completed').length;
+      const investorContracts = participatedProjects.filter(p => p.status === 'signed' || p.status === 'completed').length;
+      document.getElementById('borrowerContractCount').textContent = borrowerContracts;
+      document.getElementById('investorContractCount').textContent = investorContracts;
+      
+      // 渲染讨论列表
+      renderDiscussionList('borrower', myProjects);
+      renderDiscussionList('investor', participatedProjects);
+      
+      // 渲染合同列表
+      renderContractList('borrower', myProjects);
+      renderContractList('investor', participatedProjects);
+    }
+    
+    function renderProfileProjectItem(project, role) {
+      const template = templates.find(t => t.id === project.templateId) || {};
+      const statusColors = {
+        draft: 'bg-gray-100 text-gray-600',
+        negotiating: 'bg-amber-100 text-amber-700',
+        completed: 'bg-emerald-100 text-emerald-700',
+        signed: 'bg-blue-100 text-blue-700'
+      };
+      const statusText = { draft: '草稿', negotiating: '协商中', completed: '已完成', signed: '已签署' };
+      const iconColor = role === 'borrower' ? 'amber' : 'indigo';
+      
+      return \`
+        <div class="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onclick="openProjectFromProfile('\${project.id}')">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+              <div class="w-10 h-10 bg-\${iconColor}-100 rounded-lg flex items-center justify-center">
+                <i class="fas \${template.icon || 'fa-folder'} text-\${iconColor}-600"></i>
+              </div>
+              <div>
+                <h4 class="font-medium text-gray-900">\${project.name}</h4>
+                <p class="text-xs text-gray-500">\${template.name || '未知行业'} · \${project.negotiations?.length || 0}次协商</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-2">
+              <span class="px-2 py-1 rounded-full text-xs \${statusColors[project.status] || statusColors.draft}">\${statusText[project.status] || '草稿'}</span>
+              <i class="fas fa-chevron-right text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      \`;
+    }
+    
+    function renderDiscussionList(role, projectList) {
+      const listEl = document.getElementById(role + 'DiscussionList');
+      const discussions = [];
+      projectList.forEach(p => {
+        (p.negotiations || []).slice(-3).forEach(n => {
+          discussions.push({ ...n, projectName: p.name, projectId: p.id });
+        });
+      });
+      discussions.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      
+      if (discussions.length === 0) {
+        listEl.innerHTML = '<div class="p-6 text-center text-gray-400"><p class="text-sm">项目协商记录将在这里显示</p></div>';
+      } else {
+        listEl.innerHTML = discussions.slice(0, 5).map(d => \`
+          <div class="p-4 hover:bg-gray-50 cursor-pointer" onclick="openProjectFromProfile('\${d.projectId}')">
+            <div class="flex items-start space-x-3">
+              <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-comment text-gray-500 text-sm"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm text-gray-900 truncate">\${d.input || d.understood || '协商记录'}</p>
+                <p class="text-xs text-gray-500">\${d.projectName} · \${formatTime(d.timestamp)}</p>
+              </div>
+            </div>
+          </div>
+        \`).join('');
+      }
+    }
+    
+    function renderContractList(role, projectList) {
+      const listEl = document.getElementById(role + 'ContractList');
+      const contracts = projectList.filter(p => p.status === 'signed' || p.status === 'completed');
+      
+      if (contracts.length === 0) {
+        listEl.innerHTML = '<div class="p-6 text-center text-gray-400"><p class="text-sm">签署的合同将在这里显示</p></div>';
+      } else {
+        listEl.innerHTML = contracts.map(p => {
+          const template = templates.find(t => t.id === p.templateId) || {};
+          return \`
+            <div class="p-4 hover:bg-gray-50 cursor-pointer" onclick="openProjectFromProfile('\${p.id}')">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                  <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-file-contract text-emerald-600"></i>
+                  </div>
+                  <div>
+                    <h4 class="font-medium text-gray-900">\${p.name}</h4>
+                    <p class="text-xs text-gray-500">\${template.name || '未知行业'} · 签署于 \${formatDate(p.signedAt || p.updatedAt)}</p>
+                  </div>
+                </div>
+                <span class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">已签署</span>
+              </div>
+            </div>
+          \`;
+        }).join('');
+      }
+    }
+    
+    function openProjectFromProfile(projectId) {
+      const project = projects.find(p => p.id === projectId);
+      if (project) {
+        openProject(projectId);
+      }
+    }
+    
+    function showEditProfileModal() {
+      if (!currentUser) return;
+      document.getElementById('editDisplayName').value = currentUser.displayName || '';
+      document.getElementById('editPhone').value = currentUser.phone || '';
+      document.getElementById('editCompany').value = currentUser.company || '';
+      document.getElementById('editTitle').value = currentUser.title || '';
+      document.getElementById('editBio').value = currentUser.bio || '';
+      document.getElementById('editDefaultRole').value = currentUser.defaultRole || 'both';
+      document.getElementById('editProfileModal').classList.remove('hidden');
+    }
+    
+    function hideEditProfileModal() {
+      document.getElementById('editProfileModal').classList.add('hidden');
+    }
+    
+    async function saveProfile() {
+      const updates = {
+        displayName: document.getElementById('editDisplayName').value.trim(),
+        phone: document.getElementById('editPhone').value.trim(),
+        company: document.getElementById('editCompany').value.trim(),
+        title: document.getElementById('editTitle').value.trim(),
+        bio: document.getElementById('editBio').value.trim(),
+        defaultRole: document.getElementById('editDefaultRole').value
+      };
+      
+      // 更新本地状态
+      currentUser = { ...currentUser, ...updates };
+      localStorage.setItem('rbf_current_user', JSON.stringify(currentUser));
+      
+      // 尝试同步到服务器
+      if (authToken && !currentUser.isGuest) {
+        try {
+          await fetch('/api/auth/profile', {
+            method: 'PUT',
+            headers: { 
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + authToken
+            },
+            body: JSON.stringify(updates)
+          });
+        } catch (e) {
+          console.log('Profile sync failed, saved locally');
+        }
+      }
+      
+      updateNavUserInfo();
+      updateProfilePage();
+      hideEditProfileModal();
+    }
+    
+    // 检查登录状态
+    function checkAuthStatus() {
+      if (currentUser && authToken) {
+        updateNavUserInfo();
+        showPage('pageProjects');
+        return true;
+      }
+      showPage('pageAuth');
+      return false;
+    }
     
     // ==================== 引导教程 ====================
     let currentOnboardingStep = 0;
