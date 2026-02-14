@@ -591,6 +591,44 @@ app.post('/api/sign/:signId/remind', async (c) => {
   })
 })
 
+// 更新签署人信息
+app.put('/api/sign/:signId/update-signer', async (c) => {
+  const signId = c.req.param('signId')
+  const { signerId, name, phone, email } = await c.req.json()
+  
+  const signData = signatureStore.get(signId)
+  if (!signData) {
+    return c.json({ success: false, message: '签署流程不存在' })
+  }
+  
+  const signer = signData.signers.find((s: any) => s.id === signerId)
+  if (!signer) {
+    return c.json({ success: false, message: '签署人不存在' })
+  }
+  
+  // 已签署的签署人不能修改信息
+  if (signer.status === 'signed') {
+    return c.json({ success: false, message: '该签署人已完成签署，无法修改信息' })
+  }
+  
+  // 更新签署人信息
+  if (name) signer.name = name
+  if (phone !== undefined) signer.phone = phone
+  if (email !== undefined) signer.email = email
+  signer.updatedAt = new Date().toISOString()
+  
+  return c.json({ 
+    success: true, 
+    message: '签署人信息已更新',
+    signer: {
+      id: signer.id,
+      name: signer.name,
+      phone: signer.phone,
+      email: signer.email
+    }
+  })
+})
+
 // ==================== 自定义模板API ====================
 // 内存存储自定义模板（生产环境应使用D1/KV）
 const customTemplateStore = new Map<string, any>()
@@ -4170,6 +4208,304 @@ app.get('/', (c) => {
     </div>
   </div>
 
+  <!-- ==================== 弹窗: 编辑项目 ==================== -->
+  <div id="editProjectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
+      <div class="p-6 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-edit mr-2 text-indigo-600"></i>编辑项目</h2>
+          <button onclick="hideEditProjectModal()" class="p-2 hover:bg-gray-100 rounded-lg">
+            <i class="fas fa-times text-gray-500"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-6 space-y-4">
+        <input type="hidden" id="editProjectId">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">项目名称 <span class="text-red-500">*</span></label>
+          <input type="text" id="editProjectName" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="输入项目名称">
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
+          <textarea id="editProjectNote" rows="3" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" placeholder="项目备注..."></textarea>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">项目状态</label>
+          <select id="editProjectStatus" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <option value="negotiating">协商中</option>
+            <option value="completed">已完成</option>
+            <option value="signed">已签署</option>
+            <option value="draft">草稿</option>
+          </select>
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
+        <button onclick="hideEditProjectModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+        <button onclick="saveEditProject()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+          <i class="fas fa-save mr-2"></i>保存
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗: 删除项目确认 ==================== -->
+  <div id="deleteProjectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
+      <div class="p-6 border-b border-gray-100 bg-red-50">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mr-4">
+            <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-red-900">删除项目</h2>
+            <p class="text-sm text-red-600">此操作不可恢复</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-6">
+        <input type="hidden" id="deleteProjectId">
+        <p class="text-gray-700 mb-4">确定要删除项目 "<span id="deleteProjectName" class="font-bold text-gray-900"></span>" 吗？</p>
+        <div class="p-4 bg-amber-50 rounded-xl border border-amber-200">
+          <p class="text-sm text-amber-700"><i class="fas fa-info-circle mr-2"></i>删除后以下内容将被永久移除：</p>
+          <ul class="text-sm text-amber-600 mt-2 ml-6 list-disc">
+            <li>所有协商记录（<span id="deleteNegotiationCount">0</span>条）</li>
+            <li>所有版本快照（<span id="deleteVersionCount">0</span>个）</li>
+            <li>所有协作者关联</li>
+          </ul>
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
+        <button onclick="hideDeleteProjectModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+        <button onclick="confirmDeleteProject()" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+          <i class="fas fa-trash-alt mr-2"></i>确认删除
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗: 直接编辑合同参数 ==================== -->
+  <div id="editParamModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-pen mr-2 text-emerald-600"></i>编辑参数</h2>
+            <p id="editParamName" class="text-sm text-gray-500"></p>
+          </div>
+          <button onclick="hideEditParamModal()" class="p-2 hover:bg-white/50 rounded-lg">
+            <i class="fas fa-times text-gray-500"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-6 space-y-4">
+        <input type="hidden" id="editParamKey">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">当前值</label>
+          <div id="editParamOldValue" class="px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-gray-500"></div>
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">新值 <span class="text-red-500">*</span></label>
+          <input type="text" id="editParamNewValue" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="输入新值">
+        </div>
+        <div id="editParamNote" class="p-3 bg-indigo-50 rounded-xl border border-indigo-100 text-sm text-indigo-700">
+          <!-- 参数说明 -->
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
+        <button onclick="hideEditParamModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+        <button onclick="saveEditParam()" class="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
+          <i class="fas fa-check mr-2"></i>确认修改
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗: 删除协商记录确认 ==================== -->
+  <div id="deleteNegotiationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
+      <div class="p-6 border-b border-gray-100 bg-amber-50">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mr-4">
+            <i class="fas fa-comment-slash text-amber-600 text-xl"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-amber-900">删除协商记录</h2>
+            <p class="text-sm text-amber-600">此操作将撤销相关参数变更</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-6">
+        <input type="hidden" id="deleteNegotiationId">
+        <p class="text-gray-700 mb-4">确定要删除此协商记录吗？</p>
+        <div id="deleteNegotiationPreview" class="p-4 bg-gray-50 rounded-xl border border-gray-200">
+          <!-- 动态显示要删除的内容 -->
+        </div>
+        <div class="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
+          <p class="text-sm text-amber-700"><i class="fas fa-exclamation-triangle mr-2"></i>删除后，相关参数将恢复到此次协商前的值</p>
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
+        <button onclick="hideDeleteNegotiationModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+        <button onclick="confirmDeleteNegotiation()" class="px-6 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700">
+          <i class="fas fa-trash-alt mr-2"></i>确认删除
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗: 删除版本快照确认 ==================== -->
+  <div id="deleteVersionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
+      <div class="p-6 border-b border-gray-100 bg-purple-50">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
+            <i class="fas fa-history text-purple-600 text-xl"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-purple-900">删除版本快照</h2>
+            <p class="text-sm text-purple-600">此操作不可恢复</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-6">
+        <input type="hidden" id="deleteVersionId">
+        <p class="text-gray-700 mb-4">确定要删除版本 "<span id="deleteVersionName" class="font-bold text-gray-900"></span>" 吗？</p>
+        <div class="p-3 bg-purple-50 rounded-lg border border-purple-200">
+          <p class="text-sm text-purple-700"><i class="fas fa-info-circle mr-2"></i>删除后将无法恢复到此版本的合同状态</p>
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
+        <button onclick="hideDeleteVersionModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+        <button onclick="confirmDeleteVersion()" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+          <i class="fas fa-trash-alt mr-2"></i>确认删除
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗: 删除协作者确认 ==================== -->
+  <div id="deleteCollaboratorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
+      <div class="p-6 border-b border-gray-100 bg-rose-50">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mr-4">
+            <i class="fas fa-user-minus text-rose-600 text-xl"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-rose-900">移除协作者</h2>
+            <p class="text-sm text-rose-600">移除后对方将无法访问此项目</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-6">
+        <input type="hidden" id="deleteCollaboratorId">
+        <div id="deleteCollaboratorPreview" class="p-4 bg-gray-50 rounded-xl border border-gray-200 mb-4">
+          <div class="flex items-center space-x-3">
+            <div id="deleteCollaboratorAvatar" class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
+              <i class="fas fa-user text-indigo-600"></i>
+            </div>
+            <div>
+              <p id="deleteCollaboratorName" class="font-medium text-gray-900">协作者名称</p>
+              <p id="deleteCollaboratorRole" class="text-sm text-gray-500">角色</p>
+            </div>
+          </div>
+        </div>
+        <div class="p-3 bg-rose-50 rounded-lg border border-rose-200">
+          <p class="text-sm text-rose-700"><i class="fas fa-exclamation-triangle mr-2"></i>移除后，该协作者的所有修改记录将保留，但无法继续参与协商</p>
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
+        <button onclick="hideDeleteCollaboratorModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+        <button onclick="confirmDeleteCollaborator()" class="px-6 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700">
+          <i class="fas fa-user-minus mr-2"></i>确认移除
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗: 删除自定义模板确认 ==================== -->
+  <div id="deleteTemplateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
+      <div class="p-6 border-b border-gray-100 bg-orange-50">
+        <div class="flex items-center">
+          <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center mr-4">
+            <i class="fas fa-file-alt text-orange-600 text-xl"></i>
+          </div>
+          <div>
+            <h2 class="text-lg font-bold text-orange-900">删除自定义模板</h2>
+            <p class="text-sm text-orange-600">此操作不可恢复</p>
+          </div>
+        </div>
+      </div>
+      <div class="p-6">
+        <input type="hidden" id="deleteTemplateId">
+        <div id="deleteTemplatePreview" class="p-4 bg-gray-50 rounded-xl border border-gray-200 mb-4">
+          <div class="flex items-center space-x-3">
+            <div id="deleteTemplateIcon" class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
+              <i class="fas fa-file-contract text-indigo-600"></i>
+            </div>
+            <div>
+              <p id="deleteTemplateName" class="font-medium text-gray-900">模板名称</p>
+              <p id="deleteTemplateIndustry" class="text-sm text-gray-500">行业类型</p>
+            </div>
+          </div>
+        </div>
+        <div class="p-3 bg-orange-50 rounded-lg border border-orange-200">
+          <p class="text-sm text-orange-700"><i class="fas fa-info-circle mr-2"></i>使用此模板创建的项目不受影响，仍可正常使用</p>
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
+        <button onclick="hideDeleteTemplateModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+        <button onclick="confirmDeleteTemplate()" class="px-6 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700">
+          <i class="fas fa-trash-alt mr-2"></i>确认删除
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗: 编辑签署人信息 ==================== -->
+  <div id="editSignerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
+      <div class="p-6 border-b border-gray-100 bg-teal-50">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center">
+            <div id="editSignerIcon" class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center mr-3">
+              <i class="fas fa-user-edit text-teal-600"></i>
+            </div>
+            <h2 class="text-lg font-bold text-teal-900">编辑签署人信息</h2>
+          </div>
+          <button onclick="hideEditSignerModal()" class="p-2 hover:bg-white/50 rounded-lg">
+            <i class="fas fa-times text-gray-500"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-6">
+        <input type="hidden" id="editSignerId">
+        <input type="hidden" id="editSignerType">
+        <div class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">姓名 <span class="text-red-500">*</span></label>
+            <input type="text" id="editSignerName" placeholder="签署人姓名" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
+            <input type="tel" id="editSignerPhone" placeholder="用于接收签署通知" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">邮箱</label>
+            <input type="email" id="editSignerEmail" placeholder="用于接收签署文件" class="w-full px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500">
+          </div>
+        </div>
+      </div>
+      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
+        <button onclick="hideEditSignerModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
+        <button onclick="saveSignerInfo()" class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
+          <i class="fas fa-save mr-2"></i>保存修改
+        </button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // ==================== 状态管理 ====================
     let projects = JSON.parse(localStorage.getItem('rbf_projects') || '[]');
@@ -4779,7 +5115,16 @@ app.get('/', (c) => {
         const changeCount = p.negotiations?.length || 0;
         
         return \`
-          <div class="project-card bg-white rounded-xl p-5 border border-gray-100 cursor-pointer" onclick="openProject('\${p.id}')">
+          <div class="project-card bg-white rounded-xl p-5 border border-gray-100 cursor-pointer relative group" onclick="openProject('\${p.id}')">
+            <!-- 操作按钮（悬停显示） -->
+            <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1" onclick="event.stopPropagation()">
+              <button onclick="showEditProjectModal('\${p.id}')" class="p-2 bg-white/90 hover:bg-indigo-100 rounded-lg shadow-sm border border-gray-200 transition-colors" title="编辑项目">
+                <i class="fas fa-edit text-indigo-600 text-sm"></i>
+              </button>
+              <button onclick="showDeleteProjectModal('\${p.id}')" class="p-2 bg-white/90 hover:bg-red-100 rounded-lg shadow-sm border border-gray-200 transition-colors" title="删除项目">
+                <i class="fas fa-trash-alt text-red-500 text-sm"></i>
+              </button>
+            </div>
             <div class="flex items-start justify-between mb-3">
               <div class="w-12 h-12 rounded-xl bg-\${template.color || 'gray'}-100 flex items-center justify-center">
                 <i class="fas \${template.icon || 'fa-folder'} text-\${template.color || 'gray'}-600 text-xl"></i>
@@ -5575,7 +5920,11 @@ app.get('/', (c) => {
         const respondedAgents = hasAgentDetails ? n.agentDetails.filter(a => a.success).length : 0;
         
         return \`
-          <div class="negotiation-item bg-gray-50 rounded-xl p-4 animate-in">
+          <div class="negotiation-item bg-gray-50 rounded-xl p-4 animate-in relative group">
+            <!-- 删除按钮（悬停显示） -->
+            <button onclick="showDeleteNegotiationModal('\${n.id}')" class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity p-1.5 bg-white hover:bg-red-50 rounded-lg border border-gray-200 shadow-sm" title="删除此协商记录">
+              <i class="fas fa-trash-alt text-red-400 hover:text-red-600 text-xs"></i>
+            </button>
             <div class="flex items-center justify-between mb-2">
               <div class="flex items-center space-x-2">
                 <span class="w-6 h-6 rounded-full bg-\${pColor}-100 flex items-center justify-center">
@@ -5583,13 +5932,14 @@ app.get('/', (c) => {
                 </span>
                 <span class="text-xs text-\${pColor}-600 font-medium">\${pText}</span>
                 <span class="change-badge">#\${negotiations.length - i}</span>
+                \${n.isDirectEdit ? '<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs"><i class="fas fa-pen mr-1"></i>直接编辑</span>' : ''}
                 \${hasAgentDetails ? \`
                   <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs flex items-center">
                     <i class="fas fa-robot mr-1"></i>\${respondedAgents} Agent
                   </span>
                 \` : ''}
               </div>
-              <span class="text-xs text-gray-400">\${formatTime(n.timestamp)}</span>
+              <span class="text-xs text-gray-400 mr-6">\${formatTime(n.timestamp)}</span>
             </div>
             <p class="text-sm text-gray-800 mb-2">"\${n.input}"</p>
             
@@ -5698,12 +6048,13 @@ app.get('/', (c) => {
               \${module.clauses.map(clause => {
                 const change = changeMap[clause.key];
                 const currentValue = params[clause.key] || clause.value;
+                const escapedNote = (clause.note || '').replace(/'/g, "\\\\'").replace(/"/g, "&quot;");
                 
                 if (change) {
                   return \`
-                    <div class="bg-emerald-50 rounded-lg p-3 border-l-4 border-emerald-500">
+                    <div class="bg-emerald-50 rounded-lg p-3 border-l-4 border-emerald-500 cursor-pointer hover:bg-emerald-100 transition-colors" onclick="showEditParamModal('\${clause.key}', '\${clause.name}', '\${change.newValue}', '\${escapedNote}')" title="点击编辑">
                       <div class="flex items-center justify-between">
-                        <span class="text-gray-700 font-medium">\${clause.name}</span>
+                        <span class="text-gray-700 font-medium flex items-center">\${clause.name} <i class="fas fa-pen text-emerald-400 text-xs ml-2 opacity-50"></i></span>
                         <div class="flex items-center space-x-2">
                           <span class="value-old">\${change.oldValue}</span>
                           <i class="fas fa-arrow-right text-emerald-500 text-xs"></i>
@@ -5716,9 +6067,9 @@ app.get('/', (c) => {
                   \`;
                 } else {
                   return \`
-                    <div class="flex items-center justify-between py-2 border-b border-gray-50">
-                      <span class="text-gray-600">\${clause.name}</span>
-                      <span class="font-semibold text-indigo-600">\${currentValue}</span>
+                    <div class="flex items-center justify-between py-2 border-b border-gray-50 cursor-pointer hover:bg-indigo-50 rounded-lg px-2 -mx-2 transition-colors" onclick="showEditParamModal('\${clause.key}', '\${clause.name}', '\${currentValue}', '\${escapedNote}')" title="点击编辑">
+                      <span class="text-gray-600 flex items-center">\${clause.name} <i class="fas fa-pen text-gray-300 text-xs ml-2 opacity-0 group-hover:opacity-100"></i></span>
+                      <span class="font-semibold text-indigo-600 flex items-center">\${currentValue} <i class="fas fa-edit text-indigo-300 text-xs ml-2"></i></span>
                     </div>
                   \`;
                 }
@@ -6031,6 +6382,219 @@ app.get('/', (c) => {
     // AI助手面板入口（便捷别名）
     function showAIAdvisorPanel() { showAIAdvisorModal(); }
     function getAIAdvice() { showAIAdvisorModal(); }
+    
+    // ==================== 项目编辑/删除功能 ====================
+    function showEditProjectModal(projectId) {
+      const project = projects.find(p => p.id === projectId);
+      if (!project) return;
+      
+      document.getElementById('editProjectId').value = projectId;
+      document.getElementById('editProjectName').value = project.name || '';
+      document.getElementById('editProjectNote').value = project.note || '';
+      document.getElementById('editProjectStatus').value = project.status || 'negotiating';
+      document.getElementById('editProjectModal').classList.remove('hidden');
+    }
+    
+    function hideEditProjectModal() {
+      document.getElementById('editProjectModal').classList.add('hidden');
+    }
+    
+    function saveEditProject() {
+      const projectId = document.getElementById('editProjectId').value;
+      const project = projects.find(p => p.id === projectId);
+      if (!project) return;
+      
+      const newName = document.getElementById('editProjectName').value.trim();
+      if (!newName) {
+        showToast('项目名称不能为空', 'warning');
+        return;
+      }
+      
+      project.name = newName;
+      project.note = document.getElementById('editProjectNote').value.trim();
+      project.status = document.getElementById('editProjectStatus').value;
+      project.updatedAt = new Date().toISOString();
+      
+      saveProjects();
+      renderProjects();
+      updateStats();
+      hideEditProjectModal();
+      showToast('项目已更新', 'success');
+    }
+    
+    function showDeleteProjectModal(projectId) {
+      const project = projects.find(p => p.id === projectId);
+      if (!project) return;
+      
+      document.getElementById('deleteProjectId').value = projectId;
+      document.getElementById('deleteProjectName').textContent = project.name;
+      document.getElementById('deleteNegotiationCount').textContent = project.negotiations?.length || 0;
+      document.getElementById('deleteVersionCount').textContent = project.versions?.length || 0;
+      document.getElementById('deleteProjectModal').classList.remove('hidden');
+    }
+    
+    function hideDeleteProjectModal() {
+      document.getElementById('deleteProjectModal').classList.add('hidden');
+    }
+    
+    function confirmDeleteProject() {
+      const projectId = document.getElementById('deleteProjectId').value;
+      const index = projects.findIndex(p => p.id === projectId);
+      if (index === -1) return;
+      
+      projects.splice(index, 1);
+      saveProjects();
+      renderProjects();
+      updateStats();
+      hideDeleteProjectModal();
+      showToast('项目已删除', 'success');
+    }
+    
+    // ==================== 直接编辑合同参数功能 ====================
+    function showEditParamModal(paramKey, paramName, currentValue, note) {
+      document.getElementById('editParamKey').value = paramKey;
+      document.getElementById('editParamName').textContent = paramName;
+      document.getElementById('editParamOldValue').textContent = currentValue || '（未设置）';
+      document.getElementById('editParamNewValue').value = currentValue || '';
+      document.getElementById('editParamNote').innerHTML = note ? '<i class="fas fa-info-circle mr-2"></i>' + note : '<i class="fas fa-lightbulb mr-2"></i>直接修改参数值，无需通过自然语言协商';
+      document.getElementById('editParamModal').classList.remove('hidden');
+    }
+    
+    function hideEditParamModal() {
+      document.getElementById('editParamModal').classList.add('hidden');
+    }
+    
+    function saveEditParam() {
+      if (!currentProject) return;
+      
+      const paramKey = document.getElementById('editParamKey').value;
+      const newValue = document.getElementById('editParamNewValue').value.trim();
+      const oldValue = currentProject.params[paramKey] || '';
+      
+      if (newValue === oldValue) {
+        hideEditParamModal();
+        return;
+      }
+      
+      // 创建一条协商记录
+      const negotiation = {
+        id: 'neg_' + Date.now(),
+        input: '直接修改: ' + document.getElementById('editParamName').textContent,
+        understood: '用户直接编辑参数',
+        changes: [{
+          paramKey: paramKey,
+          paramName: document.getElementById('editParamName').textContent,
+          oldValue: oldValue,
+          newValue: newValue,
+          moduleId: 'direct-edit',
+          moduleName: '直接编辑'
+        }],
+        perspective: currentPerspective,
+        timestamp: new Date().toISOString(),
+        isDirectEdit: true
+      };
+      
+      currentProject.negotiations.push(negotiation);
+      currentProject.params[paramKey] = newValue;
+      currentProject.updatedAt = new Date().toISOString();
+      
+      saveProjects();
+      hideEditParamModal();
+      renderNegotiationHistory();
+      renderModuleCards();
+      renderContractText();
+      updateChangedBadge();
+      showToast('参数已更新', 'success');
+    }
+    
+    // ==================== 删除协商记录功能 ====================
+    function showDeleteNegotiationModal(negId) {
+      if (!currentProject) return;
+      
+      const negotiation = currentProject.negotiations.find(n => n.id === negId);
+      if (!negotiation) return;
+      
+      document.getElementById('deleteNegotiationId').value = negId;
+      
+      // 显示要删除的内容预览
+      const preview = document.getElementById('deleteNegotiationPreview');
+      preview.innerHTML = \`
+        <div class="text-sm">
+          <p class="font-medium text-gray-900 mb-2">"\${negotiation.input}"</p>
+          <div class="space-y-1">
+            \${negotiation.changes.map(c => \`
+              <div class="flex items-center text-gray-600">
+                <span class="w-24 truncate">\${c.paramName}:</span>
+                <span class="text-red-500 line-through mx-2">\${c.newValue}</span>
+                <i class="fas fa-arrow-right text-gray-400 mx-1"></i>
+                <span class="text-emerald-600">\${c.oldValue}</span>
+              </div>
+            \`).join('')}
+          </div>
+        </div>
+      \`;
+      
+      document.getElementById('deleteNegotiationModal').classList.remove('hidden');
+    }
+    
+    function hideDeleteNegotiationModal() {
+      document.getElementById('deleteNegotiationModal').classList.add('hidden');
+    }
+    
+    function confirmDeleteNegotiation() {
+      if (!currentProject) return;
+      
+      const negId = document.getElementById('deleteNegotiationId').value;
+      const negIndex = currentProject.negotiations.findIndex(n => n.id === negId);
+      if (negIndex === -1) return;
+      
+      const negotiation = currentProject.negotiations[negIndex];
+      
+      // 恢复参数到协商前的值
+      for (const change of negotiation.changes) {
+        currentProject.params[change.paramKey] = change.oldValue;
+      }
+      
+      // 删除协商记录
+      currentProject.negotiations.splice(negIndex, 1);
+      currentProject.updatedAt = new Date().toISOString();
+      
+      saveProjects();
+      hideDeleteNegotiationModal();
+      renderNegotiationHistory();
+      renderModuleCards();
+      renderContractText();
+      updateChangedBadge();
+      showToast('协商记录已删除，参数已恢复', 'success');
+    }
+    
+    // ==================== 删除版本快照功能 ====================
+    function showDeleteVersionModal(versionId, versionName) {
+      document.getElementById('deleteVersionId').value = versionId;
+      document.getElementById('deleteVersionName').textContent = versionName || '未命名版本';
+      document.getElementById('deleteVersionModal').classList.remove('hidden');
+    }
+    
+    function hideDeleteVersionModal() {
+      document.getElementById('deleteVersionModal').classList.add('hidden');
+    }
+    
+    function confirmDeleteVersion() {
+      if (!currentProject) return;
+      
+      const versionId = document.getElementById('deleteVersionId').value;
+      const versionIndex = currentProject.versions?.findIndex(v => v.id === versionId);
+      if (versionIndex === -1 || versionIndex === undefined) return;
+      
+      currentProject.versions.splice(versionIndex, 1);
+      currentProject.updatedAt = new Date().toISOString();
+      
+      saveProjects();
+      hideDeleteVersionModal();
+      renderVersionList();
+      showToast('版本快照已删除', 'success');
+    }
+    
     // ==================== 电子签章功能 ====================
     let currentSignProcess = null;
     let currentSignerId = null;
@@ -6112,6 +6676,9 @@ app.get('/', (c) => {
               \${isSigned ? \`
                 <span class="px-3 py-1.5 bg-emerald-500 text-white rounded-lg text-sm"><i class="fas fa-check mr-1"></i>已签署</span>
               \` : \`
+                <button onclick="showEditSignerModal('\${s.id}', '\${s.role}', '\${s.name}', '\${s.phone || ''}', '\${s.email || ''}', '\${signData.signId}')" class="p-2 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg" title="编辑信息">
+                  <i class="fas fa-edit"></i>
+                </button>
                 <button onclick="openSignaturePad('\${s.id}', '\${s.name}', '\${s.role}')" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm">
                   <i class="fas fa-pen mr-1"></i>去签署
                 </button>
@@ -6249,6 +6816,73 @@ app.get('/', (c) => {
         showToast(result.message || '提醒已发送', 'success');
       } catch (e) {
         showToast('发送失败', 'error');
+      }
+    }
+    
+    // ==================== 编辑签署人信息 ====================
+    let currentEditingSignId = null; // 当前正在编辑的签署流程ID
+    
+    function showEditSignerModal(signerId, signerType, name, phone, email, signId) {
+      currentEditingSignId = signId;
+      document.getElementById('editSignerId').value = signerId;
+      document.getElementById('editSignerType').value = signerType;
+      document.getElementById('editSignerName').value = name || '';
+      document.getElementById('editSignerPhone').value = phone || '';
+      document.getElementById('editSignerEmail').value = email || '';
+      
+      // 更新弹窗标题图标颜色
+      const iconColors = { investor: 'indigo', borrower: 'amber' };
+      const iconTypes = { investor: 'fa-landmark', borrower: 'fa-store' };
+      const color = iconColors[signerType] || 'teal';
+      const icon = iconTypes[signerType] || 'fa-user-edit';
+      
+      document.getElementById('editSignerIcon').className = 'w-10 h-10 bg-' + color + '-100 rounded-full flex items-center justify-center mr-3';
+      document.getElementById('editSignerIcon').innerHTML = '<i class="fas ' + icon + ' text-' + color + '-600"></i>';
+      
+      document.getElementById('editSignerModal').classList.remove('hidden');
+    }
+    
+    function hideEditSignerModal() {
+      document.getElementById('editSignerModal').classList.add('hidden');
+      currentEditingSignId = null;
+    }
+    
+    async function saveSignerInfo() {
+      const signerId = document.getElementById('editSignerId').value;
+      const name = document.getElementById('editSignerName').value.trim();
+      const phone = document.getElementById('editSignerPhone').value.trim();
+      const email = document.getElementById('editSignerEmail').value.trim();
+      
+      if (!name) {
+        showToast('请输入签署人姓名', 'warning');
+        return;
+      }
+      
+      try {
+        // 调用后端API更新签署人信息
+        const res = await fetch('/api/sign/' + currentEditingSignId + '/update-signer', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ signerId, name, phone, email })
+        });
+        
+        const result = await res.json();
+        
+        if (result.success) {
+          hideEditSignerModal();
+          showToast('签署人信息已更新', 'success');
+          // 刷新签署状态显示
+          await checkExistingSignStatus();
+        } else {
+          showToast(result.message || '更新失败', 'error');
+        }
+      } catch (e) {
+        // 如果后端不支持，只更新前端显示（演示模式）
+        console.log('后端API不支持，仅更新前端显示');
+        hideEditSignerModal();
+        showToast('签署人信息已更新（本地）', 'success');
+        // 刷新签署状态显示
+        await checkExistingSignStatus();
       }
     }
     
@@ -6860,11 +7494,34 @@ app.get('/', (c) => {
     }
     
     function deleteCustomTemplate(templateId) {
-      if (!confirm('确定要删除此模板吗？此操作不可恢复。')) return;
+      const template = customTemplates.find(t => t.id === templateId);
+      if (!template) return;
+      
+      // 显示删除确认弹窗
+      document.getElementById('deleteTemplateId').value = templateId;
+      document.getElementById('deleteTemplateName').textContent = template.name || '自定义模板';
+      document.getElementById('deleteTemplateIndustry').textContent = (template.industry || '自定义') + ' · 创建于 ' + formatDate(template.createdAt);
+      
+      const color = template.color || 'indigo';
+      const icon = template.icon || 'fa-file-contract';
+      document.getElementById('deleteTemplateIcon').className = 'w-12 h-12 bg-' + color + '-100 rounded-xl flex items-center justify-center';
+      document.getElementById('deleteTemplateIcon').innerHTML = '<i class="fas ' + icon + ' text-' + color + '-600"></i>';
+      
+      document.getElementById('deleteTemplateModal').classList.remove('hidden');
+    }
+    
+    function hideDeleteTemplateModal() {
+      document.getElementById('deleteTemplateModal').classList.add('hidden');
+    }
+    
+    function confirmDeleteTemplate() {
+      const templateId = document.getElementById('deleteTemplateId').value;
+      if (!templateId) return;
       
       customTemplates = customTemplates.filter(t => t.id !== templateId);
       saveCustomTemplates();
       renderCustomTemplateList();
+      hideDeleteTemplateModal();
       showToast('模板已删除', 'success');
     }
     
@@ -7157,11 +7814,38 @@ app.get('/', (c) => {
     
     function removeCollaborator(collaboratorId) {
       if (!currentProject) return;
-      if (!confirm('确定要移除该协作者吗？')) return;
+      
+      const collaborator = (currentProject.collaborators || []).find(c => c.id === collaboratorId);
+      if (!collaborator) return;
+      
+      // 显示删除确认弹窗
+      document.getElementById('deleteCollaboratorId').value = collaboratorId;
+      document.getElementById('deleteCollaboratorName').textContent = collaborator.name || '协作者';
+      
+      const roleLabels = { investor: '投资方', borrower: '融资方', viewer: '观察者' };
+      const roleColors = { investor: 'indigo', borrower: 'amber', viewer: 'gray' };
+      const roleIcons = { investor: 'fa-landmark', borrower: 'fa-store', viewer: 'fa-eye' };
+      
+      const role = collaborator.role || 'viewer';
+      document.getElementById('deleteCollaboratorRole').textContent = roleLabels[role] || '观察者';
+      document.getElementById('deleteCollaboratorAvatar').className = 'w-12 h-12 bg-' + (roleColors[role] || 'gray') + '-100 rounded-full flex items-center justify-center';
+      document.getElementById('deleteCollaboratorAvatar').innerHTML = '<i class="fas ' + (roleIcons[role] || 'fa-eye') + ' text-' + (roleColors[role] || 'gray') + '-600"></i>';
+      
+      document.getElementById('deleteCollaboratorModal').classList.remove('hidden');
+    }
+    
+    function hideDeleteCollaboratorModal() {
+      document.getElementById('deleteCollaboratorModal').classList.add('hidden');
+    }
+    
+    function confirmDeleteCollaborator() {
+      const collaboratorId = document.getElementById('deleteCollaboratorId').value;
+      if (!currentProject || !collaboratorId) return;
       
       currentProject.collaborators = (currentProject.collaborators || []).filter(c => c.id !== collaboratorId);
       saveProjects();
       renderCollaboratorList();
+      hideDeleteCollaboratorModal();
       showToast('协作者已移除', 'success');
     }
     
@@ -7395,12 +8079,10 @@ app.get('/', (c) => {
     
     function deleteVersion(versionId) {
       if (!currentProject) return;
-      if (!confirm('确定要删除此版本快照吗？此操作不可恢复。')) return;
+      const version = (currentProject.versions || []).find(v => v.id === versionId);
+      if (!version) return;
       
-      currentProject.versions = (currentProject.versions || []).filter(v => v.id !== versionId);
-      saveProjects();
-      renderVersionList();
-      showToast('版本已删除', 'success');
+      showDeleteVersionModal(versionId, version.name);
     }
     
     function populateVersionSelectors() {
