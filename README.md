@@ -115,7 +115,16 @@ webapp/
 | `/api/ai/negotiate-advice` | POST | 获取谈判建议 |
 | `/api/ai/risk-assessment` | POST | 风险评估 |
 | `/api/ai/market-benchmark` | POST | 市场对标分析 |
-| `/api/parse-change` | POST | AI解析自然语言变更 |
+| `/api/parse-change` | POST | AI解析自然语言变更（单一模式） |
+
+### 多Agent并行工作流
+| 接口 | 方法 | 描述 |
+|------|------|------|
+| `/api/agents` | GET | 获取所有Agent列表 |
+| `/api/agents/:id` | GET | 获取单个Agent详情 |
+| `/api/agents/route` | POST | 智能路由分析，判断分配给哪些Agent |
+| `/api/agents/process` | POST | 多Agent并行处理（核心API） |
+| `/api/agents/:id/process` | POST | 单Agent独立处理 |
 
 ## 使用指南
 
@@ -257,7 +266,112 @@ interface ContractParams {
 }
 ```
 
+## 多Agent并行工作流系统
+
+### 系统架构
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     用户自然语言输入                          │
+│           "投资金额改成800万，违约金提高到25%"                  │
+└─────────────────────────┬───────────────────────────────────┘
+                          ▼
+┌─────────────────────────────────────────────────────────────┐
+│              快速路由器 (Fast Router)                        │
+│  - 关键词快速匹配 + LLM辅助验证                              │
+│  - 8秒超时自动降级                                          │
+│  - 识别出: investment-revenue + breach-liability            │
+└─────────────────────────┬───────────────────────────────────┘
+                          ▼
+    ┌─────────────────────┼─────────────────────┐
+    ▼                     ▼                     ▼
+┌────────┐          ┌────────┐           ┌────────┐
+│投资分成│          │违约责任│           │  ...   │ (并行执行)
+│ Agent  │          │ Agent  │           │ Agent  │
+│ 20s超时│          │ 20s超时│           │ 20s超时│
+└────┬───┘          └────┬───┘           └────┬───┘
+     │                   │                    │
+     └───────────────────┼────────────────────┘
+                         ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  结果聚合器 (Aggregator)                      │
+│  - 合并成功Agent的修改建议                                    │
+│  - 检查参数冲突                                               │
+│  - 生成统一结果                                               │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### 8个专业Agent
+
+| Agent ID | 名称 | 负责模块 | 关键词示例 |
+|----------|------|---------|-----------|
+| `investment-revenue` | 投资分成专家 | 联营资金、分成比例、年化收益率 | 投资、资金、分成、金额、万元 |
+| `data-payment` | 数据对账专家 | 数据传输、频率、对账、付款 | 数据、上报、对账、POS、结算 |
+| `early-termination` | 终止条款专家 | 提前终止、亏损闭店、补偿金 | 终止、退出、闭店、亏损、补偿 |
+| `breach-liability` | 违约责任专家 | 违约情形、违约金、严重违约 | 违约、罚款、处罚、赔偿、责任 |
+| `prohibited-actions` | 合规管控专家 | 控制权变更、品牌转让、禁止事项 | 禁止、控制权、转让、搬迁 |
+| `guarantee` | 担保责任专家 | 连带责任、实控人责任、品牌担保 | 担保、连带、保证、无限责任 |
+| `store-info` | 资产信息专家 | 门店信息、品牌、证照、设备 | 门店、地址、品牌、证照、设备 |
+| `dispute-resolution` | 法律事务专家 | 仲裁、保密、通知、合规 | 仲裁、法律、争议、保密、通知 |
+
+### 工作流特性
+
+- **智能路由**: 关键词快速匹配 + LLM辅助验证，置信度超过80%直接使用快速匹配
+- **并行执行**: 最多3个Agent同时处理，使用`Promise.allSettled`确保部分失败不影响整体
+- **超时控制**: 单Agent 20秒超时，路由器 8秒超时，自动降级到备用模式
+- **冲突检测**: 自动检测多个Agent对同一参数的不同建议，提示用户确认
+- **结果聚合**: 合并所有Agent的修改建议、专业建议和风险警告
+
+### API使用示例
+
+```javascript
+// 多Agent并行处理
+const response = await fetch('/api/agents/process', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    message: '投资金额改成800万，违约金提高到25%',
+    templateId: 'catering',
+    currentParams: { investmentAmount: '500万', breachPenalty: '20%' },
+    perspective: 'investor'
+  })
+});
+
+// 返回结果
+{
+  success: true,
+  routing: {
+    understood: '用户意图',
+    targetAgents: ['investment-revenue', 'breach-liability'],
+    confidence: 100
+  },
+  changes: [
+    { key: 'investmentAmount', oldValue: '500万', newValue: '800万', ... },
+    { key: 'breachPenalty', oldValue: '20%', newValue: '25%', ... }
+  ],
+  agentDetails: [
+    { agentId: 'investment-revenue', success: true, processingTime: 1234 },
+    { agentId: 'breach-liability', success: true, processingTime: 1456 }
+  ],
+  stats: {
+    totalAgents: 2,
+    respondedAgents: 2,
+    totalTime: 1678
+  }
+}
+```
+
 ## 最近更新
+
+### V6 版本 (2026-02-14) - 多Agent并行工作流系统
+- ✅ **新增多Agent并行工作流** - 8个专业Agent并行处理用户请求
+- ✅ **智能路由系统** - 关键词匹配 + LLM验证，自动分配任务到相关Agent
+- ✅ **可视化处理面板** - 实时展示Agent处理状态、结果和耗时
+- ✅ **Agent面板视图** - 展示所有Agent及其专长领域、关键词、负责模块
+- ✅ **超时控制与降级** - 单Agent 20秒超时，自动降级到备用处理模式
+- ✅ **冲突检测机制** - 自动检测多个Agent对同一参数的不同建议
+- ✅ **协商历史增强** - 展示每次协商的Agent处理详情、耗时统计
+- ✅ **测试路由功能** - 可快速测试各Agent的路由匹配
 
 ### V5 版本 (2026-02-14) - 合同模板系统升级（滴灌通联营协议V3标准）
 - ✅ **全面升级合同模板** - 基于滴灌通联营协议（境内B类资产）MCILC260126版本

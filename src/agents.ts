@@ -104,11 +104,13 @@ export interface WorkflowResult {
 // ==================== 配置常量 ====================
 
 const CONFIG = {
-  AGENT_TIMEOUT_MS: 20000,      // 单Agent超时：20秒
-  ROUTER_TIMEOUT_MS: 8000,      // 路由器超时：8秒
+  AGENT_TIMEOUT_MS: 30000,      // 单Agent超时：30秒
+  ROUTER_TIMEOUT_MS: 10000,     // 路由器超时：10秒
   MAX_PARALLEL_AGENTS: 3,       // 最大并行Agent数
-  MODEL_FAST: 'gpt-5-mini',     // 快速模型
+  MODEL_FAST: 'gpt-5',          // 主模型（gpt-5-mini的max_tokens不够）
   MODEL_QUALITY: 'gpt-5',       // 高质量模型
+  MAX_TOKENS: 1000,             // Agent最大token数
+  ROUTER_MAX_TOKENS: 300,       // 路由器最大token数
 }
 
 // ==================== Agent定义 ====================
@@ -418,7 +420,7 @@ async function llmEnhancedRoute(
         model: CONFIG.MODEL_FAST,
         messages: [{ role: 'user', content: routerPrompt }],
         temperature: 0.1,
-        max_tokens: 200
+        max_tokens: CONFIG.ROUTER_MAX_TOKENS
       }),
       signal: controller.signal
     })
@@ -521,18 +523,21 @@ export async function executeAgentTask(
 
   // 构建参数字符串
   const relevantParams = agent.paramKeys
-    .map(key => `${key}: ${task.context.currentParams[key] || '未设置'}`)
+    .map(key => `- ${key}: ${task.context.currentParams[key] || '未设置'}`)
     .join('\n')
 
-  // 填充提示词模板
-  let prompt = agent.systemPrompt
-    .replace('##PARAMS##', relevantParams)
-    .replace('##INPUT##', task.input)
-    .replace(/##(\w+)##/g, (_, key) => task.context.currentParams[key] || '未设置')
-
-  // 添加视角信息
+  // 获取视角信息
   const perspective = task.context.perspective === 'investor' ? '投资方' : '融资方'
-  prompt = `[视角：${perspective}] [行业：${task.context.templateName}]\n${prompt}`
+
+  // 构建完整提示词
+  const prompt = `${agent.systemPrompt.replace('##PARAMS##', relevantParams)}
+
+---
+【用户请求】${task.input}
+【当前视角】${perspective}
+【行业】${task.context.templateName}
+---
+现在请直接输出JSON结果（不要用代码块包裹）：`
 
   try {
     const response = await fetchWithTimeout(
@@ -547,7 +552,7 @@ export async function executeAgentTask(
           model: CONFIG.MODEL_FAST,
           messages: [{ role: 'user', content: prompt }],
           temperature: 0.2,
-          max_tokens: 500
+          max_tokens: CONFIG.MAX_TOKENS
         })
       },
       CONFIG.AGENT_TIMEOUT_MS

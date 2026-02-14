@@ -3042,6 +3042,97 @@ app.get('/', (c) => {
             </div>
           </div>
         </div>
+        
+        <!-- Agent专家面板 -->
+        <div id="agentsView" class="hidden flex-1 overflow-y-auto p-6 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+          <div class="max-w-4xl mx-auto">
+            <!-- 顶部介绍 -->
+            <div class="text-center mb-8">
+              <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <i class="fas fa-users-cog text-white text-3xl"></i>
+              </div>
+              <h2 class="text-2xl font-bold text-gray-900 mb-2">多Agent并行工作流</h2>
+              <p class="text-gray-600 max-w-xl mx-auto">
+                我们的AI系统由8位专业Agent组成，各自负责合同的不同模块。
+                当您输入修改请求时，系统会智能路由到相关Agent并行处理，确保专业性与效率。
+              </p>
+            </div>
+            
+            <!-- 工作流程图 -->
+            <div class="bg-white rounded-2xl p-6 shadow-lg mb-8">
+              <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-project-diagram mr-2 text-indigo-600"></i>
+                工作流程
+              </h3>
+              <div class="flex items-center justify-center space-x-4 py-4">
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <i class="fas fa-keyboard text-blue-600 text-xl"></i>
+                  </div>
+                  <p class="text-sm font-medium text-gray-700">用户输入</p>
+                  <p class="text-xs text-gray-500">自然语言</p>
+                </div>
+                <i class="fas fa-arrow-right text-gray-300 text-2xl"></i>
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <i class="fas fa-route text-purple-600 text-xl"></i>
+                  </div>
+                  <p class="text-sm font-medium text-gray-700">智能路由</p>
+                  <p class="text-xs text-gray-500">关键词+LLM</p>
+                </div>
+                <i class="fas fa-arrow-right text-gray-300 text-2xl"></i>
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <i class="fas fa-users-cog text-emerald-600 text-xl"></i>
+                  </div>
+                  <p class="text-sm font-medium text-gray-700">并行处理</p>
+                  <p class="text-xs text-gray-500">多Agent协作</p>
+                </div>
+                <i class="fas fa-arrow-right text-gray-300 text-2xl"></i>
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-amber-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <i class="fas fa-object-group text-amber-600 text-xl"></i>
+                  </div>
+                  <p class="text-sm font-medium text-gray-700">结果聚合</p>
+                  <p class="text-xs text-gray-500">冲突检测</p>
+                </div>
+                <i class="fas fa-arrow-right text-gray-300 text-2xl"></i>
+                <div class="text-center">
+                  <div class="w-16 h-16 bg-pink-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <i class="fas fa-file-contract text-pink-600 text-xl"></i>
+                  </div>
+                  <p class="text-sm font-medium text-gray-700">合同更新</p>
+                  <p class="text-xs text-gray-500">精准修改</p>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Agent卡片网格 -->
+            <div class="grid grid-cols-2 gap-4" id="agentExpertCards">
+              <!-- 动态生成Agent卡片 -->
+            </div>
+            
+            <!-- 底部说明 -->
+            <div class="mt-8 p-4 bg-white/60 rounded-xl border border-indigo-100">
+              <div class="flex items-start space-x-4">
+                <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <i class="fas fa-lightbulb text-indigo-600"></i>
+                </div>
+                <div>
+                  <h4 class="font-medium text-gray-800 mb-1">使用提示</h4>
+                  <p class="text-sm text-gray-600">
+                    您可以在输入框中使用自然语言描述多个条款的变动，例如：
+                    <span class="inline-block mt-1 px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs">
+                      "投资金额改成800万，违约金提高到25%，数据上报改为每周"
+                    </span>
+                    系统会自动识别并分配给相应的专家Agent处理。
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -4886,12 +4977,96 @@ app.get('/', (c) => {
       contractView = view;
       document.getElementById('cardView').classList.toggle('hidden', view !== 'card');
       document.getElementById('fullView').classList.toggle('hidden', view !== 'full');
+      document.getElementById('agentsView').classList.toggle('hidden', view !== 'agents');
       document.getElementById('btnCardView').className = view === 'card'
         ? 'px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow text-indigo-600'
         : 'px-3 py-1.5 rounded-md text-sm font-medium text-gray-600';
       document.getElementById('btnFullView').className = view === 'full'
         ? 'px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow text-indigo-600'
         : 'px-3 py-1.5 rounded-md text-sm font-medium text-gray-600';
+      document.getElementById('btnAgentsView').className = view === 'agents'
+        ? 'px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow text-indigo-600'
+        : 'px-3 py-1.5 rounded-md text-sm font-medium text-gray-600';
+      
+      // 渲染Agent卡片
+      if (view === 'agents') {
+        renderAgentExpertCards();
+      }
+    }
+    
+    // 渲染Agent专家卡片
+    async function renderAgentExpertCards() {
+      const container = document.getElementById('agentExpertCards');
+      if (!container) return;
+      
+      try {
+        const res = await fetch('/api/agents');
+        const agents = await res.json();
+        
+        const bgColors = {
+          'yellow': 'from-yellow-400 to-amber-500',
+          'blue': 'from-blue-400 to-cyan-500',
+          'orange': 'from-orange-400 to-red-500',
+          'red': 'from-red-400 to-rose-500',
+          'purple': 'from-purple-400 to-fuchsia-500',
+          'green': 'from-green-400 to-emerald-500',
+          'indigo': 'from-indigo-400 to-violet-500',
+          'teal': 'from-teal-400 to-cyan-500',
+          'gray': 'from-gray-400 to-slate-500'
+        };
+        
+        container.innerHTML = agents.map(agent => \`
+          <div class="bg-white rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all border border-gray-100">
+            <div class="flex items-start space-x-4">
+              <div class="w-14 h-14 bg-gradient-to-br \${bgColors[agent.color] || 'from-gray-400 to-gray-500'} rounded-xl flex items-center justify-center shadow-lg">
+                <i class="fas \${agent.icon} text-white text-xl"></i>
+              </div>
+              <div class="flex-1">
+                <h4 class="font-bold text-gray-900 mb-1">\${agent.name}</h4>
+                <p class="text-sm text-gray-500 mb-3">\${agent.description}</p>
+                <div class="flex flex-wrap gap-1">
+                  \${agent.expertise.slice(0, 6).map(kw => \`
+                    <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">\${kw}</span>
+                  \`).join('')}
+                  \${agent.expertise.length > 6 ? \`<span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-xs">+\${agent.expertise.length - 6}更多</span>\` : ''}
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 pt-3 border-t border-gray-100 flex items-center justify-between">
+              <span class="text-xs text-gray-400">
+                <i class="fas fa-layer-group mr-1"></i>负责模块: \${agent.moduleIds.join(', ')}
+              </span>
+              <button onclick="testAgentRoute('\${agent.id}')" class="text-xs text-indigo-600 hover:text-indigo-700 flex items-center">
+                <i class="fas fa-vial mr-1"></i>测试路由
+              </button>
+            </div>
+          </div>
+        \`).join('');
+      } catch (e) {
+        container.innerHTML = '<div class="col-span-2 text-center text-gray-400 py-8"><i class="fas fa-exclamation-triangle text-2xl mb-2"></i><p>加载Agent列表失败</p></div>';
+      }
+    }
+    
+    // 测试Agent路由
+    async function testAgentRoute(agentId) {
+      const agent = agentColorMap[agentId];
+      const testMessages = {
+        'investment-revenue': '投资金额改成800万',
+        'data-payment': '数据上报频率改为每周',
+        'early-termination': '提前终止补偿金降低',
+        'breach-liability': '违约金提高到25%',
+        'prohibited-actions': '控制权变更需要提前通知',
+        'guarantee': '取消品牌方连带担保',
+        'store-info': '门店地址变更为新址',
+        'dispute-resolution': '仲裁机构改为北京'
+      };
+      
+      const testMessage = testMessages[agentId] || '测试输入';
+      document.getElementById('negotiationInput').value = testMessage;
+      document.getElementById('negotiationInput').focus();
+      
+      // 提示用户
+      alert(\`已填入测试输入: "\${testMessage}"\\n\\n点击"发送变更"将由 \${agent?.name || agentId} 处理此请求。\`);
     }
     
     // ==================== 多Agent并行处理系统 ====================
