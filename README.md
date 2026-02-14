@@ -9,7 +9,7 @@
 | 模块 | 功能描述 | 状态 |
 |------|---------|------|
 | 👤 个人账户 | 注册登录、个人主页、角色切换（投资方/融资方） | ✅ 完成 |
-| 🏭 行业模板 | 5个内置行业模板（演唱会、餐饮、零售、医美、教育） | ✅ 完成 |
+| 🏭 行业模板 | 6个内置行业模板（餐饮、零售、医美、教育、演唱会、设备运营） | ✅ 完成 |
 | 📝 合同协商 | 自然语言输入变更，AI解析并更新合同条款 | ✅ 完成 |
 | ☁️ 云端存储 | 项目数据同步，多设备访问 | ✅ 完成 |
 | 👥 协作功能 | 邀请链接生成，多方实时协商 | ✅ 完成 |
@@ -216,19 +216,68 @@ interface Project {
 }
 ```
 
-### ContractParams（合同参数）
+### ContractParams（合同参数）- 基于滴灌通联营协议V3
 ```typescript
 interface ContractParams {
-  investmentAmount: string      // 投资金额
-  revenueShareRatio: string     // 分成比例
-  sharingDuration: string       // 分成期限
-  minimumRevenueThreshold: string // 最低收入门槛
-  terminationReturn: string     // 提前终止返还比例
-  breachPenalty: string         // 违约金
+  // 签约主体信息
+  contractNumber: string        // 合同编号
+  dgtSigningEntity: string      // 滴灌通签约主体
+  mguName: string               // 联营方名称
+  mguController: string         // 联营方实际控制人
+  brandName: string             // 品牌方名称
+  
+  // 联营资金与分成
+  investmentAmount: string      // 联营资金金额
+  fundUsage: string             // 资金用途
+  revenueShareRatio: string     // 固定分成比例
+  sharingEndDate: string        // 收入分成期截止日
+  annualReturnRate: string      // 年化回报率（分成终止触发）
+  
+  // 提前终止
+  earlyTerminationNoticeDays: string  // 提前终止通知期
+  lossThresholdAmount: string         // 亏损闭店收入门槛
+  noEarlyCloseMonths: string          // 禁止提前闭店期
+  
+  // 数据传输与分成付款
+  dataTransmissionMethod: string      // 数据传输方式
+  dataSourceSystem: string            // 数据来源系统
+  paymentMethod: string               // 分成付款方式
+  reconciliationDeadline: string      // 对账截止日
+  
+  // 违约责任
+  breachPenaltyRate: string     // 违约金比例（默认20%）
+  seriousBreachDays: string     // 严重违约逾期天数（默认30天）
+  
+  // 争议解决
+  arbitrationInstitution: string      // 仲裁机构
+  arbitrationPlace: string            // 仲裁地点
+  
+  // 行业特定参数（根据模板不同）
+  // ...
 }
 ```
 
 ## 最近更新
+
+### V5 版本 (2026-02-14) - 合同模板系统升级（滴灌通联营协议V3标准）
+- ✅ **全面升级合同模板** - 基于滴灌通联营协议（境内B类资产）MCILC260126版本
+- ✅ **统一合同框架** - 所有行业模板使用统一的标准合同结构
+- ✅ **新增10个主要章节**：
+  - 一、联营合作商业安排（资金、分成、数据传输、账户信息）
+  - 二、陈述、保证及承诺
+  - 三、信息收集和提供
+  - 四、各方权利义务
+  - 五、违约责任（严重违约情形、违约金20%、连带责任）
+  - 六、保密
+  - 七、通知
+  - 八、廉洁与诚信
+  - 九、适用法律和争议解决
+  - 十、协议的生效、变更、解除
+- ✅ **新增4个附件**：定义及释义、特别陈述保证及承诺、资料清单、设备唯一识别码与地理位置
+- ✅ **新增设备运营行业模板** - 支持娃娃机、自动售货机、充电宝等设备类资产
+- ✅ **重要条款标识** - 添加importance属性（critical/high/medium/low）
+- ✅ **完善变量系统** - 支持50+合同参数，带${...}占位符
+- ✅ **重要条款高亮** - 添加isImportant标识用于UI高亮显示
 
 ### V3.1 版本 (2026-02-14) - 全面测试与稳定性优化
 - ✅ **全面功能测试**：验证所有核心功能正常工作
