@@ -2015,6 +2015,12 @@ app.get('/', (c) => {
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- Google Fonts - Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- 现代化UI优化样式 -->
+  <link href="/static/style.css" rel="stylesheet">
   <!-- 应用特定样式 - 精简版 -->
   <style>
     /* Base Reset & Fallback Styles */
@@ -3721,8 +3727,8 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 编辑个人资料 ==================== -->
-  <div id="editProfileModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
+  <div id="editProfileModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 max-h-[85vh] overflow-hidden animate-in flex flex-col">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-user-edit mr-2 text-indigo-600"></i>编辑个人资料</h2>
@@ -3731,7 +3737,7 @@ app.get('/', (c) => {
           </button>
         </div>
       </div>
-      <div class="p-6 space-y-4">
+      <div class="p-6 space-y-4 overflow-y-auto flex-1">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">显示名称</label>
           <input type="text" id="editDisplayName" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
@@ -3763,7 +3769,7 @@ app.get('/', (c) => {
           </select>
         </div>
       </div>
-      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
+      <div class="p-6 border-t border-gray-100 flex justify-end space-x-3 flex-shrink-0">
         <button onclick="hideEditProfileModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
         <button onclick="saveProfile()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">保存</button>
       </div>
@@ -3772,47 +3778,47 @@ app.get('/', (c) => {
   
   <!-- ==================== 页面1: 项目列表 ==================== -->
   <div id="pageProjects" class="page flex-col min-h-screen">
-    <nav class="bg-white border-b border-gray-200 px-6 py-4">
+    <nav class="bg-white/90 backdrop-blur-lg border-b border-gray-200/60 px-5 py-3 sticky top-0 z-40">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-            <i class="fas fa-handshake text-white"></i>
+          <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+            <i class="fas fa-handshake text-white text-sm"></i>
           </div>
           <div>
-            <h1 class="text-xl font-bold text-gray-900">收入分成融资协商平台</h1>
-            <p class="text-xs text-gray-500">Revenue-Based Financing Negotiation</p>
+            <h1 class="text-base font-bold text-gray-900 tracking-tight">RBF融资协商平台</h1>
+            <p class="text-xs text-gray-500 -mt-0.5">Revenue-Based Financing</p>
           </div>
         </div>
-        <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2">
           <!-- 云端同步状态 -->
-          <button onclick="showCloudSyncModal()" id="btnCloudSync" class="tooltip px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg flex items-center" data-tip="数据管理">
-            <i class="fas fa-database mr-2"></i>
-            <span class="text-sm" id="navStorageText">本地存储</span>
-            <span id="navSyncIndicator" class="ml-2 w-2 h-2 bg-emerald-400 rounded-full"></span>
+          <button onclick="showCloudSyncModal()" id="btnCloudSync" class="tooltip px-2.5 py-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg flex items-center text-xs" data-tip="数据管理">
+            <i class="fas fa-database mr-1.5"></i>
+            <span id="navStorageText">本地</span>
+            <span id="navSyncIndicator" class="ml-1.5 w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
           </button>
           <!-- 使用帮助 -->
-          <button onclick="showOnboarding()" class="tooltip px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg" data-tip="使用帮助">
+          <button onclick="showOnboarding()" class="tooltip p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg text-sm" data-tip="帮助">
             <i class="fas fa-question-circle"></i>
           </button>
           <!-- 模板管理 -->
-          <button onclick="showTemplateManagerModal()" class="tooltip px-3 py-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg" data-tip="模板管理">
+          <button onclick="showTemplateManagerModal()" class="tooltip p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg text-sm" data-tip="模板">
             <i class="fas fa-layer-group"></i>
           </button>
           <!-- 加入协作 -->
-          <button onclick="showJoinCollabModal()" class="tooltip px-3 py-2 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg flex items-center" data-tip="通过邀请码加入">
-            <i class="fas fa-user-plus mr-2"></i>
-            <span class="text-sm">加入协作</span>
+          <button onclick="showJoinCollabModal()" class="tooltip px-2.5 py-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg flex items-center text-xs" data-tip="邀请码加入">
+            <i class="fas fa-user-plus mr-1"></i>
+            <span>加入</span>
           </button>
-          <button onclick="showNewProjectModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center">
-            <i class="fas fa-plus mr-2"></i>新建项目
+          <button onclick="showNewProjectModal()" class="btn-primary text-xs">
+            <i class="fas fa-plus mr-1.5"></i>新建项目
           </button>
           <!-- 用户头像/登录入口 -->
-          <div class="border-l border-gray-200 pl-3 ml-1">
-            <button onclick="goToProfile()" id="navUserBtn" class="flex items-center space-x-2 px-3 py-2 hover:bg-gray-100 rounded-lg">
-              <div id="navUserAvatar" class="w-8 h-8 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
+          <div class="border-l border-gray-200 pl-2 ml-1">
+            <button onclick="goToProfile()" id="navUserBtn" class="flex items-center space-x-1.5 px-2 py-1.5 hover:bg-gray-100 rounded-lg">
+              <div id="navUserAvatar" class="w-7 h-7 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
                 U
               </div>
-              <span id="navUserName" class="text-sm font-medium text-gray-700 max-w-[80px] truncate">用户</span>
+              <span id="navUserName" class="text-xs font-medium text-gray-700 max-w-[60px] truncate">用户</span>
               <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
             </button>
           </div>
@@ -3820,61 +3826,61 @@ app.get('/', (c) => {
       </div>
     </nav>
     
-    <div class="flex-1 p-6">
+    <div class="flex-1 p-4">
       <div class="max-w-7xl mx-auto">
-        <!-- 统计卡片 -->
-        <div class="grid grid-cols-4 gap-4 mb-6">
-          <div class="bg-white rounded-xl p-4 border border-gray-100">
+        <!-- 统计卡片 - 紧凑型 -->
+        <div class="grid grid-cols-4 gap-3 mb-4">
+          <div class="stat-card">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-500">全部项目</p>
-                <p class="text-2xl font-bold text-gray-900" id="statTotal">0</p>
+                <p class="stat-label">全部项目</p>
+                <p class="stat-value text-gray-900" id="statTotal">0</p>
               </div>
-              <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center">
-                <i class="fas fa-folder text-indigo-600"></i>
+              <div class="icon-container icon-container-sm icon-gradient-primary">
+                <i class="fas fa-folder text-white text-sm"></i>
               </div>
             </div>
           </div>
-          <div class="bg-white rounded-xl p-4 border border-gray-100">
+          <div class="stat-card">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-500">协商中</p>
-                <p class="text-2xl font-bold text-amber-600" id="statNegotiating">0</p>
+                <p class="stat-label">协商中</p>
+                <p class="stat-value text-amber-600" id="statNegotiating">0</p>
               </div>
-              <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center">
-                <i class="fas fa-comments text-amber-600"></i>
+              <div class="icon-container icon-container-sm" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                <i class="fas fa-comments text-white text-sm"></i>
               </div>
             </div>
           </div>
-          <div class="bg-white rounded-xl p-4 border border-gray-100">
+          <div class="stat-card">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-500">已签署</p>
-                <p class="text-2xl font-bold text-emerald-600" id="statCompleted">0</p>
+                <p class="stat-label">已签署</p>
+                <p class="stat-value text-emerald-600" id="statCompleted">0</p>
               </div>
-              <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
-                <i class="fas fa-check-circle text-emerald-600"></i>
+              <div class="icon-container icon-container-sm icon-gradient-success">
+                <i class="fas fa-check-circle text-white text-sm"></i>
               </div>
             </div>
           </div>
-          <div class="bg-white rounded-xl p-4 border border-gray-100">
+          <div class="stat-card">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-500">总融资额</p>
-                <p class="text-2xl font-bold text-gray-900" id="statAmount">¥0</p>
+                <p class="stat-label">总融资额</p>
+                <p class="stat-value text-purple-600" id="statAmount">¥0</p>
               </div>
-              <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-                <i class="fas fa-yen-sign text-purple-600"></i>
+              <div class="icon-container icon-container-sm" style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);">
+                <i class="fas fa-yen-sign text-white text-sm"></i>
               </div>
             </div>
           </div>
         </div>
         
         <!-- 项目列表头部 -->
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold text-gray-800">我的项目</h2>
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-base font-bold text-gray-800">我的项目</h2>
           <div class="flex items-center space-x-2">
-            <select class="px-3 py-1.5 border border-gray-200 rounded-lg text-sm" id="filterStatus">
+            <select class="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white" id="filterStatus">
               <option value="all">全部状态</option>
               <option value="negotiating">协商中</option>
               <option value="completed">已完成</option>
@@ -3884,60 +3890,60 @@ app.get('/', (c) => {
           </div>
         </div>
         
-        <div id="projectGrid" class="grid grid-cols-3 gap-4"></div>
+        <div id="projectGrid" class="grid grid-cols-3 gap-3"></div>
         
-        <div id="emptyState" class="hidden py-12">
-          <div class="max-w-2xl mx-auto text-center">
+        <div id="emptyState" class="hidden py-8">
+          <div class="max-w-xl mx-auto text-center">
             <!-- 欢迎标题 -->
-            <div class="w-24 h-24 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-3xl flex items-center justify-center mx-auto mb-6">
-              <i class="fas fa-handshake text-indigo-600 text-4xl"></i>
+            <div class="empty-state-icon mx-auto">
+              <i class="fas fa-handshake"></i>
             </div>
-            <h3 class="text-2xl font-bold text-gray-800 mb-3">欢迎使用RBF融资协商平台</h3>
-            <p class="text-gray-500 mb-8">让收入分成融资谈判变得简单、透明、高效</p>
+            <h3 class="text-xl font-bold text-gray-800 mb-2">欢迎使用RBF融资协商平台</h3>
+            <p class="text-sm text-gray-500 mb-6">让收入分成融资谈判变得简单、透明、高效</p>
             
             <!-- 快速开始引导 -->
-            <div class="grid grid-cols-2 gap-4 mb-8">
-              <button onclick="showNewProjectModal()" class="empty-action-btn p-6 bg-white rounded-2xl text-left group">
-                <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-indigo-200 transition-colors">
-                  <i class="fas fa-plus text-indigo-600 text-xl"></i>
+            <div class="grid grid-cols-2 gap-3 mb-6">
+              <button onclick="showNewProjectModal()" class="empty-action-btn group">
+                <div class="w-10 h-10 icon-container icon-container-md icon-gradient-primary mb-3 group-hover:scale-105 transition-transform">
+                  <i class="fas fa-plus text-white"></i>
                 </div>
-                <h4 class="font-bold text-gray-800 mb-1">创建新项目</h4>
-                <p class="text-sm text-gray-500">选择行业模板，开始融资协商</p>
+                <h4 class="font-bold text-gray-800 mb-0.5 text-sm">创建新项目</h4>
+                <p class="text-xs text-gray-500">选择行业模板，开始融资协商</p>
               </button>
-              <button onclick="showJoinCollabModal()" class="empty-action-btn p-6 bg-white rounded-2xl text-left group">
-                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mb-4 group-hover:bg-emerald-200 transition-colors">
-                  <i class="fas fa-user-plus text-emerald-600 text-xl"></i>
+              <button onclick="showJoinCollabModal()" class="empty-action-btn group">
+                <div class="w-10 h-10 icon-container icon-container-md icon-gradient-success mb-3 group-hover:scale-105 transition-transform">
+                  <i class="fas fa-user-plus text-white"></i>
                 </div>
-                <h4 class="font-bold text-gray-800 mb-1">加入协作</h4>
-                <p class="text-sm text-gray-500">通过邀请码参与项目协商</p>
+                <h4 class="font-bold text-gray-800 mb-0.5 text-sm">加入协作</h4>
+                <p class="text-xs text-gray-500">通过邀请码参与项目协商</p>
               </button>
             </div>
             
             <!-- 功能亮点 -->
-            <div class="bg-gray-50 rounded-2xl p-6">
-              <h4 class="text-sm font-semibold text-gray-600 mb-4"><i class="fas fa-star text-amber-500 mr-2"></i>平台特色</h4>
-              <div class="grid grid-cols-4 gap-4 text-sm">
+            <div class="bg-white/80 backdrop-blur rounded-xl p-4 border border-gray-100">
+              <h4 class="text-xs font-semibold text-gray-600 mb-3"><i class="fas fa-star text-amber-500 mr-1"></i>平台特色</h4>
+              <div class="grid grid-cols-4 gap-3 text-xs">
                 <div class="text-center">
-                  <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mx-auto mb-2 shadow-sm">
-                    <i class="fas fa-robot text-indigo-500"></i>
+                  <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mx-auto mb-1.5 shadow-sm">
+                    <i class="fas fa-robot text-indigo-500 text-sm"></i>
                   </div>
                   <p class="text-gray-600">AI智能解析</p>
                 </div>
                 <div class="text-center">
-                  <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mx-auto mb-2 shadow-sm">
-                    <i class="fas fa-users text-purple-500"></i>
+                  <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mx-auto mb-1.5 shadow-sm">
+                    <i class="fas fa-users text-purple-500 text-sm"></i>
                   </div>
                   <p class="text-gray-600">多方协作</p>
                 </div>
                 <div class="text-center">
-                  <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mx-auto mb-2 shadow-sm">
-                    <i class="fas fa-history text-blue-500"></i>
+                  <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mx-auto mb-1.5 shadow-sm">
+                    <i class="fas fa-history text-blue-500 text-sm"></i>
                   </div>
                   <p class="text-gray-600">版本快照</p>
                 </div>
                 <div class="text-center">
-                  <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mx-auto mb-2 shadow-sm">
-                    <i class="fas fa-signature text-pink-500"></i>
+                  <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mx-auto mb-1.5 shadow-sm">
+                    <i class="fas fa-signature text-pink-500 text-sm"></i>
                   </div>
                   <p class="text-gray-600">电子签章</p>
                 </div>
@@ -3945,9 +3951,9 @@ app.get('/', (c) => {
             </div>
             
             <!-- 帮助提示 -->
-            <p class="mt-6 text-sm text-gray-400">
+            <p class="mt-4 text-xs text-gray-400">
               <i class="fas fa-question-circle mr-1"></i>
-              首次使用？<button onclick="showOnboarding()" class="text-indigo-500 hover:text-indigo-600 underline font-medium">点击这里查看新手引导</button>
+              首次使用？<button onclick="showOnboarding()" class="text-indigo-500 hover:text-indigo-600 underline font-medium">查看新手引导</button>
             </p>
           </div>
         </div>
@@ -3957,51 +3963,51 @@ app.get('/', (c) => {
   
   <!-- ==================== 页面2: 协商界面 ==================== -->
   <div id="pageNegotiation" class="page flex-col h-screen">
-    <nav class="bg-white border-b border-gray-200 px-4 py-3 flex-shrink-0">
+    <nav class="bg-white/95 backdrop-blur-lg border-b border-gray-200/60 px-4 py-2.5 flex-shrink-0">
       <div class="flex items-center justify-between">
-        <div class="flex items-center space-x-4">
-          <button onclick="goToProjects()" class="back-btn flex items-center px-3 py-2 text-gray-600 hover:text-indigo-600 rounded-lg">
-            <i class="fas fa-arrow-left mr-2"></i>
-            <span class="text-sm font-medium">返回列表</span>
+        <div class="flex items-center space-x-3">
+          <button onclick="goToProjects()" class="back-btn flex items-center px-2.5 py-1.5 text-gray-600 hover:text-indigo-600 rounded-lg text-sm">
+            <i class="fas fa-arrow-left mr-1.5"></i>
+            <span class="font-medium">返回</span>
           </button>
-          <div class="border-l border-gray-200 pl-4">
+          <div class="border-l border-gray-200 pl-3">
             <div class="flex items-center space-x-2">
-              <h1 class="font-semibold text-gray-900" id="projectTitle">项目名称</h1>
-              <span id="projectStatus" class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded text-xs">协商中</span>
+              <h1 class="font-bold text-gray-900 text-sm" id="projectTitle">项目名称</h1>
+              <span id="projectStatus" class="badge badge-warning">协商中</span>
             </div>
             <p class="text-xs text-gray-500"><span id="projectIndustry">行业</span> · <span id="projectDate">创建时间</span></p>
           </div>
         </div>
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-1.5">
           <!-- 协作者 -->
-          <button onclick="showCollaboratorModal()" class="feature-coming tooltip p-2 hover:bg-gray-100 rounded-lg text-gray-500" data-tip="邀请协作">
+          <button onclick="showCollaboratorModal()" class="tooltip p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 text-sm" data-tip="邀请协作">
             <i class="fas fa-user-plus"></i>
           </button>
           <!-- 版本历史 -->
-          <button onclick="showVersionModal()" class="feature-coming tooltip p-2 hover:bg-gray-100 rounded-lg text-gray-500" data-tip="版本历史">
+          <button onclick="showVersionModal()" class="tooltip p-1.5 hover:bg-gray-100 rounded-lg text-gray-500 text-sm" data-tip="版本历史">
             <i class="fas fa-history"></i>
           </button>
           <!-- AI助手 -->
-          <button onclick="showAIAdvisorModal()" class="tooltip p-2 hover:bg-indigo-100 rounded-lg text-indigo-600" data-tip="AI谈判助手">
+          <button onclick="showAIAdvisorModal()" class="tooltip p-1.5 hover:bg-indigo-100 rounded-lg text-indigo-600 text-sm" data-tip="AI谈判助手">
             <i class="fas fa-robot"></i>
           </button>
           <!-- 视角切换 -->
-          <div class="flex items-center bg-gray-100 rounded-lg p-1 ml-2">
-            <button onclick="switchPerspective('investor')" id="btnInvestor" class="perspective-badge px-3 py-1.5 rounded-md text-sm font-medium text-white perspective-investor">
+          <div class="flex items-center bg-gray-100 rounded-lg p-0.5 ml-1">
+            <button onclick="switchPerspective('investor')" id="btnInvestor" class="perspective-badge px-2.5 py-1 rounded-md text-xs font-semibold text-white perspective-investor">
               <i class="fas fa-landmark mr-1"></i>投资方
             </button>
-            <button onclick="switchPerspective('borrower')" id="btnBorrower" class="px-3 py-1.5 rounded-md text-sm font-medium text-gray-600">
+            <button onclick="switchPerspective('borrower')" id="btnBorrower" class="px-2.5 py-1 rounded-md text-xs font-semibold text-gray-600">
               <i class="fas fa-store mr-1"></i>融资方
             </button>
           </div>
-          <div class="w-px h-8 bg-gray-200 mx-2"></div>
-          <button onclick="saveProject()" class="px-3 py-2 bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center text-sm">
+          <div class="w-px h-6 bg-gray-200 mx-1"></div>
+          <button onclick="saveProject()" class="btn-secondary text-xs py-1.5 px-2.5">
             <i class="fas fa-save mr-1"></i>保存
           </button>
-          <button onclick="showSignModal()" class="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 flex items-center text-sm">
-            <i class="fas fa-signature mr-1"></i>发起签署
+          <button onclick="showSignModal()" class="btn-primary text-xs py-1.5 px-2.5" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+            <i class="fas fa-signature mr-1"></i>签署
           </button>
-          <button onclick="showExportModal()" class="px-3 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center text-sm">
+          <button onclick="showExportModal()" class="btn-secondary text-xs py-1.5 px-2.5">
             <i class="fas fa-download mr-1"></i>导出
           </button>
         </div>
@@ -4011,91 +4017,91 @@ app.get('/', (c) => {
     <div class="flex flex-1 overflow-hidden">
       <!-- 左侧：协商面板 -->
       <div class="w-2/5 border-r border-gray-200 flex flex-col bg-white">
-        <div class="p-4 border-b border-gray-100">
+        <div class="p-3 border-b border-gray-100 bg-gradient-to-b from-slate-50 to-white">
           <div class="flex items-center justify-between mb-2">
-            <label class="text-sm font-medium text-gray-700">
-              <i class="fas fa-comment-dots mr-1 text-indigo-600"></i>描述条款变动
+            <label class="text-xs font-semibold text-gray-700 flex items-center">
+              <i class="fas fa-comment-dots mr-1.5 text-indigo-500"></i>描述条款变动
             </label>
-            <button onclick="showAIAdvisorPanel()" id="btnAIAdvisor" class="ai-btn-glow text-xs bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-1.5 rounded-full hover:from-indigo-600 hover:to-purple-600 flex items-center shadow-lg">
-              <i class="fas fa-robot mr-1"></i>AI谈判助手
+            <button onclick="showAIAdvisorPanel()" id="btnAIAdvisor" class="text-xs bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-2.5 py-1 rounded-full hover:from-indigo-600 hover:to-purple-600 flex items-center shadow-md pulse-glow">
+              <i class="fas fa-robot mr-1"></i>AI助手
             </button>
           </div>
           <textarea id="negotiationInput" rows="2" 
-            placeholder="用自然语言描述你希望的变动...&#10;例如：投资金额改成600万，分成比例降到12%"
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-sm"></textarea>
+            placeholder="用自然语言描述变动...&#10;例如：投资金额改成600万，分成比例降到12%"
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-sm"></textarea>
           
-          <!-- 快捷输入提示 - 更醒目 -->
-          <div class="mt-2 p-2 bg-indigo-50 rounded-lg border border-indigo-100 quick-hint">
-            <p class="text-xs text-indigo-600 mb-2"><i class="fas fa-bolt mr-1"></i>快捷输入：点击按钮快速填写常见条款</p>
-            <div class="flex gap-2 flex-wrap">
-              <button onclick="quickInput('投资金额调整为')" class="px-3 py-1.5 bg-white text-indigo-600 rounded-lg text-xs hover:bg-indigo-100 border border-indigo-200 transition-colors">
-                <i class="fas fa-yen-sign mr-1"></i>金额
+          <!-- 快捷输入提示 - 更紧凑 -->
+          <div class="mt-2 p-2 bg-indigo-50/70 rounded-lg border border-indigo-100">
+            <p class="text-xs text-indigo-600 mb-1.5 font-medium"><i class="fas fa-bolt mr-1"></i>快捷输入</p>
+            <div class="flex gap-1.5 flex-wrap">
+              <button onclick="quickInput('投资金额调整为')" class="quick-input-btn">
+                <i class="fas fa-yen-sign"></i>金额
               </button>
-              <button onclick="quickInput('分成比例改为')" class="px-3 py-1.5 bg-white text-indigo-600 rounded-lg text-xs hover:bg-indigo-100 border border-indigo-200 transition-colors">
-                <i class="fas fa-percent mr-1"></i>分成
+              <button onclick="quickInput('分成比例改为')" class="quick-input-btn">
+                <i class="fas fa-percent"></i>分成
               </button>
-              <button onclick="quickInput('违约金调整为')" class="px-3 py-1.5 bg-white text-indigo-600 rounded-lg text-xs hover:bg-indigo-100 border border-indigo-200 transition-colors">
-                <i class="fas fa-exclamation-triangle mr-1"></i>违约金
+              <button onclick="quickInput('违约金调整为')" class="quick-input-btn">
+                <i class="fas fa-exclamation-triangle"></i>违约
               </button>
-              <button onclick="quickInput('分成期限改为')" class="px-3 py-1.5 bg-white text-indigo-600 rounded-lg text-xs hover:bg-indigo-100 border border-indigo-200 transition-colors">
-                <i class="fas fa-calendar mr-1"></i>期限
+              <button onclick="quickInput('分成期限改为')" class="quick-input-btn">
+                <i class="fas fa-calendar"></i>期限
               </button>
-              <button onclick="quickInput('终止返还比例提高')" class="px-3 py-1.5 bg-white text-indigo-600 rounded-lg text-xs hover:bg-indigo-100 border border-indigo-200 transition-colors">
-                <i class="fas fa-undo mr-1"></i>返还
+              <button onclick="quickInput('终止返还比例提高')" class="quick-input-btn">
+                <i class="fas fa-undo"></i>返还
               </button>
             </div>
           </div>
           
-          <div class="flex items-center justify-end mt-3">
-            <button onclick="submitNegotiation()" id="btnSubmit" class="px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center text-sm font-medium shadow-lg hover:shadow-xl transition-all">
-              <i class="fas fa-paper-plane mr-2"></i>发送变更
+          <div class="flex items-center justify-end mt-2">
+            <button onclick="submitNegotiation()" id="btnSubmit" class="btn-primary text-sm flex items-center">
+              <i class="fas fa-paper-plane mr-1.5"></i>发送变更
             </button>
           </div>
         </div>
         
-        <div class="flex-1 overflow-y-auto p-4">
-          <div class="flex items-center justify-between mb-3">
-            <h3 class="font-medium text-gray-700 flex items-center">
-              <i class="fas fa-history mr-2 text-gray-400"></i>协商记录
-              <span id="negotiationCount" class="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs">0</span>
+        <div class="flex-1 overflow-y-auto p-3">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-semibold text-gray-600 flex items-center">
+              <i class="fas fa-history mr-1.5 text-gray-400"></i>协商记录
+              <span id="negotiationCount" class="ml-1.5 px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs">0</span>
             </h3>
-            <button onclick="createVersionSnapshot()" class="text-xs text-blue-600 hover:text-blue-700 flex items-center px-2 py-1 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors" title="保存当前合同版本，可随时恢复">
+            <button onclick="createVersionSnapshot()" class="text-xs text-blue-600 hover:text-blue-700 flex items-center px-2 py-1 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors" title="保存当前合同版本">
               <i class="fas fa-save mr-1"></i>保存版本
             </button>
           </div>
-          <div id="negotiationHistory" class="space-y-3">
-            <div class="text-center text-gray-400 py-8">
-              <i class="fas fa-comments text-4xl mb-3 opacity-50"></i>
-              <p class="text-sm">开始协商</p>
-              <p class="text-xs mt-1">输入变动内容，AI将自动解析并更新合同</p>
+          <div id="negotiationHistory" class="space-y-2">
+            <div class="text-center text-gray-400 py-6">
+              <i class="fas fa-comments text-3xl mb-2 opacity-40"></i>
+              <p class="text-xs font-medium">开始协商</p>
+              <p class="text-xs mt-0.5 opacity-70">输入变动内容，AI将自动解析</p>
             </div>
           </div>
         </div>
       </div>
       
       <!-- 右侧：合同预览 -->
-      <div class="w-3/5 flex flex-col bg-gray-50">
-        <div class="p-4 border-b border-gray-200 bg-white flex items-center justify-between">
+      <div class="w-3/5 flex flex-col bg-slate-50">
+        <div class="p-3 border-b border-gray-200 bg-white flex items-center justify-between">
           <div class="flex items-center space-x-2">
-            <span id="changedBadge" class="hidden px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm">
+            <span id="changedBadge" class="hidden badge badge-success">
               <i class="fas fa-edit mr-1"></i><span id="changedCount">0</span>处变更
             </span>
           </div>
-          <div class="flex bg-gray-100 rounded-lg p-1">
-            <button onclick="switchContractView('card')" id="btnCardView" class="px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow text-indigo-600">
+          <div class="flex bg-gray-100 rounded-lg p-0.5">
+            <button onclick="switchContractView('card')" id="btnCardView" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-white shadow text-indigo-600">
               <i class="fas fa-th-large mr-1"></i>卡片
             </button>
-            <button onclick="switchContractView('full')" id="btnFullView" class="px-3 py-1.5 rounded-md text-sm font-medium text-gray-600">
-              <i class="fas fa-file-alt mr-1"></i>完整合同
+            <button onclick="switchContractView('full')" id="btnFullView" class="px-2.5 py-1 rounded-md text-xs font-semibold text-gray-600">
+              <i class="fas fa-file-alt mr-1"></i>合同
             </button>
-            <button onclick="switchContractView('agents')" id="btnAgentsView" class="px-3 py-1.5 rounded-md text-sm font-medium text-gray-600">
+            <button onclick="switchContractView('agents')" id="btnAgentsView" class="px-2.5 py-1 rounded-md text-xs font-semibold text-gray-600">
               <i class="fas fa-robot mr-1"></i>Agent
             </button>
           </div>
         </div>
         
-        <div id="cardView" class="flex-1 overflow-y-auto p-4">
-          <div id="moduleCards" class="grid grid-cols-1 gap-4"></div>
+        <div id="cardView" class="flex-1 overflow-y-auto p-3">
+          <div id="moduleCards" class="grid grid-cols-1 gap-3"></div>
         </div>
         
         <div id="fullView" class="hidden flex-1 overflow-y-auto">
@@ -4205,7 +4211,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 新建项目 ==================== -->
-  <div id="newProjectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="newProjectModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
         <div class="flex items-center justify-between">
@@ -4266,7 +4272,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 云端同步/数据管理 ==================== -->
-  <div id="cloudSyncModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="cloudSyncModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4367,7 +4373,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 协作者管理 ==================== -->
-  <div id="collaboratorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="collaboratorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-blue-50">
         <div class="flex items-center justify-between">
@@ -4487,7 +4493,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 加入协作 ==================== -->
-  <div id="joinCollabModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="joinCollabModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4526,7 +4532,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 版本历史 ==================== -->
-  <div id="versionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="versionModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-indigo-50">
         <div class="flex items-center justify-between">
@@ -4600,7 +4606,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 版本对比 ==================== -->
-  <div id="versionCompareModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="versionCompareModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4642,7 +4648,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 版本详情/回退确认 ==================== -->
-  <div id="versionDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="versionDetailModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4659,7 +4665,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: AI谈判助手 ==================== -->
-  <div id="aiAdvisorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="aiAdvisorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-500 to-purple-600">
         <div class="flex items-center justify-between">
@@ -4785,7 +4791,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 电子签署 ==================== -->
-  <div id="signModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="signModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
         <div class="flex items-center justify-between">
@@ -4911,8 +4917,8 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 签名板 ==================== -->
-  <div id="signaturePadModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-white rounded-2xl max-w-lg w-full mx-4 animate-in">
+  <div id="signaturePadModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+    <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-hidden animate-in flex flex-col">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
           <div>
@@ -4924,7 +4930,7 @@ app.get('/', (c) => {
           </button>
         </div>
       </div>
-      <div class="p-6">
+      <div class="p-6 overflow-y-auto flex-1">
         <!-- 合同摘要确认 -->
         <div class="mb-4 p-4 bg-gray-50 rounded-xl">
           <h4 class="text-sm font-medium text-gray-700 mb-2"><i class="fas fa-file-contract mr-2"></i>签署确认</h4>
@@ -4957,7 +4963,7 @@ app.get('/', (c) => {
           <p class="text-xs text-indigo-500 mt-2"><i class="fas fa-info-circle mr-1"></i>演示模式：验证码为 123456</p>
         </div>
       </div>
-      <div class="p-4 border-t border-gray-100 flex justify-end space-x-3">
+      <div class="p-4 border-t border-gray-100 flex justify-end space-x-3 flex-shrink-0">
         <button onclick="hideSignaturePadModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
         <button id="btnConfirmSignature" onclick="confirmSignature()" class="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700">
           <i class="fas fa-check mr-2"></i>确认签署
@@ -4967,7 +4973,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 签署完成 ==================== -->
-  <div id="signCompleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="signCompleteModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-8 text-center">
         <div class="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -5004,7 +5010,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 导出 ==================== -->
-  <div id="exportModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="exportModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -5050,7 +5056,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 模板管理 ==================== -->
-  <div id="templateManagerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="templateManagerModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-3xl w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
         <div class="flex items-center justify-between">
@@ -5115,7 +5121,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 创建/编辑模板 ==================== -->
-  <div id="createTemplateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="createTemplateModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -5221,7 +5227,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 模板详情 ==================== -->
-  <div id="templateDetailModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="templateDetailModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -5238,7 +5244,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 编辑项目 ==================== -->
-  <div id="editProjectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="editProjectModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -5278,7 +5284,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 删除项目确认 ==================== -->
-  <div id="deleteProjectModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="deleteProjectModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-red-50">
         <div class="flex items-center">
@@ -5313,7 +5319,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 直接编辑合同参数 ==================== -->
-  <div id="editParamModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="editParamModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
         <div class="flex items-center justify-between">
@@ -5350,7 +5356,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 删除协商记录确认 ==================== -->
-  <div id="deleteNegotiationModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="deleteNegotiationModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-amber-50">
         <div class="flex items-center">
@@ -5383,7 +5389,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 删除版本快照确认 ==================== -->
-  <div id="deleteVersionModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="deleteVersionModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-purple-50">
         <div class="flex items-center">
@@ -5413,7 +5419,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 删除协作者确认 ==================== -->
-  <div id="deleteCollaboratorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="deleteCollaboratorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-rose-50">
         <div class="flex items-center">
@@ -5453,7 +5459,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 删除自定义模板确认 ==================== -->
-  <div id="deleteTemplateModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="deleteTemplateModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-orange-50">
         <div class="flex items-center">
@@ -5493,7 +5499,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 编辑签署人信息 ==================== -->
-  <div id="editSignerModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+  <div id="editSignerModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-teal-50">
         <div class="flex items-center justify-between">
@@ -6158,33 +6164,33 @@ app.get('/', (c) => {
         const changeCount = p.negotiations?.length || 0;
         
         return \`
-          <div class="project-card bg-white rounded-xl p-5 border border-gray-100 cursor-pointer relative group" onclick="openProject('\${p.id}')">
+          <div class="project-card cursor-pointer relative group" onclick="openProject('\${p.id}')">
             <!-- 操作按钮（悬停显示） -->
-            <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1" onclick="event.stopPropagation()">
-              <button onclick="showEditProjectModal('\${p.id}')" class="p-2 bg-white/90 hover:bg-indigo-100 rounded-lg shadow-sm border border-gray-200 transition-colors" title="编辑项目">
-                <i class="fas fa-edit text-indigo-600 text-sm"></i>
+            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1" onclick="event.stopPropagation()">
+              <button onclick="showEditProjectModal('\${p.id}')" class="p-1.5 bg-white/95 hover:bg-indigo-100 rounded-md shadow-sm border border-gray-200 transition-colors" title="编辑">
+                <i class="fas fa-edit text-indigo-600 text-xs"></i>
               </button>
-              <button onclick="showDeleteProjectModal('\${p.id}')" class="p-2 bg-white/90 hover:bg-red-100 rounded-lg shadow-sm border border-gray-200 transition-colors" title="删除项目">
-                <i class="fas fa-trash-alt text-red-500 text-sm"></i>
+              <button onclick="showDeleteProjectModal('\${p.id}')" class="p-1.5 bg-white/95 hover:bg-red-100 rounded-md shadow-sm border border-gray-200 transition-colors" title="删除">
+                <i class="fas fa-trash-alt text-red-500 text-xs"></i>
               </button>
             </div>
-            <div class="flex items-start justify-between mb-3">
-              <div class="w-12 h-12 rounded-xl bg-\${template.color || 'gray'}-100 flex items-center justify-center">
-                <i class="fas \${template.icon || 'fa-folder'} text-\${template.color || 'gray'}-600 text-xl"></i>
+            <div class="flex items-start justify-between mb-2">
+              <div class="w-10 h-10 rounded-lg bg-\${template.color || 'gray'}-100 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(var(--\${template.color || 'gray'}-rgb), 0.15) 0%, rgba(var(--\${template.color || 'gray'}-rgb), 0.05) 100%);">
+                <i class="fas \${template.icon || 'fa-folder'} text-\${template.color || 'gray'}-600"></i>
               </div>
-              <div class="flex items-center space-x-2">
-                \${p.collaborators?.length > 0 ? '<i class="fas fa-users text-gray-400 text-sm"></i>' : ''}
-                <span class="px-2 py-1 rounded-full text-xs \${status.bg} \${status.text}">\${status.label}</span>
+              <div class="flex items-center space-x-1.5">
+                \${p.collaborators?.length > 0 ? '<i class="fas fa-users text-gray-400 text-xs"></i>' : ''}
+                <span class="badge \${status.bg} \${status.text}">\${status.label}</span>
               </div>
             </div>
-            <h3 class="font-semibold text-gray-900 mb-1 truncate">\${p.name}</h3>
-            <p class="text-sm text-gray-500 mb-3">\${template.name || '未知行业'}</p>
+            <h3 class="font-bold text-gray-900 mb-0.5 truncate text-sm">\${p.name}</h3>
+            <p class="text-xs text-gray-500 mb-2">\${template.name || '未知行业'}</p>
             <div class="flex items-center justify-between text-xs text-gray-400">
               <span><i class="fas fa-comments mr-1"></i>\${changeCount}次协商</span>
               <span>\${formatDate(p.updatedAt)}</span>
             </div>
-            <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between">
-              <span class="text-sm font-medium text-indigo-600">\${p.params?.investmentAmount || '-'}</span>
+            <div class="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between">
+              <span class="text-xs font-bold text-indigo-600">\${p.params?.investmentAmount || '-'}</span>
               <span class="text-xs text-gray-400">\${p.params?.revenueShareRatio || '-'}分成</span>
             </div>
           </div>
@@ -6212,19 +6218,19 @@ app.get('/', (c) => {
       const grid = document.getElementById('templateGrid');
       if (!grid) return;
       grid.innerHTML = templates.map(t => \`
-        <div class="template-card p-4 border-2 rounded-xl relative \${selectedTemplateId === t.id ? 'selected border-indigo-500 shadow-lg shadow-indigo-100' : 'border-gray-200'}" 
+        <div class="template-card \${selectedTemplateId === t.id ? 'selected' : ''}" 
              onclick="selectTemplate('\${t.id}')">
-          \${selectedTemplateId === t.id ? '<div class="absolute -top-2 -right-2 w-6 h-6 bg-indigo-500 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-check text-white text-xs"></i></div>' : ''}
-          <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-lg bg-\${t.color}-100 flex items-center justify-center \${selectedTemplateId === t.id ? 'ring-2 ring-indigo-300' : ''}">
-              <i class="fas \${t.icon} text-\${t.color}-600"></i>
+          \${selectedTemplateId === t.id ? '<div class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-md"><i class="fas fa-check text-white text-xs"></i></div>' : ''}
+          <div class="flex items-center space-x-2.5">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center \${selectedTemplateId === t.id ? 'ring-2 ring-indigo-300' : ''}" style="background: linear-gradient(135deg, var(--tw-gradient-from) 0%, var(--tw-gradient-to) 100%); --tw-gradient-from: rgba(99, 102, 241, 0.1); --tw-gradient-to: rgba(168, 85, 247, 0.1);">
+              <i class="fas \${t.icon} text-\${t.color}-600 text-sm"></i>
             </div>
-            <div class="flex-1">
-              <h4 class="font-medium text-gray-900">\${t.name}</h4>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold text-gray-900 text-sm truncate">\${t.name}</h4>
               <p class="text-xs text-gray-500 truncate">\${t.description}</p>
             </div>
           </div>
-          \${selectedTemplateId === t.id ? '<div class="mt-2 text-xs text-indigo-600 text-center font-medium"><i class="fas fa-check-circle mr-1"></i>已选择此模板</div>' : ''}
+          \${selectedTemplateId === t.id ? '<div class="mt-1.5 text-xs text-indigo-600 text-center font-medium"><i class="fas fa-check-circle mr-1"></i>已选择</div>' : ''}
         </div>
       \`).join('');
     }
