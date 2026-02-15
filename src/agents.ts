@@ -1,18 +1,19 @@
-// 多Agent并行工作流系统 V2
+// 多Agent并行工作流系统 V3
 // 基于滴灌通联营协议V3标准模板的模块化AI Agent
-// 优化版本：添加超时控制、流式响应、智能降级
+// V3升级：引入法律顾问Agent，实现自然语言→法律语言的专业转化
 
 /**
- * Agent工作流架构设计:
+ * Agent工作流架构设计 V3 - 法律顾问增强版:
  * 
  * ┌─────────────────────────────────────────────────────────────┐
  * │                     用户自然语言输入                          │
+ * │           "把投资金额改成800万，按月2.75%算收益"               │
  * └─────────────────────────┬───────────────────────────────────┘
  *                           ▼
  * ┌─────────────────────────────────────────────────────────────┐
  * │              快速路由器 (Fast Router)                        │
  * │  - 关键词快速匹配 + LLM辅助验证                              │
- * │  - 15秒超时自动降级                                          │
+ * │  - 识别涉及的合同模块                                        │
  * └─────────────────────────┬───────────────────────────────────┘
  *                           ▼
  *     ┌─────────────────────┼─────────────────────┐
@@ -20,16 +21,23 @@
  * ┌────────┐          ┌────────┐           ┌────────┐
  * │投资分成│          │违约责任│           │担保条款│  ... (并行执行)
  * │ Agent  │          │ Agent  │           │ Agent  │
- * │ 15s超时│          │ 15s超时│           │ 15s超时│
+ * │意图识别│          │意图识别│           │意图识别│
  * └────┬───┘          └────┬───┘           └────┬───┘
  *      │                   │                    │
  *      └───────────────────┼────────────────────┘
  *                          ▼
  * ┌─────────────────────────────────────────────────────────────┐
+ * │              ★★★ 法律顾问 Agent ★★★                      │
+ * │  - 接收各模块的修改意图和参数变更                            │
+ * │  - 转化为专业法律合同语言                                    │
+ * │  - 确保条款的法律严谨性和完整性                              │
+ * │  - 添加必要的法律限定和附加条件                              │
+ * └─────────────────────────┬───────────────────────────────────┘
+ *                           ▼
+ * ┌─────────────────────────────────────────────────────────────┐
  * │                  结果聚合器 (Aggregator)                      │
- * │  - 合并成功Agent的修改建议                                    │
- * │  - 检查参数冲突                                               │
- * │  - 生成统一结果                                               │
+ * │  - 输出法律专业化的修改建议                                   │
+ * │  - 标记：原文(用户表达) → 转化后(法律语言)                    │
  * └─────────────────────────────────────────────────────────────┘
  */
 
@@ -102,10 +110,50 @@ export interface SmartChange extends ParamChange {
   relatedTo?: string               // 关联的直接修改key
   selected?: boolean               // 用户是否确认选中（默认：直接修改true，推断修改false）
   category?: string                // 分类：unit_conversion | calculation_method | formula_update | related_term
+  // V3新增：法律顾问转化结果
+  originalExpression?: string      // 用户原始表达
+  legalClauseText?: string         // 法律顾问转化后的专业条款
+  legalNotes?: string[]            // 法律注意事项/附加说明
+  legalReview?: {                  // 法律审核信息
+    reviewed: boolean              // 是否经过法律顾问审核
+    reviewedAt?: string            // 审核时间
+    legalScore?: number            // 法律规范性评分 (0-100)
+    improvements?: string[]        // 法律建议的改进点
+  }
 }
 
 /**
- * 智能变更分析结果
+ * 法律顾问转化请求
+ */
+export interface LegalTransformRequest {
+  originalInput: string            // 用户原始输入
+  moduleChanges: {                 // 各模块识别的修改
+    agentId: string
+    agentName: string
+    changes: ParamChange[]
+    understood: string
+  }[]
+  context: {
+    templateName: string           // 行业模板
+    perspective: string            // 视角（投资方/融资方）
+    currentParams: Record<string, any>
+  }
+}
+
+/**
+ * 法律顾问转化结果
+ */
+export interface LegalTransformResult {
+  success: boolean
+  transformedChanges: SmartChange[] // 法律语言转化后的修改
+  legalSummary: string             // 法律层面的修改摘要
+  riskWarnings: string[]           // 法律风险警告
+  clauseRecommendations: string[]  // 条款完善建议
+  processingTime: number
+}
+
+/**
+ * 智能变更分析结果 V3 - 包含法律顾问转化
  */
 export interface SmartChangeResult {
   success: boolean
@@ -116,6 +164,14 @@ export interface SmartChangeResult {
   warnings: string[]               // 风险警告
   agentResponses?: AgentResponse[] // 各Agent响应详情
   processingTime: number
+  // V3新增：法律顾问转化信息
+  legalTransform?: {
+    enabled: boolean               // 是否启用法律顾问转化
+    legalSummary?: string          // 法律层面的修改摘要
+    riskWarnings?: string[]        // 法律风险警告
+    clauseRecommendations?: string[] // 条款完善建议
+    transformTime?: number         // 法律转化耗时
+  }
 }
 
 /**
@@ -183,9 +239,30 @@ export const contractAgents: Record<string, ContractAgent> = {
     description: '负责联营资金、分成比例、年化收益率等核心商业条款',
     moduleIds: ['investment-revenue', 'business-arrangement'],
     expertise: [
+      // 核心关键词
       '投资', '资金', '分成', '比例', '收益', '回报', '期限', '金额',
       '联营资金', '分成比例', '年化', '收益率', '分成期', '万元', '百分比',
-      '800万', '500万', '1000万', '10%', '15%', '20%', '25%', '30%'
+      // 描述变动的自然语言（重要！）
+      '描述', '变动', '条款', '修改', '变更', '更改', '调整', '改动',
+      '想修改', '需要修改', '要修改', '请修改', '帮我修改', '麻烦修改',
+      '描述条款', '条款变动', '描述变动', '合同变动', '协议变动',
+      // 动作词
+      '改', '修改', '调整', '提高', '降低', '增加', '减少', '设置', '设定',
+      '变', '换', '升', '降', '加', '减', '涨', '跌',
+      // 数值表达 - 更广泛的范围
+      '800万', '500万', '1000万', '600万', '300万', '200万', '100万',
+      '50万', '80万', '150万', '250万', '350万', '450万', '550万', '650万', '750万', '850万', '900万',
+      '10%', '15%', '20%', '25%', '30%', '12%', '18%', '8%', '5%',
+      '1%', '2%', '3%', '4%', '6%', '7%', '9%', '11%', '13%', '14%', '16%', '17%', '19%',
+      '21%', '22%', '23%', '24%', '26%', '27%', '28%', '29%',
+      // 时间相关
+      '月', '年', '天', '日', '每月', '每年', '按月', '按年', '按日',
+      '2.75%', '2.5%', '3%', '月息', '月利', '年化率', '年利率',
+      // 自然语言表达 - 扩充
+      '把', '将', '想要', '希望', '改成', '改为', '变成', '变为', '调到', '调成',
+      '变一下', '调一下', '改一下', '换成', '提升到', '降到', '升到', '减到',
+      '能不能', '可不可以', '是否可以', '帮我', '请帮', '麻烦',
+      '我想', '我要', '我希望', '我需要'
     ],
     paramKeys: [
       'investmentAmount', 'revenueShareRatio', 'annualYieldRate',
@@ -209,8 +286,12 @@ export const contractAgents: Record<string, ContractAgent> = {
     description: '负责数据传输方式、频率、对账机制、付款安排',
     moduleIds: ['data-payment', 'data-transmission'],
     expertise: [
+      // 核心关键词
       '数据', '传输', '上报', '对账', '付款', '频率', '系统', 'POS',
-      '日报', '周报', '月报', '自动', '手动', '结算', '每日', '每周', '每月'
+      '日报', '周报', '月报', '自动', '手动', '结算', '每日', '每周', '每月',
+      // 扩展
+      '汇报', '报告', '同步', '推送', '接口', '数据源', '数据传输',
+      '实时', '定时', '延迟', '时效', '账期', '结算周期'
     ],
     paramKeys: [
       'dataTransmissionMethod', 'dataReportFrequency', 'dataSource',
@@ -236,8 +317,12 @@ export const contractAgents: Record<string, ContractAgent> = {
     description: '负责提前终止、亏损闭店、补偿金计算',
     moduleIds: ['early-termination'],
     expertise: [
+      // 核心关键词
       '终止', '退出', '闭店', '亏损', '补偿', '提前', '结束', '解约',
-      '补偿金', '通知期', '90天', '解除', '闭店', '停业'
+      '补偿金', '通知期', '90天', '解除', '闭店', '停业',
+      // 扩展
+      '撤资', '撤出', '不做了', '关店', '不干了', '解除合同', '取消',
+      '提前结束', '提前退出', '提前终止', '返还', '退还', '赔偿'
     ],
     paramKeys: [
       'lossClosurePeriod', 'lossClosureThreshold', 'lossClosureNoticeDays', 'annualYieldRate'
@@ -262,8 +347,12 @@ export const contractAgents: Record<string, ContractAgent> = {
     description: '负责违约情形认定、违约金、严重违约处理',
     moduleIds: ['breach-liability', 'breach'],
     expertise: [
+      // 核心关键词
       '违约', '违约金', '罚款', '处罚', '严重违约', '赔偿', '责任',
-      '延迟', '逾期', '造假', '挪用', '15%', '20%', '25%', '30天'
+      '延迟', '逾期', '造假', '挪用', '15%', '20%', '25%', '30天',
+      // 扩展
+      '罚金', '惩罚', '违规', '违反', '不履行', '不配合', '失信',
+      '欺诈', '欺骗', '隐瞒', '虚假', '作假'
     ],
     paramKeys: ['dataDelay', 'paymentDelay', 'breachPenalty'],
     systemPrompt: `你是【违约责任专家】，负责处理违约金和违约认定相关条款。
@@ -394,22 +483,160 @@ export const agentList = Object.values(contractAgents).map(agent => ({
 // ==================== 路由器实现 ====================
 
 /**
- * 快速关键词匹配路由
+ * 通用变更意图检测 - 识别用户想要"修改"的意图
+ * 返回是否包含变更意图，以及可能的目标值
+ * 
+ * V2增强版：增加对"描述条款变动"等自然语言表达的识别
+ */
+function detectChangeIntent(message: string): { hasIntent: boolean; targetValue?: string; changeType?: string } {
+  // 变更动词模式 - 大幅扩充
+  const changePatterns = [
+    // 原有模式
+    /(?:把|将|想要|希望|请|麻烦).{0,10}(?:改|调|变|设|换|降|提|增|减)/,
+    /(?:改|调|变|设|换|降|提|增|减).{0,5}(?:成|为|到|至)/,
+    /(?:从|由).{0,20}(?:改|调|变|换).{0,5}(?:成|为|到)/,
+    
+    // 描述性表达（重要！用户常用）
+    /描述.*(?:变动|变更|修改|调整|改动)/,
+    /(?:变动|变更|修改|调整|改动).*描述/,
+    /条款.*(?:变动|变更|修改|调整|改动)/,
+    /(?:变动|变更|修改|调整|改动).*条款/,
+    
+    // 请求类表达
+    /(?:想|要|需要|希望|请|帮|麻烦).{0,5}(?:改|调|修|变|换|设|定)/,
+    /(?:能不能|可不可以|是否可以|可否|能否).{0,5}(?:改|调|修|变|换|设|定)/,
+    /(?:帮我|请帮|麻烦|劳驾).{0,10}(?:改|调|修|变|设)/,
+    
+    // 动作类表达
+    /(?:修改|调整|变更|更改|更换|调换|变动|改动|改变)/,
+    /(?:提高|降低|增加|减少|提升|下降|增大|减小)/,
+    /(?:设置|设定|设为|定为|改为|调为|变为)/,
+    
+    // 数值变动表达
+    /\d+(?:\.\d+)?\s*(?:万|%|元|个月|天|年).{0,5}(?:改|调|变|升|降)/,
+    /(?:改|调|变|升|降).{0,5}\d+(?:\.\d+)?\s*(?:万|%|元|个月|天|年)/,
+    
+    // 比较类表达
+    /(?:从|由)\s*.{1,20}\s*(?:改|变|调|换).{0,5}(?:成|为|到)/,
+    /(?:原来|之前|现在|目前).{0,10}(?:是|为).{0,10}(?:改|变|调)/,
+  ]
+  
+  // 数值提取模式
+  const valuePatterns = [
+    /(\d+(?:\.\d+)?)\s*(?:万|百万|亿|%|个月|天|年)/g,
+    /(?:改|调|变|设|换).{0,3}(?:成|为|到|至)\s*(\d+(?:\.\d+)?)\s*(?:万|百万|亿|%|个月|天|年)?/,
+    /(\d+(?:\.\d+)?)\s*(?:万|百万|亿|%|个月|天|年)\s*(?:的|来)?\s*(?:收益|利率|比例|金额|资金)/,
+  ]
+  
+  // 直接判断是否包含关键变更词汇
+  const directChangeWords = [
+    '修改', '调整', '变更', '更改', '改动', '变动', '改变',
+    '描述', '条款', '合同', '协议', '参数',
+    '提高', '降低', '增加', '减少', '设置', '设定'
+  ]
+  const hasDirectWord = directChangeWords.some(word => message.includes(word))
+  
+  const hasIntent = changePatterns.some(p => p.test(message)) || hasDirectWord
+  
+  // 提取目标值
+  let targetValue: string | undefined
+  for (const pattern of valuePatterns) {
+    const match = message.match(pattern)
+    if (match) {
+      targetValue = match[1] || match[0]
+      break
+    }
+  }
+  
+  return { hasIntent: hasIntent || !!targetValue, targetValue }
+}
+
+/**
+ * 智能关键词权重计算
+ * 根据上下文动态调整权重
+ */
+function calculateKeywordWeight(keyword: string, message: string, context: {
+  hasChangeIntent: boolean
+  hasNumericValue: boolean
+}): number {
+  let weight = 1
+  
+  // 精确匹配加权
+  if (message.includes(keyword)) {
+    weight += 2
+  }
+  
+  // 词组匹配（关键词在有意义的位置）
+  const meaningfulPatterns = [
+    new RegExp(`(?:把|将|改|调|设).*${keyword}`, 'i'),
+    new RegExp(`${keyword}.*(?:改|调|变|设|换|降|提|增|减)`, 'i'),
+    new RegExp(`${keyword}.*(?:成|为|到|至)`, 'i'),
+  ]
+  
+  if (meaningfulPatterns.some(p => p.test(message))) {
+    weight += 3
+  }
+  
+  // 变更意图加权
+  if (context.hasChangeIntent) {
+    weight += 1
+  }
+  
+  // 数值类关键词在有数值时加权
+  if (context.hasNumericValue && /\d|万|%|元|年|月|天/.test(keyword)) {
+    weight += 2
+  }
+  
+  return weight
+}
+
+/**
+ * 快速关键词匹配路由 - 增强版
  */
 function quickMatchAgents(message: string): { agents: string[]; confidence: number } {
   const matched: { id: string; score: number }[] = []
   const lowerMessage = message.toLowerCase()
   
+  // 检测变更意图
+  const intentInfo = detectChangeIntent(message)
+  const hasNumericValue = /\d+(?:\.\d+)?/.test(message)
+  
+  // 如果消息太短且没有明确意图，降低置信度
+  const isShortMessage = message.length < 10
+  
   for (const [agentId, agent] of Object.entries(contractAgents)) {
     let score = 0
+    
     for (const keyword of agent.expertise) {
-      // 精确匹配和模糊匹配
-      if (message.includes(keyword)) {
-        score += 2  // 精确匹配
-      } else if (lowerMessage.includes(keyword.toLowerCase())) {
-        score += 1  // 模糊匹配
+      // 检查是否匹配
+      const exactMatch = message.includes(keyword)
+      const fuzzyMatch = !exactMatch && lowerMessage.includes(keyword.toLowerCase())
+      
+      if (exactMatch || fuzzyMatch) {
+        const weight = calculateKeywordWeight(keyword, message, {
+          hasChangeIntent: intentInfo.hasIntent,
+          hasNumericValue
+        })
+        score += exactMatch ? weight * 2 : weight
       }
     }
+    
+    // 特殊规则：根据消息内容直接判断
+    // 涉及金额数字的默认加入投资分成Agent
+    if (agentId === 'investment-revenue' && /\d+(?:\.\d+)?\s*(?:万|百万|亿|元|%|个月|年)/.test(message)) {
+      score += 5
+    }
+    
+    // 涉及利率计算的
+    if (agentId === 'investment-revenue' && /(?:按|每|月|年|日).{0,5}(?:利|率|息|收益)/.test(message)) {
+      score += 6
+    }
+    
+    // 涉及时间周期的收益计算
+    if (agentId === 'investment-revenue' && /(?:\d+(?:\.\d+)?%?\s*(?:\/|×|乘|按|的)\s*(?:月|年|天|日))/.test(message)) {
+      score += 8
+    }
+    
     if (score > 0) {
       matched.push({ id: agentId, score })
     }
@@ -417,12 +644,34 @@ function quickMatchAgents(message: string): { agents: string[]; confidence: numb
   
   matched.sort((a, b) => b.score - a.score)
   
-  // 计算置信度
+  // 计算置信度 - 更平滑的曲线
   const topScore = matched[0]?.score || 0
-  const confidence = Math.min(100, topScore * 15)
+  let confidence = Math.min(100, topScore * 10)
+  
+  // 如果检测到明确的变更意图，提高置信度
+  if (intentInfo.hasIntent && matched.length > 0) {
+    confidence = Math.min(100, confidence + 20)
+  }
+  
+  // 短消息降低置信度
+  if (isShortMessage) {
+    confidence = Math.max(30, confidence - 20)
+  }
   
   // 返回得分最高的Agent（最多3个）
-  const agents = matched.slice(0, CONFIG.MAX_PARALLEL_AGENTS).map(m => m.id)
+  // 如果第一名得分远高于其他，只返回第一名
+  let agents: string[]
+  if (matched.length >= 2 && matched[0].score > matched[1].score * 2) {
+    agents = [matched[0].id]
+  } else {
+    agents = matched.slice(0, CONFIG.MAX_PARALLEL_AGENTS).map(m => m.id)
+  }
+  
+  // 如果没有匹配到任何Agent但有变更意图，默认使用投资分成Agent
+  if (agents.length === 0 && intentInfo.hasIntent) {
+    agents = ['investment-revenue']
+    confidence = 40
+  }
   
   return { agents, confidence }
 }
@@ -446,23 +695,46 @@ async function llmEnhancedRoute(
     }
   }
 
-  const routerPrompt = `分析用户输入，判断应该分配给哪些专家处理。
+  const routerPrompt = `你是收入分成融资合同协商系统的智能路由器。分析用户输入，判断应该分配给哪些专家处理。
 
-可用专家：
-1. investment-revenue(投资分成) - 关键词：投资/资金/分成/比例/收益/金额/万元
-2. data-payment(数据对账) - 关键词：数据/传输/上报/对账/付款/频率
-3. early-termination(终止条款) - 关键词：终止/退出/闭店/亏损/补偿
-4. breach-liability(违约责任) - 关键词：违约/违约金/罚款/延迟/处罚
-5. prohibited-actions(合规管控) - 关键词：禁止/控制权/转让/搬迁
-6. guarantee(担保责任) - 关键词：担保/连带/保证/责任
-7. store-info(资产信息) - 关键词：门店/地址/品牌/证照
-8. dispute-resolution(法律事务) - 关键词：仲裁/保密/通知
+## 可用专家及其职责：
+1. **investment-revenue(投资分成专家)** - 处理：投资金额、分成比例、收益率、利率计算、资金用途、期限、金额调整
+   - 典型表达：改投资金额、调整分成比例、按月X%计算、年化收益、资金改成XX万、利率设为X%
+   - 关键词：投资、资金、分成、比例、收益、金额、万元、百分比、利率、月息、年化
+2. **data-payment(数据对账专家)** - 处理：数据上报、传输方式、对账周期、付款频率
+   - 关键词：数据、传输、对账、付款、结算、上报
+3. **early-termination(终止条款专家)** - 处理：提前终止、亏损闭店、补偿金、解约
+   - 关键词：终止、退出、闭店、亏损、补偿、解约
+4. **breach-liability(违约责任专家)** - 处理：违约金、罚款、违约认定、赔偿
+   - 关键词：违约、罚款、赔偿、责任
+5. **prohibited-actions(合规管控专家)** - 处理：禁止行为、控制权变更、品牌转让
+   - 关键词：禁止、控制权、转让、品牌
+6. **guarantee(担保责任专家)** - 处理：担保、连带责任、保证
+   - 关键词：担保、连带、保证
+7. **store-info(资产信息专家)** - 处理：门店信息、地址、品牌、证照
+   - 关键词：门店、地址、证照、资产
+8. **dispute-resolution(法律事务专家)** - 处理：仲裁、保密、法律事务
+   - 关键词：仲裁、保密、法律、争议
 
-用户输入：${message}
+## 重要判断规则：
+1. 如果用户输入包含数字（如XX万、XX%、X年/月）且没有明确指向其他专家的关键词，优先分配给 **investment-revenue**
+2. 用户说"描述条款变动"、"修改条款"、"调整合同"等模糊表达时：
+   - 如果包含金额、比例等数字 → investment-revenue
+   - 如果提到具体条款名称 → 对应专家
+   - 如果没有具体指向 → investment-revenue（默认处理商业核心条款）
+3. 涉及"按月/按日/按年"计算收益 → investment-revenue
+4. 涉及数字+时间单位（如2.75%/月、每月XX%）→ investment-revenue
+5. 表达"改成"、"调整为"、"设为"等变更意图时，根据变更对象判断
 
-快速匹配建议：${quickMatch.agents.join(', ')} (置信度${quickMatch.confidence}%)
+## 用户输入：
+"${message}"
 
-输出JSON：{"understood":"用户意图","targetAgents":["agent-id"],"confidence":85}`
+## 快速匹配建议：
+${quickMatch.agents.length > 0 ? quickMatch.agents.join(', ') + ' (置信度' + quickMatch.confidence + '%)' : '无匹配'}
+
+## 任务：
+仔细分析用户意图，即使表达模糊也要尽力识别。输出JSON（不要代码块）：
+{"understood":"用20字简述用户想要做什么","targetAgents":["最相关的agent-id"],"confidence":0-100}`
 
   try {
     const controller = new AbortController()
@@ -1424,6 +1696,415 @@ ${JSON.stringify(context.currentParams, null, 2)}
       warnings: [...multiAgentResult.allWarnings, '联动分析失败，仅显示直接修改'],
       agentResponses: multiAgentResult.agentResponses,
       processingTime: Date.now() - startTime
+    }
+  }
+}
+
+// ==================== 法律顾问Agent系统 V3 ====================
+
+/**
+ * 法律顾问Agent系统提示词
+ * 核心职责：将用户自然语言表达转化为专业法律合同语言
+ */
+const LEGAL_COUNSEL_SYSTEM_PROMPT = `你是一位资深的收入分成融资（Revenue-Based Financing）领域法律顾问，拥有15年以上的投融资合同起草和审核经验。
+
+## 你的核心职责
+将用户的自然语言表达转化为符合中国法律规范的专业合同条款语言。
+
+## 转化原则
+
+### 1. 法律语言规范
+- 使用精确的法律术语，避免口语化表达
+- 条款结构完整：主体明确、权利义务清晰、条件限定具体
+- 数字表述规范：大写小写并存，如"人民币捌佰万元整（¥8,000,000.00）"
+- 日期表述规范：年月日完整，如"自2024年3月1日起"
+- 比例表述规范：百分比+说明，如"按月息2.75%（年化33%）计算"
+
+### 2. 条款完整性
+每个条款必须包含：
+- 条款主体：明确适用对象
+- 核心内容：具体的权利或义务
+- 计算方式：涉及金额的需说明计算基准
+- 生效条件：条款适用的前提条件
+- 例外情形：特殊情况的处理方式（如适用）
+
+### 3. 风险防范语言
+- 添加必要的限定条件："除本协议另有约定外"、"经双方书面同意"
+- 添加违约责任关联："如违反本条款，按照第X条处理"
+- 添加解释条款："本条所称'收入'指..."
+
+### 4. 行业特定规范
+收入分成融资合同常见条款格式：
+
+【投资金额条款】
+"甲方同意向乙方提供联营资金人民币XXX元整（¥XXX），该款项应于本协议签署后X个工作日内划入乙方指定账户。"
+
+【分成比例条款】
+"乙方应按照其月度营业收入的X%（大写：百分之X）向甲方支付收入分成款。营业收入以乙方POS系统/财务账簿记录为准。"
+
+【收益计算条款】
+"本协议项下资金成本按月/日计算，月度费率为X%（年化X%）。计算公式：月度应付金额 = 期初本金余额 × 月度费率。"
+
+【违约金条款】
+"如乙方发生本协议第X条所列违约情形，应向甲方支付违约金，金额为联营资金总额的X%，即人民币XXX元整。"
+
+## 输出格式要求
+
+对于每个参数变更，输出：
+{
+  "key": "参数key",
+  "paramName": "参数名称",
+  "oldValue": "原值",
+  "newValue": "新值（用户想要的）",
+  "originalExpression": "用户原始表达方式",
+  "clauseText": "简短的条款描述",
+  "legalClauseText": "完整的法律条款语言，符合合同格式规范",
+  "legalNotes": ["法律注意事项1", "法律注意事项2"],
+  "legalReview": {
+    "reviewed": true,
+    "legalScore": 85,
+    "improvements": ["可进一步完善的点"]
+  }
+}
+
+## 重要提醒
+1. 保持条款的法律效力和可执行性
+2. 确保条款表述不存在歧义
+3. 涉及金额、比例、期限的必须数字精确
+4. 合同用语应庄重、正式，避免口语和情感化表达`
+
+/**
+ * 法律顾问Agent - 转化自然语言为法律条款
+ */
+export async function executeLegalCounselTransform(
+  request: LegalTransformRequest,
+  apiKey: string,
+  baseUrl: string
+): Promise<LegalTransformResult> {
+  const startTime = Date.now()
+
+  // 构建法律转化请求
+  const userPrompt = `## 用户原始输入
+"${request.originalInput}"
+
+## 各模块Agent识别的修改意图
+${request.moduleChanges.map(m => `
+### ${m.agentName}
+意图理解：${m.understood}
+参数变更：
+${m.changes.map(c => `- ${c.paramName}：${c.oldValue} → ${c.newValue}`).join('\n')}`).join('\n')}
+
+## 当前合同背景
+- 行业：${request.context.templateName}
+- 视角：${request.context.perspective === 'investor' ? '投资方' : '融资方'}
+- 相关当前参数：
+${JSON.stringify(request.context.currentParams, null, 2)}
+
+## 任务
+请将以上修改意图转化为专业的法律合同条款语言。
+
+输出JSON格式（不要代码块）：
+{
+  "legalSummary": "本次修改的法律层面摘要",
+  "transformedChanges": [
+    {
+      "key": "investmentAmount",
+      "paramName": "联营资金金额",
+      "oldValue": "500万",
+      "newValue": "800万",
+      "originalExpression": "把投资金额改成800万",
+      "clauseText": "联营资金调整为800万元",
+      "legalClauseText": "甲方同意向乙方提供联营资金人民币捌佰万元整（¥8,000,000.00），该款项应于本协议生效后五（5）个工作日内，以银行转账方式划入乙方指定的银行账户。乙方应出具相应收款凭证。",
+      "legalNotes": [
+        "建议明确资金用途限制",
+        "建议增加分期支付条款（如适用）"
+      ],
+      "legalReview": {
+        "reviewed": true,
+        "legalScore": 90,
+        "improvements": ["可考虑增加资金监管账户条款"]
+      }
+    }
+  ],
+  "riskWarnings": ["法律风险提示"],
+  "clauseRecommendations": ["建议完善的条款"]
+}`
+
+  try {
+    const response = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: CONFIG.MODEL_QUALITY, // 法律转化使用高质量模型
+        messages: [
+          { role: 'system', content: LEGAL_COUNSEL_SYSTEM_PROMPT },
+          { role: 'user', content: userPrompt }
+        ],
+        temperature: 0.3,
+        max_tokens: 2000
+      })
+    })
+
+    if (!response.ok) {
+      throw new Error('Legal counsel API request failed')
+    }
+
+    const data = await response.json()
+    const content = data.choices?.[0]?.message?.content || ''
+
+    // 解析JSON
+    let result: any = null
+    const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/)
+    if (codeBlockMatch) {
+      try {
+        result = JSON.parse(codeBlockMatch[1].trim())
+      } catch (e) {}
+    }
+    
+    if (!result) {
+      const jsonMatch = content.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        try {
+          result = JSON.parse(jsonMatch[0])
+        } catch (e) {}
+      }
+    }
+
+    if (result && result.transformedChanges) {
+      return {
+        success: true,
+        transformedChanges: result.transformedChanges.map((c: any) => ({
+          ...c,
+          changeType: 'primary' as ChangeType,
+          selected: true,
+          legalReview: {
+            ...c.legalReview,
+            reviewed: true,
+            reviewedAt: new Date().toISOString()
+          }
+        })),
+        legalSummary: result.legalSummary || '已完成法律语言转化',
+        riskWarnings: result.riskWarnings || [],
+        clauseRecommendations: result.clauseRecommendations || [],
+        processingTime: Date.now() - startTime
+      }
+    }
+
+    return {
+      success: false,
+      transformedChanges: [],
+      legalSummary: '法律转化失败',
+      riskWarnings: ['无法解析法律顾问响应'],
+      clauseRecommendations: [],
+      processingTime: Date.now() - startTime
+    }
+
+  } catch (error) {
+    return {
+      success: false,
+      transformedChanges: [],
+      legalSummary: '法律转化服务暂时不可用',
+      riskWarnings: [`错误: ${(error as Error).message}`],
+      clauseRecommendations: [],
+      processingTime: Date.now() - startTime
+    }
+  }
+}
+
+/**
+ * V3增强版：智能联动修改工作流（带法律顾问转化）
+ * 完整流程：用户输入 → 模块Agent识别 → 法律顾问转化 → 联动分析 → 输出
+ */
+export async function executeSmartChangeWorkflowV3(
+  message: string,
+  context: {
+    currentParams: Record<string, any>
+    templateId: string
+    templateName: string
+    negotiationHistory?: any[]
+    perspective?: string
+  },
+  apiKey: string,
+  baseUrl: string,
+  options: {
+    enableLegalTransform?: boolean  // 是否启用法律顾问转化，默认true
+  } = {}
+): Promise<SmartChangeResult> {
+  const startTime = Date.now()
+  const enableLegal = options.enableLegalTransform !== false
+
+  // Step 1: 执行多Agent并行工作流识别修改意图
+  const multiAgentResult = await executeMultiAgentWorkflow(message, context, apiKey, baseUrl)
+
+  if (!multiAgentResult.success || multiAgentResult.allChanges.length === 0) {
+    // 如果多Agent没有识别到修改，尝试直接用智能分析
+    const fallbackResult = await executeSmartChangeAnalysis(message, context, apiKey, baseUrl)
+    return {
+      ...fallbackResult,
+      legalTransform: { enabled: false }
+    }
+  }
+
+  // Step 2: 法律顾问转化（如果启用）
+  let legalTransformResult: LegalTransformResult | null = null
+  let primaryChanges: SmartChange[] = []
+
+  if (enableLegal) {
+    const legalRequest: LegalTransformRequest = {
+      originalInput: message,
+      moduleChanges: multiAgentResult.agentResponses
+        .filter(r => r.success && r.changes.length > 0)
+        .map(r => ({
+          agentId: r.agentId,
+          agentName: r.agentName,
+          changes: r.changes,
+          understood: r.understood || ''
+        })),
+      context: {
+        templateName: context.templateName,
+        perspective: context.perspective || 'borrower',
+        currentParams: context.currentParams
+      }
+    }
+
+    legalTransformResult = await executeLegalCounselTransform(legalRequest, apiKey, baseUrl)
+
+    if (legalTransformResult.success && legalTransformResult.transformedChanges.length > 0) {
+      // 使用法律顾问转化后的结果
+      primaryChanges = legalTransformResult.transformedChanges
+    } else {
+      // 法律转化失败，使用原始Agent结果
+      primaryChanges = multiAgentResult.allChanges.map(c => ({
+        ...c,
+        changeType: 'primary' as ChangeType,
+        selected: true,
+        originalExpression: message,
+        legalReview: {
+          reviewed: false
+        }
+      }))
+    }
+  } else {
+    // 未启用法律转化，直接使用Agent结果
+    primaryChanges = multiAgentResult.allChanges.map(c => ({
+      ...c,
+      changeType: 'primary' as ChangeType,
+      selected: true
+    }))
+  }
+
+  // Step 3: 联动分析（保持原有逻辑）
+  const inferPrompt = `你是合同条款联动分析专家。基于已识别的直接修改，分析可能需要联动调整的相关参数。
+
+## 已识别的直接修改
+${JSON.stringify(primaryChanges.map(c => ({ key: c.key, paramName: c.paramName, oldValue: c.oldValue, newValue: c.newValue })), null, 2)}
+
+## 当前所有合同参数
+${JSON.stringify(context.currentParams, null, 2)}
+
+## 原始用户请求
+"${message}"
+
+## 重要的联动规则
+1. 月利率设置 → 年化利率换算 + 资金成本计算方式调整为"按月"
+2. 日利率设置 → 年化利率换算 + 资金成本计算方式调整为"按日"
+3. 投资金额变化 → 违约金金额可能需要按比例调整
+4. 分成期限变化 → 截止日期需要重新计算
+
+输出JSON（不要代码块）：
+{
+  "analysisExplanation": "联动分析说明",
+  "inferredChanges": [
+    {
+      "key": "paramKey",
+      "paramName": "参数名",
+      "oldValue": "原值",
+      "newValue": "新值",
+      "clauseText": "条款描述",
+      "changeType": "inferred",
+      "confidence": "high",
+      "reason": "联动原因",
+      "relatedTo": "关联参数key",
+      "category": "calculation_method",
+      "selected": false
+    }
+  ],
+  "warnings": []
+}`
+
+  let inferredChanges: SmartChange[] = []
+  let analysisExplanation = '基于直接修改分析可能的联动影响'
+
+  try {
+    const inferResponse = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: CONFIG.MODEL_FAST,
+        messages: [
+          { role: 'user', content: inferPrompt }
+        ],
+        temperature: 0.2,
+        max_tokens: 1000
+      })
+    })
+
+    if (inferResponse.ok) {
+      const data = await inferResponse.json()
+      const content = data.choices?.[0]?.message?.content || ''
+      const jsonMatch = content.match(/\{[\s\S]*\}/)
+      if (jsonMatch) {
+        try {
+          const result = JSON.parse(jsonMatch[0])
+          inferredChanges = (result.inferredChanges || []).map((c: any) => ({
+            ...c,
+            changeType: 'inferred' as ChangeType,
+            selected: false
+          }))
+          analysisExplanation = result.analysisExplanation || analysisExplanation
+        } catch (e) {}
+      }
+    }
+  } catch (e) {}
+
+  // 规则引擎补充
+  const ruleBasedInferred = detectRuleBasedInferredChanges(
+    message,
+    primaryChanges,
+    context.currentParams,
+    inferredChanges
+  )
+  if (ruleBasedInferred.length > 0) {
+    inferredChanges = [...inferredChanges, ...ruleBasedInferred]
+  }
+
+  // 构建最终结果
+  return {
+    success: true,
+    understood: multiAgentResult.understood,
+    primaryChanges,
+    inferredChanges,
+    analysisExplanation,
+    warnings: [
+      ...multiAgentResult.allWarnings,
+      ...(legalTransformResult?.riskWarnings || [])
+    ],
+    agentResponses: multiAgentResult.agentResponses,
+    processingTime: Date.now() - startTime,
+    legalTransform: enableLegal ? {
+      enabled: true,
+      legalSummary: legalTransformResult?.legalSummary,
+      riskWarnings: legalTransformResult?.riskWarnings,
+      clauseRecommendations: legalTransformResult?.clauseRecommendations,
+      transformTime: legalTransformResult?.processingTime
+    } : {
+      enabled: false
     }
   }
 }

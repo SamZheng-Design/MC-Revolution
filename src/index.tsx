@@ -8,10 +8,14 @@ import {
   executeMultiAgentWorkflow,
   executeAgentTask,
   executeSmartChangeWorkflow,
+  executeSmartChangeWorkflowV3,
   executeSmartChangeAnalysis,
+  executeLegalCounselTransform,
   type AgentTask,
   type SmartChange,
-  type SmartChangeResult
+  type SmartChangeResult,
+  type LegalTransformRequest,
+  type LegalTransformResult
 } from './agents'
 
 type Bindings = {
@@ -1579,12 +1583,16 @@ app.post('/api/agents/:id/process', async (c) => {
   }
 })
 
-// ==================== 智能联动修改API ====================
+// ==================== 智能联动修改API V3 - 法律顾问增强版 ====================
 
 /**
- * 智能变更分析API - 核心API
- * 分析用户输入，返回直接修改和推断的联动修改
- * 用户需要确认后才会应用修改
+ * 智能变更分析API V3 - 核心API（法律顾问增强版）
+ * 流程：用户自然语言 → 模块Agent识别 → 法律顾问转化 → 联动分析 → 输出
+ * 
+ * 新增功能：
+ * - 法律顾问Agent将用户自然语言转化为专业法律条款语言
+ * - 每个修改项包含：原始表达 + 法律条款 + 法律注意事项
+ * - 法律审核评分和改进建议
  */
 app.post('/api/agents/smart-change', async (c) => {
   const { 
@@ -1592,7 +1600,8 @@ app.post('/api/agents/smart-change', async (c) => {
     templateId, 
     currentParams, 
     negotiationHistory,
-    perspective 
+    perspective,
+    enableLegalTransform = true  // 新增：是否启用法律顾问转化，默认启用
   } = await c.req.json()
   
   const { apiKey, baseUrl } = getAIConfig(c)
@@ -1616,20 +1625,30 @@ app.post('/api/agents/smart-change', async (c) => {
   
   try {
     const startTime = Date.now()
-    const result = await executeSmartChangeWorkflow(message, context, apiKey, baseUrl)
+    
+    // 使用V3工作流（包含法律顾问转化）
+    const result = await executeSmartChangeWorkflowV3(
+      message, 
+      context, 
+      apiKey, 
+      baseUrl,
+      { enableLegalTransform }
+    )
     
     return c.json({
       success: result.success,
       // 用户理解
       understood: result.understood,
       analysisExplanation: result.analysisExplanation,
-      // 直接修改（用户明确要求的）
+      // 直接修改（经法律顾问转化后的专业条款）
       primaryChanges: result.primaryChanges,
       // 推断修改（AI分析的关联延申）
       inferredChanges: result.inferredChanges,
-      // 警告信息
+      // 警告信息（包含法律风险警告）
       warnings: result.warnings,
-      // Agent详情（可选）
+      // 法律顾问信息（V3新增）
+      legalTransform: result.legalTransform,
+      // Agent详情
       agentDetails: result.agentResponses?.map(r => ({
         agentId: r.agentId,
         agentName: r.agentName,
@@ -1641,6 +1660,7 @@ app.post('/api/agents/smart-change', async (c) => {
         totalPrimaryChanges: result.primaryChanges.length,
         totalInferredChanges: result.inferredChanges.length,
         processingTime: result.processingTime,
+        legalTransformTime: result.legalTransform?.transformTime,
         totalTime: Date.now() - startTime
       }
     })
@@ -1648,6 +1668,59 @@ app.post('/api/agents/smart-change', async (c) => {
     return c.json({ 
       success: false, 
       error: 'Smart change analysis failed: ' + (error as Error).message 
+    }, 500)
+  }
+})
+
+/**
+ * 单独调用法律顾问转化API
+ * 用于对已有的修改进行法律语言转化
+ */
+app.post('/api/agents/legal-transform', async (c) => {
+  const { 
+    originalInput,
+    moduleChanges,
+    templateId,
+    currentParams,
+    perspective
+  } = await c.req.json()
+  
+  const { apiKey, baseUrl } = getAIConfig(c)
+  
+  if (!apiKey) {
+    return c.json({ error: 'API key not configured' }, 500)
+  }
+  
+  const template = industryTemplates[templateId]
+  if (!template) {
+    return c.json({ error: 'Template not found' }, 404)
+  }
+  
+  const request: LegalTransformRequest = {
+    originalInput,
+    moduleChanges: moduleChanges || [],
+    context: {
+      templateName: template.name,
+      perspective: perspective || 'borrower',
+      currentParams: currentParams || template.defaultParams
+    }
+  }
+  
+  try {
+    const result = await executeLegalCounselTransform(request, apiKey, baseUrl)
+    
+    return c.json({
+      success: result.success,
+      transformedChanges: result.transformedChanges,
+      legalSummary: result.legalSummary,
+      riskWarnings: result.riskWarnings,
+      clauseRecommendations: result.clauseRecommendations,
+      processingTime: result.processingTime
+    })
+  } catch (error) {
+    return c.json({ 
+      success: false, 
+      error: 'Legal transform failed: ' + (error as Error).message 
     }, 500)
   }
 })
@@ -1938,32 +2011,11 @@ app.get('/', (c) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>收入分成融资协商平台</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <!-- Tailwind CSS with multiple CDN fallbacks for stability -->
-  <script>
-    (function() {
-      var cdns = [
-        'https://cdn.tailwindcss.com/3.4.17',
-        'https://cdn.jsdelivr.net/npm/tailwindcss@3.4.17/lib/cdn.min.js',
-        'https://unpkg.com/tailwindcss@3.4.17/lib/cdn.min.js'
-      ];
-      var loaded = false;
-      function loadScript(url, callback) {
-        var script = document.createElement('script');
-        script.src = url;
-        script.onload = function() { loaded = true; if(callback) callback(); };
-        script.onerror = callback;
-        document.head.appendChild(script);
-      }
-      function tryNext(index) {
-        if (loaded || index >= cdns.length) return;
-        loadScript(cdns[index], function() { if(!loaded) tryNext(index + 1); });
-      }
-      tryNext(0);
-    })();
-  </script>
-  <!-- FontAwesome with multiple CDN fallbacks -->
-  <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" onerror="this.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'">
-  <!-- Fallback Base Styles (in case Tailwind CDN fails) -->
+  <!-- Tailwind CSS CDN - 大幅提升性能 -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <!-- 应用特定样式 - 精简版 -->
   <style>
     /* Base Reset & Fallback Styles */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -2565,9 +2617,597 @@ app.get('/', (c) => {
         height: 56px;
       }
     }
+    
+    /* ============================================================
+       完整颜色系统 - 基于实际使用分析生成
+       ============================================================ */
+    
+    /* Gray Scale */
+    .text-gray-300 { color: #d1d5db; }
+    .bg-gray-300 { background-color: #d1d5db; }
+    .bg-gray-400 { background-color: #9ca3af; }
+    .bg-gray-800 { background-color: #1f2937; }
+    .border-gray-400 { border-color: #9ca3af; }
+    .border-gray-500 { border-color: #6b7280; }
+    .border-gray-50 { border-color: #f9fafb; }
+    
+    /* Indigo Extended */
+    .text-indigo-300 { color: #a5b4fc; }
+    .text-indigo-500 { color: #6366f1; }
+    .text-indigo-800 { color: #3730a3; }
+    .text-indigo-900 { color: #312e81; }
+    .bg-indigo-200 { background-color: #c7d2fe; }
+    .bg-indigo-700 { background-color: #4338ca; }
+    .border-indigo-100 { border-color: #e0e7ff; }
+    .border-indigo-300 { border-color: #a5b4fc; }
+    .border-indigo-600 { border-color: #4f46e5; }
+    
+    /* Emerald Extended */
+    .text-emerald-400 { color: #34d399; }
+    .text-emerald-500 { color: #10b981; }
+    .text-emerald-700 { color: #047857; }
+    .text-emerald-800 { color: #065f46; }
+    .text-emerald-900 { color: #064e3b; }
+    .bg-emerald-200 { background-color: #a7f3d0; }
+    .bg-emerald-400 { background-color: #34d399; }
+    .bg-emerald-700 { background-color: #047857; }
+    .border-emerald-100 { border-color: #d1fae5; }
+    .border-emerald-300 { border-color: #6ee7b7; }
+    .border-emerald-500 { border-color: #10b981; }
+    .border-emerald-600 { border-color: #059669; }
+    
+    /* Amber Extended */
+    .text-amber-500 { color: #f59e0b; }
+    .text-amber-700 { color: #b45309; }
+    .text-amber-800 { color: #92400e; }
+    .text-amber-900 { color: #78350f; }
+    .bg-amber-600 { background-color: #d97706; }
+    .bg-amber-700 { background-color: #b45309; }
+    .border-amber-100 { border-color: #fef3c7; }
+    .border-amber-300 { border-color: #fcd34d; }
+    .border-amber-500 { border-color: #f59e0b; }
+    .border-amber-600 { border-color: #d97706; }
+    
+    /* Red Extended */
+    .text-red-300 { color: #fca5a5; }
+    .text-red-400 { color: #f87171; }
+    .text-red-700 { color: #b91c1c; }
+    .text-red-800 { color: #991b1b; }
+    .text-red-900 { color: #7f1d1d; }
+    .bg-red-700 { background-color: #b91c1c; }
+    .border-red-100 { border-color: #fee2e2; }
+    .border-red-200 { border-color: #fecaca; }
+    
+    /* Purple Extended */
+    .text-purple-500 { color: #a855f7; }
+    .text-purple-700 { color: #7e22ce; }
+    .text-purple-800 { color: #6b21a8; }
+    .text-purple-900 { color: #581c87; }
+    .bg-purple-700 { background-color: #7e22ce; }
+    .border-purple-100 { border-color: #f3e8ff; }
+    .border-purple-600 { border-color: #9333ea; }
+    
+    /* Blue Extended */
+    .text-blue-500 { color: #3b82f6; }
+    .text-blue-600 { color: #2563eb; }
+    .text-blue-700 { color: #1d4ed8; }
+    .text-blue-900 { color: #1e3a8a; }
+    .bg-blue-50 { background-color: #eff6ff; }
+    .bg-blue-100 { background-color: #dbeafe; }
+    .bg-blue-500 { background-color: #3b82f6; }
+    .border-blue-200 { border-color: #bfdbfe; }
+    
+    /* Rose Extended */
+    .text-rose-500 { color: #f43f5e; }
+    .text-rose-600 { color: #e11d48; }
+    .text-rose-700 { color: #be123c; }
+    .text-rose-900 { color: #881337; }
+    .bg-rose-500 { background-color: #f43f5e; }
+    .bg-rose-700 { background-color: #be123c; }
+    
+    /* Orange Extended */
+    .text-orange-600 { color: #ea580c; }
+    .text-orange-700 { color: #c2410c; }
+    .text-orange-900 { color: #7c2d12; }
+    .bg-orange-700 { background-color: #c2410c; }
+    
+    /* Pink Extended */
+    .text-pink-500 { color: #ec4899; }
+    .text-pink-600 { color: #db2777; }
+    .bg-pink-50 { background-color: #fdf2f8; }
+    .bg-pink-100 { background-color: #fce7f3; }
+    
+    /* Teal Extended */
+    .text-teal-600 { color: #0d9488; }
+    .text-teal-900 { color: #134e4a; }
+    .bg-teal-700 { background-color: #0f766e; }
+    
+    /* Violet Extended */
+    .text-violet-600 { color: #7c3aed; }
+    .text-violet-700 { color: #6d28d9; }
+    .text-violet-800 { color: #5b21b6; }
+    .bg-violet-50 { background-color: #f5f3ff; }
+    .bg-violet-100 { background-color: #ede9fe; }
+    .border-violet-100 { border-color: #ede9fe; }
+    .border-violet-200 { border-color: #ddd6fe; }
+    .border-violet-400 { border-color: #a78bfa; }
+    
+    /* Cyan Extended */
+    .bg-cyan-500 { background-color: #06b6d4; }
+    .border-cyan-600 { border-color: #0891b2; }
+    
+    /* Slate Extended */
+    .text-slate-700 { color: #334155; }
+    .text-slate-900 { color: #0f172a; }
+    .bg-slate-50 { background-color: #f8fafc; }
+    .border-slate-200 { border-color: #e2e8f0; }
+    
+    /* ============================================================
+       补充布局和交互类
+       ============================================================ */
+    
+    /* Additional spacing */
+    .gap-1 { gap: 0.25rem; }
+    .gap-2 { gap: 0.5rem; }
+    .gap-3 { gap: 0.75rem; }
+    .gap-5 { gap: 1.25rem; }
+    .gap-8 { gap: 2rem; }
+    .space-y-1 > * + * { margin-top: 0.25rem; }
+    .space-y-6 > * + * { margin-top: 1.5rem; }
+    .space-y-8 > * + * { margin-top: 2rem; }
+    .space-x-1 > * + * { margin-left: 0.25rem; }
+    .space-x-6 > * + * { margin-left: 1.5rem; }
+    
+    /* Additional padding/margin */
+    .p-1 { padding: 0.25rem; }
+    .px-1 { padding-left: 0.25rem; padding-right: 0.25rem; }
+    .px-5 { padding-left: 1.25rem; padding-right: 1.25rem; }
+    .px-8 { padding-left: 2rem; padding-right: 2rem; }
+    .py-0\\.5 { padding-top: 0.125rem; padding-bottom: 0.125rem; }
+    .py-5 { padding-top: 1.25rem; padding-bottom: 1.25rem; }
+    .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+    .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+    .pt-4 { padding-top: 1rem; }
+    .pt-6 { padding-top: 1.5rem; }
+    .pb-4 { padding-bottom: 1rem; }
+    .pb-6 { padding-bottom: 1.5rem; }
+    .pl-4 { padding-left: 1rem; }
+    .pl-6 { padding-left: 1.5rem; }
+    .pr-4 { padding-right: 1rem; }
+    .mt-1 { margin-top: 0.25rem; }
+    .mt-8 { margin-top: 2rem; }
+    .mb-8 { margin-bottom: 2rem; }
+    .ml-1 { margin-left: 0.25rem; }
+    .ml-4 { margin-left: 1rem; }
+    .mr-4 { margin-right: 1rem; }
+    .-mt-1 { margin-top: -0.25rem; }
+    .-mt-2 { margin-top: -0.5rem; }
+    .-ml-1 { margin-left: -0.25rem; }
+    .-mr-1 { margin-right: -0.25rem; }
+    
+    /* Additional widths/heights */
+    .w-1 { width: 0.25rem; }
+    .w-2 { width: 0.5rem; }
+    .w-3 { width: 0.75rem; }
+    .w-4 { width: 1rem; }
+    .w-5 { width: 1.25rem; }
+    .w-6 { width: 1.5rem; }
+    .w-7 { width: 1.75rem; }
+    .w-14 { width: 3.5rem; }
+    .w-20 { width: 5rem; }
+    .w-24 { width: 6rem; }
+    .w-32 { width: 8rem; }
+    .w-40 { width: 10rem; }
+    .w-48 { width: 12rem; }
+    .w-64 { width: 16rem; }
+    .w-auto { width: auto; }
+    .h-1 { height: 0.25rem; }
+    .h-2 { height: 0.5rem; }
+    .h-3 { height: 0.75rem; }
+    .h-4 { height: 1rem; }
+    .h-5 { height: 1.25rem; }
+    .h-6 { height: 1.5rem; }
+    .h-7 { height: 1.75rem; }
+    .h-14 { height: 3.5rem; }
+    .h-20 { height: 5rem; }
+    .h-24 { height: 6rem; }
+    .h-32 { height: 8rem; }
+    .h-40 { height: 10rem; }
+    .h-48 { height: 12rem; }
+    .h-64 { height: 16rem; }
+    .h-auto { height: auto; }
+    .min-w-0 { min-width: 0; }
+    .min-w-\\[200px\\] { min-width: 200px; }
+    .min-h-\\[200px\\] { min-height: 200px; }
+    .max-w-xs { max-width: 20rem; }
+    .max-w-sm { max-width: 24rem; }
+    .max-w-3xl { max-width: 48rem; }
+    .max-w-5xl { max-width: 64rem; }
+    .max-w-7xl { max-width: 80rem; }
+    .max-w-full { max-width: 100%; }
+    .max-h-60 { max-height: 15rem; }
+    .max-h-96 { max-height: 24rem; }
+    .max-h-\\[60vh\\] { max-height: 60vh; }
+    .max-h-\\[80vh\\] { max-height: 80vh; }
+    
+    /* Additional border styles */
+    .border-l { border-left-width: 1px; }
+    .border-r { border-right-width: 1px; }
+    .border-l-2 { border-left-width: 2px; }
+    .border-l-4 { border-left-width: 4px; }
+    .border-t-2 { border-top-width: 2px; }
+    .border-b-2 { border-bottom-width: 2px; }
+    .border-0 { border-width: 0; }
+    .border-transparent { border-color: transparent; }
+    .rounded-md { border-radius: 0.375rem; }
+    .rounded-3xl { border-radius: 1.5rem; }
+    .rounded-t-xl { border-top-left-radius: 0.75rem; border-top-right-radius: 0.75rem; }
+    .rounded-b-xl { border-bottom-left-radius: 0.75rem; border-bottom-right-radius: 0.75rem; }
+    .rounded-l-xl { border-top-left-radius: 0.75rem; border-bottom-left-radius: 0.75rem; }
+    .rounded-r-xl { border-top-right-radius: 0.75rem; border-bottom-right-radius: 0.75rem; }
+    
+    /* Additional text styles */
+    .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+    .text-5xl { font-size: 3rem; line-height: 1; }
+    .text-left { text-align: left; }
+    .text-right { text-align: right; }
+    .italic { font-style: italic; }
+    .uppercase { text-transform: uppercase; }
+    .lowercase { text-transform: lowercase; }
+    .capitalize { text-transform: capitalize; }
+    .tracking-wide { letter-spacing: 0.025em; }
+    .tracking-wider { letter-spacing: 0.05em; }
+    .leading-none { line-height: 1; }
+    .leading-tight { line-height: 1.25; }
+    .leading-snug { line-height: 1.375; }
+    .leading-normal { line-height: 1.5; }
+    .leading-relaxed { line-height: 1.625; }
+    .leading-loose { line-height: 2; }
+    .underline { text-decoration: underline; }
+    .line-through { text-decoration: line-through; }
+    .no-underline { text-decoration: none; }
+    .whitespace-nowrap { white-space: nowrap; }
+    .whitespace-pre-wrap { white-space: pre-wrap; }
+    .break-words { word-wrap: break-word; overflow-wrap: break-word; }
+    .line-clamp-1 { display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden; }
+    .line-clamp-3 { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    
+    /* Additional flex/grid */
+    .inline-flex { display: inline-flex; }
+    .inline-block { display: inline-block; }
+    .block { display: block; }
+    .flex-row { flex-direction: row; }
+    .flex-row-reverse { flex-direction: row-reverse; }
+    .flex-col-reverse { flex-direction: column-reverse; }
+    .flex-grow { flex-grow: 1; }
+    .flex-grow-0 { flex-grow: 0; }
+    .flex-shrink { flex-shrink: 1; }
+    .flex-shrink-0 { flex-shrink: 0; }
+    .flex-auto { flex: 1 1 auto; }
+    .flex-initial { flex: 0 1 auto; }
+    .flex-none { flex: none; }
+    .items-start { align-items: flex-start; }
+    .items-end { align-items: flex-end; }
+    .items-baseline { align-items: baseline; }
+    .items-stretch { align-items: stretch; }
+    .justify-start { justify-content: flex-start; }
+    .justify-end { justify-content: flex-end; }
+    .justify-around { justify-content: space-around; }
+    .justify-evenly { justify-content: space-evenly; }
+    .self-start { align-self: flex-start; }
+    .self-end { align-self: flex-end; }
+    .self-center { align-self: center; }
+    .content-center { align-content: center; }
+    .grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .col-span-1 { grid-column: span 1 / span 1; }
+    .col-span-2 { grid-column: span 2 / span 2; }
+    .col-span-3 { grid-column: span 3 / span 3; }
+    .col-span-full { grid-column: 1 / -1; }
+    .row-span-2 { grid-row: span 2 / span 2; }
+    
+    /* Additional positioning */
+    .static { position: static; }
+    .sticky { position: sticky; }
+    .top-1 { top: 0.25rem; }
+    .top-2 { top: 0.5rem; }
+    .top-4 { top: 1rem; }
+    .top-full { top: 100%; }
+    .right-1 { right: 0.25rem; }
+    .right-2 { right: 0.5rem; }
+    .right-4 { right: 1rem; }
+    .bottom-2 { bottom: 0.5rem; }
+    .bottom-4 { bottom: 1rem; }
+    .left-1 { left: 0.25rem; }
+    .left-2 { left: 0.5rem; }
+    .left-4 { left: 1rem; }
+    .-top-1 { top: -0.25rem; }
+    .-top-2 { top: -0.5rem; }
+    .-right-1 { right: -0.25rem; }
+    .-right-2 { right: -0.5rem; }
+    .z-0 { z-index: 0; }
+    .z-10 { z-index: 10; }
+    .z-20 { z-index: 20; }
+    .z-30 { z-index: 30; }
+    .z-40 { z-index: 40; }
+    .z-\\[100\\] { z-index: 100; }
+    .z-\\[999\\] { z-index: 999; }
+    .z-\\[9999\\] { z-index: 9999; }
+    
+    /* Additional backgrounds */
+    .bg-transparent { background-color: transparent; }
+    .bg-current { background-color: currentColor; }
+    .bg-gradient-to-r { background-image: linear-gradient(to right, var(--tw-gradient-stops)); }
+    .bg-gradient-to-l { background-image: linear-gradient(to left, var(--tw-gradient-stops)); }
+    .bg-gradient-to-t { background-image: linear-gradient(to top, var(--tw-gradient-stops)); }
+    .bg-gradient-to-b { background-image: linear-gradient(to bottom, var(--tw-gradient-stops)); }
+    .bg-gradient-to-br { background-image: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
+    .bg-gradient-to-tr { background-image: linear-gradient(to top right, var(--tw-gradient-stops)); }
+    .bg-gradient-to-bl { background-image: linear-gradient(to bottom left, var(--tw-gradient-stops)); }
+    .bg-gradient-to-tl { background-image: linear-gradient(to top left, var(--tw-gradient-stops)); }
+    .from-indigo-500 { --tw-gradient-from: #6366f1; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
+    .from-indigo-600 { --tw-gradient-from: #4f46e5; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
+    .from-purple-500 { --tw-gradient-from: #a855f7; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
+    .from-purple-600 { --tw-gradient-from: #9333ea; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
+    .from-emerald-500 { --tw-gradient-from: #10b981; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
+    .from-amber-500 { --tw-gradient-from: #f59e0b; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
+    .from-rose-500 { --tw-gradient-from: #f43f5e; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
+    .via-purple-500 { --tw-gradient-stops: var(--tw-gradient-from), #a855f7, var(--tw-gradient-to, transparent); }
+    .via-indigo-500 { --tw-gradient-stops: var(--tw-gradient-from), #6366f1, var(--tw-gradient-to, transparent); }
+    .via-pink-500 { --tw-gradient-stops: var(--tw-gradient-from), #ec4899, var(--tw-gradient-to, transparent); }
+    .to-indigo-600 { --tw-gradient-to: #4f46e5; }
+    .to-indigo-700 { --tw-gradient-to: #4338ca; }
+    .to-purple-600 { --tw-gradient-to: #9333ea; }
+    .to-purple-700 { --tw-gradient-to: #7e22ce; }
+    .to-pink-500 { --tw-gradient-to: #ec4899; }
+    .to-pink-600 { --tw-gradient-to: #db2777; }
+    .to-emerald-600 { --tw-gradient-to: #059669; }
+    .to-amber-600 { --tw-gradient-to: #d97706; }
+    .to-rose-600 { --tw-gradient-to: #e11d48; }
+    .to-transparent { --tw-gradient-to: transparent; }
+    .bg-black\\/60, .bg-black\\/50 { background-color: rgba(0, 0, 0, 0.5); }
+    .bg-white\\/50 { background-color: rgba(255, 255, 255, 0.5); }
+    .bg-white\\/80 { background-color: rgba(255, 255, 255, 0.8); }
+    .bg-white\\/90 { background-color: rgba(255, 255, 255, 0.9); }
+    
+    /* Additional effects */
+    .opacity-100 { opacity: 1; }
+    .opacity-75 { opacity: 0.75; }
+    .opacity-60 { opacity: 0.6; }
+    .opacity-70 { opacity: 0.7; }
+    .opacity-80 { opacity: 0.8; }
+    .opacity-90 { opacity: 0.9; }
+    .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); }
+    .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+    .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
+    .shadow-none { box-shadow: none; }
+    .ring-1 { box-shadow: 0 0 0 1px var(--tw-ring-color, rgba(99, 102, 241, 0.5)); }
+    .ring-2 { box-shadow: 0 0 0 2px var(--tw-ring-color, rgba(99, 102, 241, 0.5)); }
+    .ring-indigo-500 { --tw-ring-color: #6366f1; }
+    .ring-offset-2 { --tw-ring-offset-width: 2px; }
+    .backdrop-blur-sm { backdrop-filter: blur(4px); }
+    .backdrop-blur { backdrop-filter: blur(8px); }
+    .backdrop-blur-md { backdrop-filter: blur(12px); }
+    .backdrop-blur-lg { backdrop-filter: blur(16px); }
+    .blur-sm { filter: blur(4px); }
+    .blur { filter: blur(8px); }
+    .brightness-95 { filter: brightness(0.95); }
+    .brightness-105 { filter: brightness(1.05); }
+    .grayscale { filter: grayscale(100%); }
+    
+    /* Additional interactions */
+    .pointer-events-none { pointer-events: none; }
+    .pointer-events-auto { pointer-events: auto; }
+    .select-none { user-select: none; }
+    .select-text { user-select: text; }
+    .select-all { user-select: all; }
+    .resize-none { resize: none; }
+    .resize-y { resize: vertical; }
+    .resize-x { resize: horizontal; }
+    .resize { resize: both; }
+    .outline-none { outline: 2px solid transparent; outline-offset: 2px; }
+    .outline { outline-style: solid; }
+    .focus\\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; }
+    .focus\\:ring-2:focus { box-shadow: 0 0 0 2px var(--tw-ring-color, rgba(99, 102, 241, 0.5)); }
+    .focus\\:ring-indigo-500:focus { --tw-ring-color: #6366f1; }
+    .focus\\:border-indigo-500:focus { border-color: #6366f1; }
+    
+    /* Additional hover states */
+    .hover\\:bg-gray-200:hover { background-color: #e5e7eb; }
+    .hover\\:bg-indigo-100:hover { background-color: #e0e7ff; }
+    .hover\\:bg-indigo-600:hover { background-color: #4f46e5; }
+    .hover\\:bg-indigo-800:hover { background-color: #3730a3; }
+    .hover\\:bg-emerald-50:hover { background-color: #ecfdf5; }
+    .hover\\:bg-emerald-100:hover { background-color: #d1fae5; }
+    .hover\\:bg-emerald-600:hover { background-color: #059669; }
+    .hover\\:bg-emerald-800:hover { background-color: #065f46; }
+    .hover\\:bg-amber-50:hover { background-color: #fffbeb; }
+    .hover\\:bg-amber-100:hover { background-color: #fef3c7; }
+    .hover\\:bg-rose-50:hover { background-color: #fff1f2; }
+    .hover\\:bg-rose-100:hover { background-color: #ffe4e6; }
+    .hover\\:bg-purple-50:hover { background-color: #faf5ff; }
+    .hover\\:bg-purple-100:hover { background-color: #f3e8ff; }
+    .hover\\:text-gray-600:hover { color: #4b5563; }
+    .hover\\:text-gray-700:hover { color: #374151; }
+    .hover\\:text-gray-800:hover { color: #1f2937; }
+    .hover\\:text-gray-900:hover { color: #111827; }
+    .hover\\:text-indigo-700:hover { color: #4338ca; }
+    .hover\\:text-indigo-800:hover { color: #3730a3; }
+    .hover\\:text-emerald-700:hover { color: #047857; }
+    .hover\\:text-red-600:hover { color: #dc2626; }
+    .hover\\:text-red-700:hover { color: #b91c1c; }
+    .hover\\:text-white:hover { color: #fff; }
+    .hover\\:border-indigo-300:hover { border-color: #a5b4fc; }
+    .hover\\:border-indigo-500:hover { border-color: #6366f1; }
+    .hover\\:border-gray-300:hover { border-color: #d1d5db; }
+    .hover\\:shadow-md:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
+    .hover\\:shadow-lg:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+    .hover\\:shadow-xl:hover { box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    .hover\\:scale-105:hover { transform: scale(1.05); }
+    .hover\\:scale-110:hover { transform: scale(1.1); }
+    .hover\\:-translate-y-1:hover { transform: translateY(-0.25rem); }
+    .hover\\:opacity-100:hover { opacity: 1; }
+    
+    /* Additional transforms */
+    .transform { transform: translateX(var(--tw-translate-x, 0)) translateY(var(--tw-translate-y, 0)) rotate(var(--tw-rotate, 0)) skewX(var(--tw-skew-x, 0)) skewY(var(--tw-skew-y, 0)) scaleX(var(--tw-scale-x, 1)) scaleY(var(--tw-scale-y, 1)); }
+    .scale-95 { transform: scale(0.95); }
+    .scale-100 { transform: scale(1); }
+    .scale-105 { transform: scale(1.05); }
+    .scale-110 { transform: scale(1.1); }
+    .scale-125 { transform: scale(1.25); }
+    .scale-150 { transform: scale(1.5); }
+    .rotate-45 { transform: rotate(45deg); }
+    .rotate-90 { transform: rotate(90deg); }
+    .rotate-180 { transform: rotate(180deg); }
+    .-rotate-45 { transform: rotate(-45deg); }
+    .-rotate-90 { transform: rotate(-90deg); }
+    .translate-x-0 { transform: translateX(0); }
+    .translate-x-1 { transform: translateX(0.25rem); }
+    .translate-x-2 { transform: translateX(0.5rem); }
+    .translate-y-0 { transform: translateY(0); }
+    .translate-y-1 { transform: translateY(0.25rem); }
+    .translate-y-2 { transform: translateY(0.5rem); }
+    .-translate-x-1 { transform: translateX(-0.25rem); }
+    .-translate-x-1\\/2 { transform: translateX(-50%); }
+    .-translate-y-1 { transform: translateY(-0.25rem); }
+    .-translate-y-1\\/2 { transform: translateY(-50%); }
+    .origin-center { transform-origin: center; }
+    .origin-top { transform-origin: top; }
+    .origin-bottom { transform-origin: bottom; }
+    
+    /* Additional transitions/animations */
+    .transition-transform { transition-property: transform; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    .transition-opacity { transition-property: opacity; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    .transition-shadow { transition-property: box-shadow; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+    .duration-75 { transition-duration: 75ms; }
+    .duration-100 { transition-duration: 100ms; }
+    .duration-150 { transition-duration: 150ms; }
+    .duration-200 { transition-duration: 200ms; }
+    .duration-300 { transition-duration: 300ms; }
+    .duration-500 { transition-duration: 500ms; }
+    .ease-in { transition-timing-function: cubic-bezier(0.4, 0, 1, 1); }
+    .ease-out { transition-timing-function: cubic-bezier(0, 0, 0.2, 1); }
+    .ease-in-out { transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); }
+    .animate-spin { animation: spin 1s linear infinite; }
+    .animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+    .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    .animate-bounce { animation: bounce 1s infinite; }
+    @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+    @keyframes bounce { 0%, 100% { transform: translateY(-25%); animation-timing-function: cubic-bezier(0.8, 0, 1, 1); } 50% { transform: translateY(0); animation-timing-function: cubic-bezier(0, 0, 0.2, 1); } }
+    
+    /* Additional overflow */
+    .overflow-x-auto { overflow-x: auto; }
+    .overflow-x-hidden { overflow-x: hidden; }
+    .overflow-y-hidden { overflow-y: hidden; }
+    .overflow-visible { overflow: visible; }
+    .overflow-scroll { overflow: scroll; }
+    
+    /* Additional display */
+    .invisible { visibility: hidden; }
+    .visible { visibility: visible; }
+    .collapse { visibility: collapse; }
+    
+    /* Group hover */
+    .group:hover .group-hover\\:visible { visibility: visible; }
+    .group:hover .group-hover\\:block { display: block; }
+    .group:hover .group-hover\\:flex { display: flex; }
+    .group:hover .group-hover\\:bg-gray-50 { background-color: #f9fafb; }
+    .group:hover .group-hover\\:bg-indigo-50 { background-color: #eef2ff; }
+    .group:hover .group-hover\\:text-indigo-600 { color: #4f46e5; }
+    .group:hover .group-hover\\:scale-105 { transform: scale(1.05); }
+    .group:hover .group-hover\\:translate-x-1 { transform: translateX(0.25rem); }
+    
+    /* Responsive variants */
+    @media (min-width: 640px) {
+      .sm\\:flex { display: flex; }
+      .sm\\:hidden { display: none; }
+      .sm\\:block { display: block; }
+      .sm\\:inline-flex { display: inline-flex; }
+      .sm\\:w-auto { width: auto; }
+      .sm\\:px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+      .sm\\:py-4 { padding-top: 1rem; padding-bottom: 1rem; }
+      .sm\\:text-sm { font-size: 0.875rem; }
+      .sm\\:text-base { font-size: 1rem; }
+      .sm\\:text-lg { font-size: 1.125rem; }
+      .sm\\:text-xl { font-size: 1.25rem; }
+      .sm\\:flex-row { flex-direction: row; }
+      .sm\\:items-center { align-items: center; }
+      .sm\\:justify-between { justify-content: space-between; }
+      .sm\\:space-x-4 > * + * { margin-left: 1rem; }
+      .sm\\:gap-4 { gap: 1rem; }
+    }
+    @media (min-width: 768px) {
+      .md\\:flex { display: flex; }
+      .md\\:hidden { display: none; }
+      .md\\:block { display: block; }
+      .md\\:w-auto { width: auto; }
+      .md\\:w-1\\/2 { width: 50%; }
+      .md\\:w-1\\/3 { width: 33.333333%; }
+      .md\\:w-2\\/3 { width: 66.666667%; }
+      .md\\:px-8 { padding-left: 2rem; padding-right: 2rem; }
+      .md\\:py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
+      .md\\:text-lg { font-size: 1.125rem; }
+      .md\\:text-xl { font-size: 1.25rem; }
+      .md\\:text-2xl { font-size: 1.5rem; }
+      .md\\:text-3xl { font-size: 1.875rem; }
+      .md\\:flex-row { flex-direction: row; }
+      .md\\:items-center { align-items: center; }
+      .md\\:justify-between { justify-content: space-between; }
+      .md\\:space-x-6 > * + * { margin-left: 1.5rem; }
+      .md\\:gap-6 { gap: 1.5rem; }
+      .md\\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1024px) {
+      .lg\\:flex { display: flex; }
+      .lg\\:hidden { display: none; }
+      .lg\\:block { display: block; }
+      .lg\\:w-auto { width: auto; }
+      .lg\\:w-1\\/3 { width: 33.333333%; }
+      .lg\\:w-1\\/4 { width: 25%; }
+      .lg\\:w-2\\/3 { width: 66.666667%; }
+      .lg\\:w-3\\/4 { width: 75%; }
+      .lg\\:px-12 { padding-left: 3rem; padding-right: 3rem; }
+      .lg\\:py-8 { padding-top: 2rem; padding-bottom: 2rem; }
+      .lg\\:text-xl { font-size: 1.25rem; }
+      .lg\\:text-2xl { font-size: 1.5rem; }
+      .lg\\:text-3xl { font-size: 1.875rem; }
+      .lg\\:text-4xl { font-size: 2.25rem; }
+      .lg\\:flex-row { flex-direction: row; }
+      .lg\\:items-center { align-items: center; }
+      .lg\\:justify-between { justify-content: space-between; }
+      .lg\\:space-x-8 > * + * { margin-left: 2rem; }
+      .lg\\:gap-8 { gap: 2rem; }
+      .lg\\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    }
+    @media (min-width: 1280px) {
+      .xl\\:flex { display: flex; }
+      .xl\\:hidden { display: none; }
+      .xl\\:block { display: block; }
+      .xl\\:w-1\\/4 { width: 25%; }
+      .xl\\:w-1\\/5 { width: 20%; }
+      .xl\\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .xl\\:gap-10 { gap: 2.5rem; }
+    }
+    
+    /* Dark mode (if needed in future) */
+    @media (prefers-color-scheme: dark) {
+      .dark\\:bg-gray-800 { background-color: #1f2937; }
+      .dark\\:bg-gray-900 { background-color: #111827; }
+      .dark\\:text-white { color: #fff; }
+      .dark\\:text-gray-300 { color: #d1d5db; }
+      .dark\\:border-gray-700 { border-color: #374151; }
+    }
   </style>
 </head>
 <body class="bg-gray-50 min-h-screen">
+  <!-- Loading Screen -->
+  <div id="app-loading">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">收入分成融资协商平台</div>
+    <div class="loading-sub">正在加载资源...</div>
+  </div>
 
   <!-- ==================== 产品引导教程弹窗 ==================== -->
   <div id="onboardingModal" class="hidden fixed inset-0 bg-black/60 onboarding-modal flex items-center justify-center z-[100]">
@@ -5445,11 +6085,25 @@ app.get('/', (c) => {
     }
     
     // ==================== 初始化 ====================
+    // 隐藏loading屏幕
+    function hideLoadingScreen() {
+      const loading = document.getElementById('app-loading');
+      if (loading) {
+        loading.classList.add('fade-out');
+        setTimeout(() => {
+          loading.style.display = 'none';
+        }, 500);
+      }
+    }
+    
     async function init() {
       await loadTemplates();
       await loadCustomTemplatesOnInit();
       renderProjects();
       updateStats();
+      
+      // 隐藏loading屏幕
+      hideLoadingScreen();
       
       // 检查用户是否已登录
       if (currentUser) {
@@ -6020,6 +6674,41 @@ app.get('/', (c) => {
         \`;
       }
       
+      // 法律顾问转化信息（V3新增）
+      if (result.legalTransform?.enabled) {
+        html += \`
+          <div class="mb-6 p-4 bg-indigo-50 rounded-xl border border-indigo-200">
+            <div class="flex items-start space-x-3">
+              <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-balance-scale text-indigo-600"></i>
+              </div>
+              <div class="flex-1">
+                <p class="text-sm font-medium text-indigo-800 mb-1">
+                  <i class="fas fa-gavel mr-1"></i>法律顾问审核
+                </p>
+                \${result.legalTransform.legalSummary ? \`<p class="text-gray-700 mb-2">\${escapeHtml(result.legalTransform.legalSummary)}</p>\` : ''}
+                \${result.legalTransform.clauseRecommendations?.length > 0 ? \`
+                  <div class="mt-2 p-2 bg-white/50 rounded-lg">
+                    <p class="text-xs font-medium text-indigo-700 mb-1"><i class="fas fa-lightbulb mr-1"></i>条款完善建议：</p>
+                    <ul class="text-xs text-indigo-600 space-y-1">
+                      \${result.legalTransform.clauseRecommendations.map(r => \`<li class="flex items-start"><i class="fas fa-check-circle mr-1 mt-0.5"></i>\${escapeHtml(r)}</li>\`).join('')}
+                    </ul>
+                  </div>
+                \` : ''}
+                \${result.legalTransform.riskWarnings?.length > 0 ? \`
+                  <div class="mt-2 p-2 bg-red-50 rounded-lg">
+                    <p class="text-xs font-medium text-red-700 mb-1"><i class="fas fa-exclamation-triangle mr-1"></i>法律风险提示：</p>
+                    <ul class="text-xs text-red-600 space-y-1">
+                      \${result.legalTransform.riskWarnings.map(w => \`<li>\${escapeHtml(w)}</li>\`).join('')}
+                    </ul>
+                  </div>
+                \` : ''}
+              </div>
+            </div>
+          </div>
+        \`;
+      }
+      
       // 直接修改（Primary Changes）
       if (result.primaryChanges?.length > 0) {
         html += \`
@@ -6133,6 +6822,46 @@ app.get('/', (c) => {
         categoryBadge = \`<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">\${categoryLabels[change.category] || change.category}</span>\`;
       }
       
+      // 法律条款显示（V3新增）
+      let legalClauseHtml = '';
+      if (change.legalClauseText) {
+        legalClauseHtml = \`
+          <div class="mt-3 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+            <div class="flex items-center mb-2">
+              <i class="fas fa-gavel text-indigo-600 mr-2 text-sm"></i>
+              <span class="text-xs font-semibold text-indigo-700">法律条款语言</span>
+              \${change.legalReview?.reviewed ? \`<span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded text-xs"><i class="fas fa-check-circle mr-1"></i>已审核</span>\` : ''}
+            </div>
+            <p class="text-sm text-indigo-900 leading-relaxed">\${escapeHtml(change.legalClauseText)}</p>
+            \${change.legalNotes?.length > 0 ? \`
+              <div class="mt-2 pt-2 border-t border-indigo-100">
+                <p class="text-xs text-indigo-600 font-medium mb-1"><i class="fas fa-sticky-note mr-1"></i>法律注意事项：</p>
+                <ul class="text-xs text-indigo-500 space-y-0.5">
+                  \${change.legalNotes.map(n => \`<li class="flex items-start"><span class="mr-1">•</span>\${escapeHtml(n)}</li>\`).join('')}
+                </ul>
+              </div>
+            \` : ''}
+            \${change.legalReview?.legalScore ? \`
+              <div class="mt-2 flex items-center justify-between text-xs">
+                <span class="text-indigo-500">法律规范性评分</span>
+                <span class="font-semibold \${change.legalReview.legalScore >= 80 ? 'text-emerald-600' : change.legalReview.legalScore >= 60 ? 'text-amber-600' : 'text-red-600'}">\${change.legalReview.legalScore}/100</span>
+              </div>
+            \` : ''}
+          </div>
+        \`;
+      }
+      
+      // 用户原始表达
+      let originalExpressionHtml = '';
+      if (change.originalExpression && change.legalClauseText) {
+        originalExpressionHtml = \`
+          <div class="text-xs text-gray-400 mt-2 flex items-center">
+            <i class="fas fa-comment mr-1"></i>
+            <span>您的表达："\${escapeHtml(change.originalExpression)}"</span>
+          </div>
+        \`;
+      }
+      
       return \`
         <div class="p-4 \${bgColor} rounded-xl border transition-all hover:shadow-md" data-change-type="\${type}" data-index="\${index}">
           <div class="flex items-start">
@@ -6147,13 +6876,16 @@ app.get('/', (c) => {
                 <span class="font-semibold text-gray-800">\${escapeHtml(change.paramName || change.key)}</span>
                 \${confidenceBadge}
                 \${categoryBadge}
+                \${change.legalReview?.reviewed ? '<span class="px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded text-xs"><i class="fas fa-balance-scale mr-1"></i>法律审核</span>' : ''}
               </div>
               <div class="flex items-center text-sm mb-2">
                 <span class="text-gray-500 line-through mr-2">\${escapeHtml(change.oldValue || '-')}</span>
                 <i class="fas fa-arrow-right text-gray-400 mx-2"></i>
                 <span class="font-semibold text-emerald-600">\${escapeHtml(change.newValue)}</span>
               </div>
-              \${change.clauseText ? \`<p class="text-sm text-gray-600 bg-white/50 rounded p-2 mb-2">\${escapeHtml(change.clauseText)}</p>\` : ''}
+              \${change.clauseText && !change.legalClauseText ? \`<p class="text-sm text-gray-600 bg-white/50 rounded p-2 mb-2">\${escapeHtml(change.clauseText)}</p>\` : ''}
+              \${legalClauseHtml}
+              \${originalExpressionHtml}
               \${change.reason ? \`
                 <div class="flex items-start text-sm text-gray-500 mt-2">
                   <i class="fas fa-info-circle mr-2 mt-0.5 text-amber-500"></i>
@@ -6210,7 +6942,7 @@ app.get('/', (c) => {
         return;
       }
       
-      // 创建协商记录
+      // 创建协商记录（V3增强：包含法律信息）
       const negotiation = {
         id: 'neg_' + Date.now(),
         input: pendingMessage,
@@ -6224,7 +6956,12 @@ app.get('/', (c) => {
           changeType: c.changeType,
           confidence: c.confidence,
           reason: c.reason,
-          category: c.category
+          category: c.category,
+          // V3新增：法律信息
+          originalExpression: c.originalExpression,
+          legalClauseText: c.legalClauseText,
+          legalNotes: c.legalNotes,
+          legalReview: c.legalReview
         })),
         smartChangeMode: true,
         primaryCount: confirmedPrimary.length,
@@ -6232,7 +6969,9 @@ app.get('/', (c) => {
         analysisExplanation: smartChangeResult.analysisExplanation,
         warnings: smartChangeResult.warnings,
         perspective: currentPerspective,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        // V3新增：法律顾问转化信息
+        legalTransform: smartChangeResult.legalTransform
       };
       currentProject.negotiations.push(negotiation);
       
