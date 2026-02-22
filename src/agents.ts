@@ -2294,3 +2294,259 @@ ${JSON.stringify(context.currentParams, null, 2)}
     }
   }
 }
+
+// ==================== 渐进式工作流 V4 ====================
+
+/**
+ * 渐进式智能修改工作流
+ * 设计原则：用户修改合同的第一要务是"看到改了什么"
+ * 
+ * Phase 1 (快速, ~5s): Agent识别 → 直接修改 + 规则引擎联动
+ *   → 用户立即能看到要改什么，可以开始确认
+ * Phase 2 (并行, ~15s): 法律顾问 + LLM联动分析 并行执行
+ *   → 追加法律条款润色 + 更深层关联修改建议
+ * 
+ * 通过回调函数 onPhaseComplete 实时推送每个阶段的结果
+ */
+export async function executeProgressiveWorkflow(
+  message: string,
+  context: {
+    currentParams: Record<string, any>
+    templateId: string
+    templateName: string
+    negotiationHistory?: any[]
+    perspective?: string
+  },
+  apiKey: string,
+  baseUrl: string,
+  onPhaseComplete: (phase: string, data: any) => void
+): Promise<void> {
+  const startTime = Date.now()
+
+  // ═══════════════ Phase 1: 快速识别 ═══════════════
+  // 目标：5秒内让用户看到"要改什么"
+  
+  onPhaseComplete('status', { phase: 1, message: '正在识别修改意图...' })
+  
+  const multiAgentResult = await executeMultiAgentWorkflow(message, context, apiKey, baseUrl)
+
+  if (!multiAgentResult.success || multiAgentResult.allChanges.length === 0) {
+    // 多Agent失败，回退到单次智能分析
+    onPhaseComplete('status', { phase: 1, message: '正在深度分析...' })
+    const fallbackResult = await executeSmartChangeAnalysis(message, context, apiKey, baseUrl)
+    onPhaseComplete('complete', {
+      ...fallbackResult,
+      legalTransform: { enabled: false }
+    })
+    return
+  }
+
+  // 构建初始直接修改
+  const phase1PrimaryChanges: SmartChange[] = multiAgentResult.allChanges.map(c => ({
+    ...c,
+    changeType: 'primary' as ChangeType,
+    selected: true,
+    originalExpression: message,
+    legalReview: { reviewed: false }
+  }))
+
+  // 规则引擎 — 即时生成确定性联动（不需要LLM，毫秒级）
+  const ruleBasedInferred = detectRuleBasedInferredChanges(
+    message,
+    phase1PrimaryChanges,
+    context.currentParams,
+    []
+  )
+
+  // Phase 1 完成 → 推送给前端
+  onPhaseComplete('phase1', {
+    success: true,
+    understood: multiAgentResult.understood,
+    primaryChanges: phase1PrimaryChanges,
+    inferredChanges: ruleBasedInferred,
+    analysisExplanation: ruleBasedInferred.length > 0 
+      ? `识别到 ${phase1PrimaryChanges.length} 项直接修改，规则引擎推断 ${ruleBasedInferred.length} 项关联修改`
+      : `识别到 ${phase1PrimaryChanges.length} 项直接修改`,
+    warnings: multiAgentResult.allWarnings,
+    agentResponses: multiAgentResult.agentResponses,
+    processingTime: Date.now() - startTime,
+    legalTransform: { enabled: true, status: 'pending' }
+  })
+
+  // ═══════════════ Phase 2: 并行深度分析 ═══════════════
+  // 法律顾问 + LLM联动分析 同时执行，谁先完成谁先推送
+  
+  onPhaseComplete('status', { phase: 2, message: '法律顾问审核 + 深度联动分析中...' })
+
+  // 2A: 法律顾问请求
+  const legalRequest: LegalTransformRequest = {
+    originalInput: message,
+    moduleChanges: multiAgentResult.agentResponses
+      .filter(r => r.success && r.changes.length > 0)
+      .map(r => ({
+        agentId: r.agentId,
+        agentName: r.agentName,
+        changes: r.changes,
+        understood: r.understood || ''
+      })),
+    context: {
+      templateName: context.templateName,
+      perspective: context.perspective || 'borrower',
+      currentParams: context.currentParams
+    }
+  }
+
+  // 2B: LLM联动分析 prompt
+  const inferPrompt = buildInferPrompt(phase1PrimaryChanges, context, message)
+
+  // 并行执行 — Promise.allSettled 确保一个失败不影响另一个
+  const [legalSettled, inferSettled] = await Promise.allSettled([
+    executeLegalCounselTransform(legalRequest, apiKey, baseUrl),
+    executeLLMInferAnalysis(inferPrompt, apiKey, baseUrl)
+  ])
+
+  // 处理法律顾问结果
+  let finalPrimaryChanges = phase1PrimaryChanges
+  let legalTransformInfo: any = { enabled: true }
+
+  if (legalSettled.status === 'fulfilled' && legalSettled.value.success && legalSettled.value.transformedChanges.length > 0) {
+    finalPrimaryChanges = legalSettled.value.transformedChanges
+    legalTransformInfo = {
+      enabled: true,
+      legalSummary: legalSettled.value.legalSummary,
+      riskWarnings: legalSettled.value.riskWarnings,
+      clauseRecommendations: legalSettled.value.clauseRecommendations,
+      transformTime: legalSettled.value.processingTime
+    }
+  } else {
+    legalTransformInfo = {
+      enabled: true,
+      legalSummary: legalSettled.status === 'fulfilled' ? '法律顾问未能生成条款，使用原始修改' : '法律顾问服务暂时不可用',
+      riskWarnings: legalSettled.status === 'fulfilled' ? legalSettled.value.riskWarnings : [],
+      clauseRecommendations: []
+    }
+  }
+
+  // 处理LLM联动分析结果
+  let llmInferredChanges: SmartChange[] = []
+  let llmInferWarnings: string[] = []
+  let analysisExplanation = ''
+
+  if (inferSettled.status === 'fulfilled' && inferSettled.value) {
+    llmInferredChanges = inferSettled.value.inferredChanges || []
+    llmInferWarnings = inferSettled.value.warnings || []
+    analysisExplanation = inferSettled.value.analysisExplanation || ''
+  }
+
+  // 合并联动修改：LLM结果 + 规则引擎结果（去重）
+  const existingKeys = new Set(llmInferredChanges.map(c => c.key))
+  const mergedInferred = [
+    ...llmInferredChanges,
+    ...ruleBasedInferred.filter(c => !existingKeys.has(c.key))
+  ]
+
+  // Phase 2 完成 → 推送最终结果
+  onPhaseComplete('phase2', {
+    success: true,
+    understood: multiAgentResult.understood,
+    primaryChanges: finalPrimaryChanges,
+    inferredChanges: mergedInferred,
+    analysisExplanation: analysisExplanation || `共识别 ${finalPrimaryChanges.length} 项直接修改和 ${mergedInferred.length} 项关联修改`,
+    warnings: [
+      ...multiAgentResult.allWarnings,
+      ...(legalTransformInfo.riskWarnings || []),
+      ...llmInferWarnings
+    ],
+    agentResponses: multiAgentResult.agentResponses,
+    processingTime: Date.now() - startTime,
+    legalTransform: legalTransformInfo
+  })
+}
+
+/**
+ * 构建联动分析prompt（提取为独立函数复用）
+ */
+function buildInferPrompt(
+  primaryChanges: SmartChange[],
+  context: { currentParams: Record<string, any>; templateName?: string; perspective?: string },
+  message: string
+): string {
+  return `你是合同条款联动分析专家。基于已识别的直接修改，分析可能需要联动调整的相关参数。
+
+## 已识别的直接修改
+${primaryChanges.map(c => `- ${c.paramName}（${c.key}）：${c.oldValue} → ${c.newValue}`).join('\n')}
+
+## 当前所有合同参数
+${JSON.stringify(context.currentParams, null, 2)}
+
+## 原始用户请求
+"${message}"
+
+## 重要的联动规则（必须检查）
+1. 月利率/季度利率/日利率设置 → 年化利率必须同步换算，资金成本计算方式必须匹配
+2. 投资金额变化 → 违约金金额必须按比例重新计算（如违约金=投资额×20%）
+3. 分成期限变化 → 截止日期需要重新计算
+4. 收益计算方式变化 → 对账周期、结算周期应同步调整
+5. 分成比例变化 → 预计回收期、年化回报率需要重新评估
+
+直接输出JSON对象，不要包裹在代码块中：
+{"analysisExplanation":"联动分析说明","inferredChanges":[{"key":"参数key","paramName":"参数中文名","oldValue":"原值","newValue":"建议新值","clauseText":"条款变更描述","changeType":"inferred","confidence":"high或medium或low","reason":"为什么需要联动修改","relatedTo":"关联的直接修改参数key","category":"calculation_method或unit_conversion或formula_update或related_term","selected":false}],"warnings":["风险提示字符串"]}`
+}
+
+/**
+ * 独立的LLM联动分析（从V3工作流提取复用）
+ */
+async function executeLLMInferAnalysis(
+  inferPrompt: string,
+  apiKey: string,
+  baseUrl: string
+): Promise<{ inferredChanges: SmartChange[], warnings: string[], analysisExplanation: string } | null> {
+  try {
+    const inferResponse = await fetch(`${baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: CONFIG.MODEL_QUALITY,
+        messages: [
+          { role: 'system', content: '你是合同条款联动分析专家。直接输出JSON对象，不要包裹在代码块中。所有字段必须是字符串类型。' },
+          { role: 'user', content: inferPrompt }
+        ],
+        temperature: 0.2,
+        max_tokens: CONFIG.INFER_MAX_TOKENS
+      })
+    })
+
+    if (!inferResponse.ok) return null
+
+    const data = await inferResponse.json()
+    const content = data.choices?.[0]?.message?.content || ''
+    console.log('[InferAnalysis] content length:', content.length, 'finish_reason:', data.choices?.[0]?.finish_reason)
+
+    const parsed = extractJsonFromContent(content)
+    if (!parsed) return null
+
+    return {
+      inferredChanges: (parsed.inferredChanges || []).map((c: any) => ({
+        key: c.key || '',
+        paramName: c.paramName || '',
+        oldValue: c.oldValue || '',
+        newValue: c.newValue || '',
+        clauseText: c.clauseText || '',
+        changeType: 'inferred' as ChangeType,
+        confidence: c.confidence || 'medium',
+        reason: c.reason || '',
+        relatedTo: c.relatedTo || '',
+        category: c.category || 'related_term',
+        selected: false
+      })),
+      warnings: Array.isArray(parsed.warnings) ? parsed.warnings.map((w: any) => typeof w === 'string' ? w : String(w)) : [],
+      analysisExplanation: parsed.analysisExplanation || ''
+    }
+  } catch (e) {
+    console.error('[InferAnalysis] Error:', e)
+    return null
+  }
+}

@@ -11,6 +11,7 @@ import {
   executeSmartChangeWorkflowV3,
   executeSmartChangeAnalysis,
   executeLegalCounselTransform,
+  executeProgressiveWorkflow,
   type AgentTask,
   type SmartChange,
   type SmartChangeResult,
@@ -1670,6 +1671,84 @@ app.post('/api/agents/smart-change', async (c) => {
       error: 'Smart change analysis failed: ' + (error as Error).message 
     }, 500)
   }
+})
+
+/**
+ * 渐进式智能分析API (SSE流式)
+ * Phase 1 (~5s): Agent识别 → 直接修改 + 规则联动（用户立即能操作）
+ * Phase 2 (~15s): 法律顾问 + LLM联动 并行（追加法律条款和深层关联）
+ */
+app.post('/api/agents/smart-change-stream', async (c) => {
+  const { 
+    message, 
+    templateId, 
+    currentParams, 
+    negotiationHistory,
+    perspective
+  } = await c.req.json()
+  
+  const { apiKey, baseUrl } = getAIConfig(c)
+  
+  if (!apiKey) {
+    return c.json({ error: 'API key not configured' }, 500)
+  }
+  
+  const template = industryTemplates[templateId]
+  if (!template) {
+    return c.json({ error: 'Template not found' }, 404)
+  }
+  
+  const context = {
+    currentParams: currentParams || template.defaultParams,
+    templateId,
+    templateName: template.name,
+    negotiationHistory: negotiationHistory || [],
+    perspective: perspective || 'borrower'
+  }
+
+  // SSE 流式响应
+  const stream = new ReadableStream({
+    start(controller) {
+      const encoder = new TextEncoder()
+      
+      const sendEvent = (event: string, data: any) => {
+        controller.enqueue(encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`))
+      }
+
+      executeProgressiveWorkflow(
+        message,
+        context,
+        apiKey,
+        baseUrl,
+        (phase, data) => {
+          try {
+            sendEvent(phase, data)
+          } catch (e) {
+            // 连接可能已关闭
+          }
+        }
+      ).then(() => {
+        try {
+          sendEvent('done', { timestamp: Date.now() })
+          controller.close()
+        } catch (e) {}
+      }).catch((err) => {
+        try {
+          sendEvent('error', { message: err.message || 'Workflow failed' })
+          controller.close()
+        } catch (e) {}
+      })
+    }
+  })
+
+  return new Response(stream, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*'
+    }
+  })
 })
 
 /**
@@ -6090,10 +6169,10 @@ app.get('/', (c) => {
       showSmartChangeAnalysisPanel(message);
       
       try {
-        // 调用智能联动分析API
-        updateSmartChangeStatus('analyzing', '正在分析您的修改意图...');
+        // 使用SSE流式API，渐进式展示结果
+        updateSmartChangeStatus('analyzing', '正在识别修改意图...');
         
-        const res = await fetch('/api/agents/smart-change', {
+        const res = await fetch('/api/agents/smart-change-stream', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -6105,19 +6184,38 @@ app.get('/', (c) => {
           })
         });
         
-        const result = await res.json();
-        smartChangeResult = result;
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
         
-        if (result.success && (result.primaryChanges?.length > 0 || result.inferredChanges?.length > 0)) {
-          // 显示分析结果，等待用户确认
-          updateSmartChangeStatus('confirm', '分析完成，请确认修改');
-          showSmartChangeConfirmPanel(result, message);
-        } else {
-          // 没有识别到修改
-          updateSmartChangeStatus('no-changes', result.warnings?.length > 0 
-            ? '提示: ' + (typeof result.warnings[0] === 'string' ? result.warnings[0] : JSON.stringify(result.warnings[0])) 
-            : 'AI未能理解您的变动描述，请尝试更具体的表述');
-          setTimeout(() => hideSmartChangePanel(), 3000);
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          buffer += decoder.decode(value, { stream: true });
+          
+          // 解析SSE事件
+          const lines = buffer.split('\\n');
+          buffer = lines.pop() || '';
+          
+          let currentEvent = '';
+          for (const line of lines) {
+            if (line.startsWith('event: ')) {
+              currentEvent = line.substring(7).trim();
+            } else if (line.startsWith('data: ') && currentEvent) {
+              try {
+                const data = JSON.parse(line.substring(6));
+                handleStreamEvent(currentEvent, data, message);
+              } catch (e) {}
+              currentEvent = '';
+            }
+          }
+        }
+        
+        // 如果最终没有收到结果，视为失败
+        if (!smartChangeResult) {
+          updateSmartChangeStatus('error', '分析超时，请重试');
+          setTimeout(() => hideSmartChangePanel(), 2000);
         }
       } catch (e) {
         console.error('Smart change analysis error:', e);
@@ -6128,6 +6226,87 @@ app.get('/', (c) => {
         btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>发送变更';
         activeAgentProcessing = false;
       }
+    }
+    
+    // 处理SSE流事件 — 渐进式渲染
+    function handleStreamEvent(event, data, message) {
+      switch (event) {
+        case 'status':
+          // 状态更新
+          if (data.phase === 1) {
+            updateSmartChangeStatus('analyzing', data.message || '正在识别修改意图...');
+          } else if (data.phase === 2) {
+            updateSmartChangeStatus('phase2', data.message || '法律顾问审核 + 深度联动分析中...');
+          }
+          break;
+          
+        case 'phase1':
+          // Phase 1 完成：立即展示直接修改 + 规则联动
+          smartChangeResult = data;
+          if (data.success && (data.primaryChanges?.length > 0 || data.inferredChanges?.length > 0)) {
+            updateSmartChangeStatus('phase1-done', '已识别修改，正在进行法律审核...');
+            showSmartChangeConfirmPanel(data, message);
+            // 显示"法律审核中"指示器
+            showPhase2LoadingIndicator();
+          } else {
+            updateSmartChangeStatus('no-changes', data.warnings?.length > 0 
+              ? '提示: ' + (typeof data.warnings[0] === 'string' ? data.warnings[0] : JSON.stringify(data.warnings[0])) 
+              : 'AI未能理解您的变动描述，请尝试更具体的表述');
+            setTimeout(() => hideSmartChangePanel(), 3000);
+          }
+          break;
+          
+        case 'phase2':
+          // Phase 2 完成：更新为最终结果（含法律条款 + 深层联动）
+          smartChangeResult = data;
+          updateSmartChangeStatus('confirm', '分析完成，请确认修改');
+          showSmartChangeConfirmPanel(data, message);
+          break;
+          
+        case 'complete':
+          // 单次完整结果（fallback模式）
+          smartChangeResult = data;
+          if (data.success && (data.primaryChanges?.length > 0 || data.inferredChanges?.length > 0)) {
+            updateSmartChangeStatus('confirm', '分析完成，请确认修改');
+            showSmartChangeConfirmPanel(data, message);
+          } else {
+            updateSmartChangeStatus('no-changes', data.warnings?.length > 0 
+              ? '提示: ' + (typeof data.warnings[0] === 'string' ? data.warnings[0] : JSON.stringify(data.warnings[0])) 
+              : 'AI未能理解您的变动描述，请尝试更具体的表述');
+            setTimeout(() => hideSmartChangePanel(), 3000);
+          }
+          break;
+          
+        case 'error':
+          updateSmartChangeStatus('error', data.message || '分析失败');
+          setTimeout(() => hideSmartChangePanel(), 2000);
+          break;
+      }
+    }
+    
+    // Phase 2 加载指示器 — 告诉用户法律审核还在进行中
+    function showPhase2LoadingIndicator() {
+      const resultArea = document.getElementById('smartChangeResultArea');
+      if (!resultArea) return;
+      
+      // 在结果区域顶部插入法律审核进度条
+      const indicator = document.createElement('div');
+      indicator.id = 'phase2Indicator';
+      indicator.className = 'mb-4 p-3 bg-indigo-50 rounded-xl border border-indigo-200 animate-pulse';
+      indicator.innerHTML = \`
+        <div class="flex items-center space-x-3">
+          <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-spinner fa-spin text-indigo-600 text-sm"></i>
+          </div>
+          <div class="flex-1">
+            <p class="text-sm font-medium text-indigo-800">
+              <i class="fas fa-gavel mr-1"></i>法律顾问审核中 + 深度联动分析中...
+            </p>
+            <p class="text-xs text-indigo-500 mt-0.5">完成后将自动追加法律条款和更多关联修改建议</p>
+          </div>
+        </div>
+      \`;
+      resultArea.insertBefore(indicator, resultArea.firstChild);
     }
     
     // 显示智能联动分析面板
@@ -6213,6 +6392,18 @@ app.get('/', (c) => {
           icon: '<i class="fas fa-spinner fa-spin text-violet-600"></i>',
           bg: 'bg-violet-100',
           title: '正在分析...',
+          desc: message
+        },
+        'phase1-done': {
+          icon: '<i class="fas fa-check text-emerald-600"></i>',
+          bg: 'bg-emerald-100',
+          title: '已识别修改',
+          desc: message
+        },
+        'phase2': {
+          icon: '<i class="fas fa-spinner fa-spin text-indigo-600"></i>',
+          bg: 'bg-indigo-100',
+          title: '深度分析中...',
           desc: message
         },
         'confirm': {
