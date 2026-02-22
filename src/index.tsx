@@ -6256,7 +6256,7 @@ app.get('/', (c) => {
             showPhase2LoadingIndicator();
           } else {
             updateSmartChangeStatus('no-changes', data.warnings?.length > 0 
-              ? '提示: ' + (typeof data.warnings[0] === 'string' ? data.warnings[0] : JSON.stringify(data.warnings[0])) 
+              ? '提示: ' + cleanWarningText(data.warnings[0]) 
               : 'AI未能理解您的变动描述，请尝试更具体的表述');
             setTimeout(() => hideSmartChangePanel(), 3000);
           }
@@ -6277,7 +6277,7 @@ app.get('/', (c) => {
             showSmartChangeConfirmPanel(data, message);
           } else {
             updateSmartChangeStatus('no-changes', data.warnings?.length > 0 
-              ? '提示: ' + (typeof data.warnings[0] === 'string' ? data.warnings[0] : JSON.stringify(data.warnings[0])) 
+              ? '提示: ' + cleanWarningText(data.warnings[0]) 
               : 'AI未能理解您的变动描述，请尝试更具体的表述');
             setTimeout(() => hideSmartChangePanel(), 3000);
           }
@@ -6495,7 +6495,7 @@ app.get('/', (c) => {
                   <div class="mt-2 p-2 bg-red-50 rounded-lg">
                     <p class="text-xs font-medium text-red-700 mb-1"><i class="fas fa-exclamation-triangle mr-1"></i>法律风险提示：</p>
                     <ul class="text-xs text-red-600 space-y-1">
-                      \${result.legalTransform.riskWarnings.map(w => \`<li>\${escapeHtml(typeof w === 'string' ? w : JSON.stringify(w))}</li>\`).join('')}
+                      \${result.legalTransform.riskWarnings.map(w => \`<li>\${escapeHtml(cleanWarningText(w))}</li>\`).join('')}
                     </ul>
                   </div>
                 \` : ''}
@@ -6559,7 +6559,7 @@ app.get('/', (c) => {
               <i class="fas fa-exclamation-triangle text-red-600 mt-1"></i>
               <div>
                 <p class="text-sm font-medium text-red-800 mb-1">风险提示</p>
-                \${result.warnings.map(w => \`<p class="text-sm text-red-700">\${escapeHtml(typeof w === 'string' ? w : JSON.stringify(w))}</p>\`).join('')}
+                \${result.warnings.map(w => \`<p class="text-sm text-red-700">\${escapeHtml(cleanWarningText(w))}</p>\`).join('')}
               </div>
             </div>
           </div>
@@ -6746,6 +6746,7 @@ app.get('/', (c) => {
         changes: allConfirmed.map(c => ({
           paramKey: c.key,
           paramName: c.paramName,
+          moduleName: c.paramName || '条款修改',
           oldValue: c.oldValue,
           newValue: c.newValue,
           clauseText: c.clauseText,
@@ -7150,6 +7151,19 @@ app.get('/', (c) => {
       return div.innerHTML;
     }
     
+    // 清理警告文本：去掉各种前缀标签，保持文本自然通顺
+    function cleanWarningText(w) {
+      if (typeof w !== 'string') return typeof w === 'object' ? JSON.stringify(w) : String(w);
+      let text = w;
+      // 去掉 [xxx] 前缀（如 [投资分成专家]）
+      text = text.replace(/^\[.*?\]\s*/, '');
+      // 去掉 【xxx】 前缀（如 【资金缺口风险】）
+      text = text.replace(/^【.*?】\s*/, '');
+      // 去掉开头的"警告："或"提示："
+      text = text.replace(/^(警告|提示|注意)[：:]\s*/, '');
+      return text;
+    }
+    
     function quickInput(text) {
       document.getElementById('negotiationInput').value = text;
       document.getElementById('negotiationInput').focus();
@@ -7294,7 +7308,7 @@ app.get('/', (c) => {
               
               \${n.warnings?.length > 0 ? \`
                 <div class="bg-red-50 rounded-lg p-2 border border-red-100">
-                  <p class="text-xs text-red-700"><i class="fas fa-exclamation-triangle mr-1"></i>\${typeof n.warnings[0] === 'string' ? escapeHtml(n.warnings[0]) : escapeHtml(JSON.stringify(n.warnings[0]))}</p>
+                  <p class="text-xs text-red-700"><i class="fas fa-exclamation-triangle mr-1"></i>\${escapeHtml(cleanWarningText(n.warnings[0]))}</p>
                 </div>
               \` : ''}
             </div>
