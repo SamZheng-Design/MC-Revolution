@@ -2616,6 +2616,11 @@ app.get('/', (c) => {
     .z-30 { z-index: 30; }
     .z-40 { z-index: 40; }
     .z-\\[100\\] { z-index: 100; }
+    .z-\\[200\\] { z-index: 200; }
+    .z-\\[300\\] { z-index: 300; }
+    .z-\\[400\\] { z-index: 400; }
+    .z-\\[500\\] { z-index: 500; }
+    .z-\\[900\\] { z-index: 900; }
     .z-\\[999\\] { z-index: 999; }
     .z-\\[9999\\] { z-index: 9999; }
     
@@ -2893,7 +2898,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 产品引导教程弹窗 ==================== -->
-  <div id="onboardingModal" class="hidden fixed inset-0 bg-black/60 onboarding-modal flex items-center justify-center z-[100]">
+  <div id="onboardingModal" class="hidden fixed inset-0 bg-black/60 onboarding-modal flex items-center justify-center z-[300]">
     <div class="onboarding-card bg-white rounded-3xl max-w-2xl w-full mx-4 overflow-hidden">
       <!-- 顶部渐变背景 -->
       <div class="relative h-48 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 overflow-hidden">
@@ -3404,7 +3409,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 编辑个人资料 ==================== -->
-  <div id="editProfileModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="editProfileModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 max-h-[85vh] overflow-hidden animate-in flex flex-col">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -3888,7 +3893,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 新建项目 ==================== -->
-  <div id="newProjectModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="newProjectModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
         <div class="flex items-center justify-between">
@@ -3949,7 +3954,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 云端同步/数据管理 ==================== -->
-  <div id="cloudSyncModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="cloudSyncModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4050,7 +4055,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 协作者管理 ==================== -->
-  <div id="collaboratorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="collaboratorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-blue-50">
         <div class="flex items-center justify-between">
@@ -4170,7 +4175,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 加入协作 ==================== -->
-  <div id="joinCollabModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="joinCollabModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4209,7 +4214,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 版本历史 ==================== -->
-  <div id="versionModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="versionModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-indigo-50">
         <div class="flex items-center justify-between">
@@ -4283,7 +4288,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 版本对比 ==================== -->
-  <div id="versionCompareModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="versionCompareModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4325,7 +4330,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 版本详情/回退确认 ==================== -->
-  <div id="versionDetailModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="versionDetailModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4342,7 +4347,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: AI谈判助手 ==================== -->
-  <div id="aiAdvisorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="aiAdvisorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-500 to-purple-600">
         <div class="flex items-center justify-between">
@@ -4468,7 +4473,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 电子签署 ==================== -->
-  <div id="signModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="signModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
         <div class="flex items-center justify-between">
@@ -4594,7 +4599,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 签名板 ==================== -->
-  <div id="signaturePadModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="signaturePadModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[90vh] overflow-hidden animate-in flex flex-col">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4650,7 +4655,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 签署完成 ==================== -->
-  <div id="signCompleteModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="signCompleteModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-8 text-center">
         <div class="w-20 h-20 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -4687,7 +4692,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 导出 ==================== -->
-  <div id="exportModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="exportModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4733,7 +4738,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 模板管理 ==================== -->
-  <div id="templateManagerModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="templateManagerModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-3xl w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
         <div class="flex items-center justify-between">
@@ -4798,7 +4803,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 创建/编辑模板 ==================== -->
-  <div id="createTemplateModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="createTemplateModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4904,7 +4909,7 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 弹窗: 模板详情 ==================== -->
-  <div id="templateDetailModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="templateDetailModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4921,7 +4926,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 编辑项目 ==================== -->
-  <div id="editProjectModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="editProjectModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
@@ -4961,7 +4966,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 删除项目确认 ==================== -->
-  <div id="deleteProjectModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="deleteProjectModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-red-50">
         <div class="flex items-center">
@@ -4996,7 +5001,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 直接编辑合同参数 ==================== -->
-  <div id="editParamModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="editParamModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-emerald-50 to-teal-50">
         <div class="flex items-center justify-between">
@@ -5033,7 +5038,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 删除协商记录确认 ==================== -->
-  <div id="deleteNegotiationModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="deleteNegotiationModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-amber-50">
         <div class="flex items-center">
@@ -5066,7 +5071,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 删除版本快照确认 ==================== -->
-  <div id="deleteVersionModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="deleteVersionModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-purple-50">
         <div class="flex items-center">
@@ -5096,7 +5101,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 删除协作者确认 ==================== -->
-  <div id="deleteCollaboratorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="deleteCollaboratorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-rose-50">
         <div class="flex items-center">
@@ -5136,7 +5141,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 删除自定义模板确认 ==================== -->
-  <div id="deleteTemplateModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="deleteTemplateModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-orange-50">
         <div class="flex items-center">
@@ -5176,7 +5181,7 @@ app.get('/', (c) => {
   </div>
 
   <!-- ==================== 弹窗: 编辑签署人信息 ==================== -->
-  <div id="editSignerModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50">
+  <div id="editSignerModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100 bg-teal-50">
         <div class="flex items-center justify-between">
@@ -5226,6 +5231,63 @@ app.get('/', (c) => {
     let selectedTemplateId = null;
     let currentPerspective = 'investor';
     let contractView = 'card';
+    
+    // ==================== 弹窗滚动锁定工具 ====================
+    let _scrollLockCount = 0;
+    let _savedScrollY = 0;
+    
+    function lockBodyScroll() {
+      if (_scrollLockCount === 0) {
+        _savedScrollY = window.scrollY;
+        document.body.classList.add('modal-open');
+        document.body.style.top = '-' + _savedScrollY + 'px';
+      }
+      _scrollLockCount++;
+    }
+    
+    function unlockBodyScroll() {
+      _scrollLockCount = Math.max(0, _scrollLockCount - 1);
+      if (_scrollLockCount === 0) {
+        document.body.classList.remove('modal-open');
+        document.body.style.top = '';
+        window.scrollTo(0, _savedScrollY);
+      }
+    }
+    
+    // 通用弹窗显示（带滚动锁定和动画）
+    function showModal(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.classList.remove('hidden', 'modal-closing');
+        lockBodyScroll();
+      }
+    }
+    
+    // 通用弹窗关闭（带动画和滚动解锁）
+    function hideModal(id, skipAnimation) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (skipAnimation) {
+        el.classList.add('hidden');
+        unlockBodyScroll();
+      } else {
+        el.classList.add('modal-closing');
+        setTimeout(() => {
+          el.classList.add('hidden');
+          el.classList.remove('modal-closing');
+          unlockBodyScroll();
+        }, 180);
+      }
+    }
+    
+    // 点击蒙层关闭弹窗
+    document.addEventListener('click', function(e) {
+      if (e.target.classList.contains('backdrop-blur-sm') || 
+          e.target.classList.contains('onboarding-modal')) {
+        // 只有点到蒙层本身才关闭（不是内部元素冒泡）
+        if (e.target === e.currentTarget) return;
+      }
+    });
     
     // ==================== 账户状态管理 ====================
     let currentUser = JSON.parse(localStorage.getItem('rbf_current_user') || 'null');
@@ -5590,11 +5652,11 @@ app.get('/', (c) => {
       document.getElementById('editTitle').value = currentUser.title || '';
       document.getElementById('editBio').value = currentUser.bio || '';
       document.getElementById('editDefaultRole').value = currentUser.defaultRole || 'both';
-      document.getElementById('editProfileModal').classList.remove('hidden');
+      showModal('editProfileModal');
     }
     
     function hideEditProfileModal() {
-      document.getElementById('editProfileModal').classList.add('hidden');
+      hideModal('editProfileModal');
     }
     
     async function saveProfile() {
@@ -5663,11 +5725,20 @@ app.get('/', (c) => {
     function showOnboarding() {
       currentOnboardingStep = 0;
       updateOnboardingUI();
-      document.getElementById('onboardingModal').classList.remove('hidden');
+      const modal = document.getElementById('onboardingModal');
+      modal.classList.remove('hidden');
+      modal.classList.remove('modal-closing');
+      lockBodyScroll();
     }
     
     function closeOnboarding() {
-      document.getElementById('onboardingModal').classList.add('hidden');
+      const modal = document.getElementById('onboardingModal');
+      modal.classList.add('modal-closing');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('modal-closing');
+        unlockBodyScroll();
+      }, 200);
       localStorage.setItem('rbf_onboarding_seen', 'true');
     }
     
@@ -5889,8 +5960,8 @@ app.get('/', (c) => {
     }
     
     // ==================== 新建项目 ====================
-    function showNewProjectModal() { document.getElementById('newProjectModal').classList.remove('hidden'); }
-    function hideNewProjectModal() { document.getElementById('newProjectModal').classList.add('hidden'); }
+    function showNewProjectModal() { showModal('newProjectModal'); }
+    function hideNewProjectModal() { hideModal('newProjectModal'); }
     
     function renderTemplateGrid() {
       const grid = document.getElementById('templateGrid');
@@ -6321,7 +6392,7 @@ app.get('/', (c) => {
       if (!panel) {
         panel = document.createElement('div');
         panel.id = 'smartChangePanel';
-        panel.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-50';
+        panel.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-[200]';
         document.body.appendChild(panel);
       }
       
@@ -6805,7 +6876,7 @@ app.get('/', (c) => {
     // Toast提示
     function showToast(message) {
       const toast = document.createElement('div');
-      toast.className = 'fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-gray-800 text-white rounded-lg shadow-xl z-50 animate-in';
+      toast.className = 'fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-gray-800 text-white rounded-lg shadow-xl z-[900] animate-in';
       toast.innerHTML = \`<i class="fas fa-check-circle mr-2 text-emerald-400"></i>\${escapeHtml(message)}\`;
       document.body.appendChild(toast);
       setTimeout(() => toast.remove(), 3000);
@@ -6864,7 +6935,7 @@ app.get('/', (c) => {
         // 创建面板
         panel = document.createElement('div');
         panel.id = 'multiAgentPanel';
-        panel.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-50';
+        panel.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-[200]';
         panel.innerHTML = \`
           <div class="bg-white rounded-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl">
             <div class="p-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
@@ -7509,10 +7580,10 @@ app.get('/', (c) => {
     
     // ==================== 弹窗控制 ====================
     function showCloudSyncModal() { 
-      document.getElementById('cloudSyncModal').classList.remove('hidden');
+      showModal('cloudSyncModal');
       updateStorageStats();
     }
-    function hideCloudSyncModal() { document.getElementById('cloudSyncModal').classList.add('hidden'); }
+    function hideCloudSyncModal() { hideModal('cloudSyncModal'); }
     
     // ==================== 云端存储/数据管理 ====================
     function updateStorageStats() {
@@ -7639,21 +7710,21 @@ app.get('/', (c) => {
         warning: 'fa-exclamation-triangle'
       };
       const toast = document.createElement('div');
-      toast.className = 'fixed bottom-4 right-4 ' + colors[type] + ' text-white px-6 py-3 rounded-lg shadow-lg flex items-center z-50 animate-in';
+      toast.className = 'fixed bottom-4 right-4 ' + colors[type] + ' text-white px-6 py-3 rounded-lg shadow-lg flex items-center z-[900] animate-in';
       toast.innerHTML = '<i class="fas ' + icons[type] + ' mr-2"></i>' + message;
       document.body.appendChild(toast);
       setTimeout(() => { toast.remove(); }, 3000);
     }
     function showCollaboratorModal() { 
-      document.getElementById('collaboratorModal').classList.remove('hidden');
+      showModal('collaboratorModal');
       renderCollaboratorList();
       if (currentProject) {
         document.getElementById('ownerCreateDate').textContent = formatDate(currentProject.createdAt);
       }
     }
-    function hideCollaboratorModal() { document.getElementById('collaboratorModal').classList.add('hidden'); }
-    function showJoinCollabModal() { document.getElementById('joinCollabModal').classList.remove('hidden'); }
-    function hideJoinCollabModal() { document.getElementById('joinCollabModal').classList.add('hidden'); }
+    function hideCollaboratorModal() { hideModal('collaboratorModal'); }
+    function showJoinCollabModal() { showModal('joinCollabModal'); }
+    function hideJoinCollabModal() { hideModal('joinCollabModal'); }
     
     // ==================== 协作功能 ====================
     let selectedInviteRole = 'investor';
@@ -7679,19 +7750,19 @@ app.get('/', (c) => {
       }
     }
     function showVersionModal() { 
-      document.getElementById('versionModal').classList.remove('hidden');
+      showModal('versionModal');
       renderVersionList();
     }
-    function hideVersionModal() { document.getElementById('versionModal').classList.add('hidden'); }
+    function hideVersionModal() { hideModal('versionModal'); }
     function showVersionCompareModal() { 
-      document.getElementById('versionCompareModal').classList.remove('hidden');
+      showModal('versionCompareModal');
       populateVersionSelectors();
     }
-    function hideVersionCompareModal() { document.getElementById('versionCompareModal').classList.add('hidden'); }
-    function showVersionDetailModal() { document.getElementById('versionDetailModal').classList.remove('hidden'); }
-    function hideVersionDetailModal() { document.getElementById('versionDetailModal').classList.add('hidden'); }
-    function showAIAdvisorModal() { document.getElementById('aiAdvisorModal').classList.remove('hidden'); }
-    function hideAIAdvisorModal() { document.getElementById('aiAdvisorModal').classList.add('hidden'); }
+    function hideVersionCompareModal() { hideModal('versionCompareModal'); }
+    function showVersionDetailModal() { showModal('versionDetailModal'); }
+    function hideVersionDetailModal() { hideModal('versionDetailModal'); }
+    function showAIAdvisorModal() { showModal('aiAdvisorModal'); }
+    function hideAIAdvisorModal() { hideModal('aiAdvisorModal'); }
     
     // AI助手面板入口（便捷别名）
     function showAIAdvisorPanel() { showAIAdvisorModal(); }
@@ -7707,10 +7778,11 @@ app.get('/', (c) => {
       document.getElementById('editProjectNote').value = project.note || '';
       document.getElementById('editProjectStatus').value = project.status || 'negotiating';
       document.getElementById('editProjectModal').classList.remove('hidden');
+      lockBodyScroll();
     }
     
     function hideEditProjectModal() {
-      document.getElementById('editProjectModal').classList.add('hidden');
+      hideModal('editProjectModal');
     }
     
     function saveEditProject() {
@@ -7745,10 +7817,11 @@ app.get('/', (c) => {
       document.getElementById('deleteNegotiationCount').textContent = project.negotiations?.length || 0;
       document.getElementById('deleteVersionCount').textContent = project.versions?.length || 0;
       document.getElementById('deleteProjectModal').classList.remove('hidden');
+      lockBodyScroll();
     }
     
     function hideDeleteProjectModal() {
-      document.getElementById('deleteProjectModal').classList.add('hidden');
+      hideModal('deleteProjectModal');
     }
     
     function confirmDeleteProject() {
@@ -7772,10 +7845,11 @@ app.get('/', (c) => {
       document.getElementById('editParamNewValue').value = currentValue || '';
       document.getElementById('editParamNote').innerHTML = note ? '<i class="fas fa-info-circle mr-2"></i>' + note : '<i class="fas fa-lightbulb mr-2"></i>直接修改参数值，无需通过自然语言协商';
       document.getElementById('editParamModal').classList.remove('hidden');
+      lockBodyScroll();
     }
     
     function hideEditParamModal() {
-      document.getElementById('editParamModal').classList.add('hidden');
+      hideModal('editParamModal');
     }
     
     function saveEditParam() {
@@ -7849,10 +7923,11 @@ app.get('/', (c) => {
       \`;
       
       document.getElementById('deleteNegotiationModal').classList.remove('hidden');
+      lockBodyScroll();
     }
     
     function hideDeleteNegotiationModal() {
-      document.getElementById('deleteNegotiationModal').classList.add('hidden');
+      hideModal('deleteNegotiationModal', true);
     }
     
     function confirmDeleteNegotiation() {
@@ -7887,10 +7962,11 @@ app.get('/', (c) => {
       document.getElementById('deleteVersionId').value = versionId;
       document.getElementById('deleteVersionName').textContent = versionName || '未命名版本';
       document.getElementById('deleteVersionModal').classList.remove('hidden');
+      lockBodyScroll();
     }
     
     function hideDeleteVersionModal() {
-      document.getElementById('deleteVersionModal').classList.add('hidden');
+      hideModal('deleteVersionModal', true);
     }
     
     function confirmDeleteVersion() {
@@ -7916,11 +7992,11 @@ app.get('/', (c) => {
     let isDrawing = false;
     
     function showSignModal() { 
-      document.getElementById('signModal').classList.remove('hidden');
+      showModal('signModal');
       checkExistingSignProcess();
     }
     function hideSignModal() { 
-      document.getElementById('signModal').classList.add('hidden');
+      hideModal('signModal');
       resetSignModal();
     }
     
@@ -8154,10 +8230,11 @@ app.get('/', (c) => {
       document.getElementById('editSignerIcon').innerHTML = '<i class="fas ' + icon + ' text-' + color + '-600"></i>';
       
       document.getElementById('editSignerModal').classList.remove('hidden');
+      lockBodyScroll();
     }
     
     function hideEditSignerModal() {
-      document.getElementById('editSignerModal').classList.add('hidden');
+      hideModal('editSignerModal', true);
       currentEditingSignId = null;
     }
     
@@ -8201,11 +8278,11 @@ app.get('/', (c) => {
     }
     
     // ==================== 签名板功能 ====================
-    function showSignaturePadModal() { document.getElementById('signaturePadModal').classList.remove('hidden'); initSignatureCanvas(); }
-    function hideSignaturePadModal() { document.getElementById('signaturePadModal').classList.add('hidden'); currentSignerId = null; }
-    function showSignCompleteModal() { document.getElementById('signCompleteModal').classList.remove('hidden'); }
+    function showSignaturePadModal() { showModal('signaturePadModal'); initSignatureCanvas(); }
+    function hideSignaturePadModal() { hideModal('signaturePadModal'); currentSignerId = null; }
+    function showSignCompleteModal() { showModal('signCompleteModal'); }
     function hideSignCompleteModal() { 
-      document.getElementById('signCompleteModal').classList.add('hidden');
+      hideModal('signCompleteModal');
       // 更新项目状态
       if (currentProject) {
         currentProject.status = 'signed';
@@ -8431,22 +8508,22 @@ app.get('/', (c) => {
       
       showToast('合同已下载', 'success');
     }
-    function showExportModal() { document.getElementById('exportModal').classList.remove('hidden'); }
-    function hideExportModal() { document.getElementById('exportModal').classList.add('hidden'); }
+    function showExportModal() { showModal('exportModal'); }
+    function hideExportModal() { hideModal('exportModal'); }
     function showTemplateManagerModal() { 
-      document.getElementById('templateManagerModal').classList.remove('hidden'); 
+      showModal('templateManagerModal'); 
       loadCustomTemplates();
       renderSystemTemplateList();
     }
-    function hideTemplateManagerModal() { document.getElementById('templateManagerModal').classList.add('hidden'); }
+    function hideTemplateManagerModal() { hideModal('templateManagerModal'); }
     function showCreateTemplateModal() { 
-      document.getElementById('createTemplateModal').classList.remove('hidden');
+      showModal('createTemplateModal');
       resetCreateTemplateForm();
       renderSourceTemplateOptions();
     }
-    function hideCreateTemplateModal() { document.getElementById('createTemplateModal').classList.add('hidden'); }
-    function showTemplateDetailModal() { document.getElementById('templateDetailModal').classList.remove('hidden'); }
-    function hideTemplateDetailModal() { document.getElementById('templateDetailModal').classList.add('hidden'); }
+    function hideCreateTemplateModal() { hideModal('createTemplateModal'); }
+    function showTemplateDetailModal() { showModal('templateDetailModal'); }
+    function hideTemplateDetailModal() { hideModal('templateDetailModal'); }
     
     // ==================== 模板定制功能 ====================
     let customTemplates = JSON.parse(localStorage.getItem('rbf_custom_templates') || '[]');
@@ -8822,10 +8899,11 @@ app.get('/', (c) => {
       document.getElementById('deleteTemplateIcon').innerHTML = '<i class="fas ' + icon + ' text-' + color + '-600"></i>';
       
       document.getElementById('deleteTemplateModal').classList.remove('hidden');
+      lockBodyScroll();
     }
     
     function hideDeleteTemplateModal() {
-      document.getElementById('deleteTemplateModal').classList.add('hidden');
+      hideModal('deleteTemplateModal', true);
     }
     
     function confirmDeleteTemplate() {
@@ -9146,10 +9224,11 @@ app.get('/', (c) => {
       document.getElementById('deleteCollaboratorAvatar').innerHTML = '<i class="fas ' + (roleIcons[role] || 'fa-eye') + ' text-' + (roleColors[role] || 'gray') + '-600"></i>';
       
       document.getElementById('deleteCollaboratorModal').classList.remove('hidden');
+      lockBodyScroll();
     }
     
     function hideDeleteCollaboratorModal() {
-      document.getElementById('deleteCollaboratorModal').classList.add('hidden');
+      hideModal('deleteCollaboratorModal', true);
     }
     
     function confirmDeleteCollaborator() {

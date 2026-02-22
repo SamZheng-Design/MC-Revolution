@@ -139,7 +139,7 @@ nav, .navbar {
     0 4px 20px rgba(99, 102, 241, 0.06);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 50;
   transition: all var(--duration-normal) var(--ease-smooth);
 }
 
@@ -347,6 +347,18 @@ nav:hover, .navbar:hover {
 }
 
 /* ========== 7. 模态框系统 - 支持滚动 ========== */
+/*
+ * Z-Index 层级体系:
+ * 10  - 页面内浮动元素
+ * 50  - 导航栏 (sticky nav)
+ * 100 - 下拉菜单/popover
+ * 200 - 普通弹窗/模态框
+ * 300 - 引导教程弹窗
+ * 400 - AI聊天窗口
+ * 500 - AI悬浮按钮
+ * 900 - Toast通知
+ * 9999 - Loading遮罩
+ */
 .modal-overlay, .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -356,7 +368,7 @@ nav:hover, .navbar:hover {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
+  z-index: 200;
   padding: 20px;
   animation: fadeIn var(--duration-fast) var(--ease-smooth);
 }
@@ -373,11 +385,13 @@ nav:hover, .navbar:hover {
   box-shadow: var(--shadow-2xl);
   width: 100%;
   max-width: 560px;
-  max-height: 85vh; /* 关键：限制最大高度 */
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   animation: modalSlideUp var(--duration-normal) var(--ease-spring);
   overflow: hidden;
+  /* 确保弹窗内容在最上层 */
+  isolation: isolate;
 }
 
 @keyframes modalSlideUp {
@@ -502,7 +516,7 @@ input::placeholder, textarea::placeholder {
     0 4px 20px rgba(99, 102, 241, 0.4),
     0 0 40px rgba(99, 102, 241, 0.2);
   cursor: pointer;
-  z-index: 1000;
+  z-index: 500;
   transition: all var(--duration-normal) var(--ease-spring);
   display: flex;
   align-items: center;
@@ -559,7 +573,7 @@ input::placeholder, textarea::placeholder {
   background: white;
   border-radius: var(--radius-2xl);
   box-shadow: var(--shadow-2xl);
-  z-index: 999;
+  z-index: 400;
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -924,6 +938,45 @@ input::placeholder, textarea::placeholder {
   z-index: 9999;
 }
 
+/* ========== 17.5 全局弹窗辅助 ========== */
+/* 弹窗打开时禁止body滚动 */
+body.modal-open {
+  overflow: hidden;
+  /* 防止iOS Safari滚动穿透 */
+  position: fixed;
+  width: 100%;
+  /* touch-action 防止触摸滚动 */
+  touch-action: none;
+}
+
+/* 弹窗关闭动画 */
+.modal-closing {
+  animation: fadeOut var(--duration-fast) var(--ease-smooth) forwards;
+}
+
+.modal-closing .modal-card,
+.modal-closing .modal-content,
+.modal-closing .modal-dialog,
+.modal-closing .onboarding-card {
+  animation: modalSlideDown var(--duration-fast) var(--ease-smooth) forwards;
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes modalSlideDown {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+  }
+}
+
 #app-loading::before {
   content: '';
   position: absolute;
@@ -967,17 +1020,25 @@ input::placeholder, textarea::placeholder {
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   background: rgba(15, 23, 42, 0.6);
+  z-index: 300 !important;
+  /* 防止背景滚动穿透 */
+  overscroll-behavior: contain;
 }
 
 .onboarding-card {
   box-shadow: 
     var(--shadow-2xl),
-    0 0 60px rgba(99, 102, 241, 0.15);
+    0 0 60px rgba(99, 102, 241, 0.15),
+    0 0 0 1px rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-3xl);
   overflow: hidden;
   max-height: 85vh;
   display: flex;
   flex-direction: column;
+  /* 关键：确保弹窗创建新堆叠上下文 */
+  isolation: isolate;
+  position: relative;
+  z-index: 1;
 }
 
 .onboarding-content {
@@ -1173,6 +1234,17 @@ input::placeholder, textarea::placeholder {
   .onboarding-card {
     margin: 12px;
     max-height: 90vh;
+    border-radius: var(--radius-xl);
+  }
+  
+  /* 移动端弹窗overlay增强 */
+  .modal-overlay, .modal-backdrop, .onboarding-modal {
+    padding: 12px;
+    align-items: flex-end; /* 移动端底部弹出更自然 */
+  }
+  
+  .onboarding-modal {
+    align-items: center; /* 引导弹窗保持居中 */
   }
 }
 
@@ -1180,6 +1252,16 @@ input::placeholder, textarea::placeholder {
   .modal-card, .modal-dialog {
     margin: 8px;
     border-radius: var(--radius-lg);
+  }
+  
+  .onboarding-card {
+    margin: 8px;
+    border-radius: var(--radius-lg);
+  }
+  
+  /* 移动端引导弹窗顶部渐变区域缩小 */
+  .onboarding-card .h-48 {
+    height: 8rem;
   }
   
   .stat-card {
