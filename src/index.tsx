@@ -2216,414 +2216,6 @@ app.get('/', (c) => {
     .bg-black { background-color: #000; }
     .bg-opacity-50 { background-color: rgba(0,0,0,0.5); }
     
-    /* App-specific styles */
-    .page { display: none; }
-    .page.active { display: flex; }
-    .project-card { transition: all 0.3s; }
-    .project-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.12); }
-    .template-card { transition: all 0.3s; cursor: pointer; }
-    .template-card:hover { transform: scale(1.02); }
-    .template-card.selected { border-color: #6366f1; background: #eef2ff; }
-    .negotiation-item { transition: all 0.2s; }
-    .negotiation-item:hover { background: #f9fafb; }
-    .module-card { transition: all 0.3s; }
-    .module-card.has-changes { border-color: #10b981; background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 100%); }
-    .change-badge { background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; font-size: 10px; padding: 2px 8px; border-radius: 10px; }
-    .value-changed { background: linear-gradient(120deg, #10b981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
-    .value-old { text-decoration: line-through; color: #9ca3af; font-size: 0.9em; }
-    .perspective-badge { transition: all 0.3s; }
-    .perspective-investor { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); }
-    .perspective-borrower { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); }
-    .contract-section { scroll-margin-top: 80px; }
-    .contract-section.has-changes { background: linear-gradient(90deg, #ecfdf5 0%, transparent 100%); border-left: 4px solid #10b981; }
-    .clause-param { background: linear-gradient(120deg, #a78bfa 0%, #818cf8 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
-    .clause-param-changed { background: linear-gradient(120deg, #10b981 0%, #059669 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
-    .feature-coming { opacity: 0.7; }
-    .feature-coming:hover { opacity: 1; }
-    .tooltip { position: relative; }
-    .tooltip:hover::after { content: attr(data-tip); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); padding: 4px 8px; background: #1f2937; color: white; font-size: 12px; border-radius: 4px; white-space: nowrap; z-index: 100; }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .animate-in { animation: slideIn 0.3s ease-out; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-    .pulse { animation: pulse 2s infinite; }
-    .version-item { transition: all 0.2s; }
-    .version-item:hover { background: #f3f4f6; }
-    .version-item.current { background: #dbeafe; border-left: 3px solid #3b82f6; }
-    
-    /* 引导教程弹窗样式 */
-    .onboarding-modal { backdrop-filter: blur(8px); }
-    .onboarding-card { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
-    .onboarding-step { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-    .onboarding-step.active { opacity: 1; transform: translateX(0); }
-    .onboarding-step.prev { opacity: 0; transform: translateX(-100%); position: absolute; }
-    .onboarding-step.next { opacity: 0; transform: translateX(100%); position: absolute; }
-    .step-dot { transition: all 0.3s; }
-    .step-dot.active { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); transform: scale(1.2); }
-    .feature-icon { transition: all 0.3s; }
-    .feature-icon:hover { transform: scale(1.1); }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    .float-animation { animation: float 3s ease-in-out infinite; }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
-    
-    /* 智能联动修改面板样式 */
-    #smartChangePanel {
-      backdrop-filter: blur(8px);
-    }
-    #smartChangePanel > div {
-      animation: smartChangeSlideIn 0.3s ease-out;
-    }
-    @keyframes smartChangeSlideIn {
-      from { opacity: 0; transform: scale(0.95) translateY(20px); }
-      to { opacity: 1; transform: scale(1) translateY(0); }
-    }
-    .smart-change-item {
-      transition: all 0.2s ease;
-    }
-    .smart-change-item:hover {
-      transform: translateX(4px);
-    }
-    .smart-change-item input[type="checkbox"] {
-      transition: all 0.2s;
-    }
-    .smart-change-item input[type="checkbox"]:checked {
-      transform: scale(1.1);
-    }
-    /* 置信度指示器动画 */
-    .confidence-high {
-      animation: confidencePulse 2s ease-in-out infinite;
-    }
-    @keyframes confidencePulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
-      50% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
-    }
-    /* 关联修改闪烁提示 */
-    .inferred-highlight {
-      animation: inferredBlink 1.5s ease-in-out 2;
-    }
-    @keyframes inferredBlink {
-      0%, 100% { background-color: rgba(251, 191, 36, 0.1); }
-      50% { background-color: rgba(251, 191, 36, 0.3); }
-    }
-    .delay-100 { animation-delay: 0.1s; }
-    .delay-200 { animation-delay: 0.2s; }
-    .delay-300 { animation-delay: 0.3s; }
-    .delay-400 { animation-delay: 0.4s; }
-    
-    /* 修复：用CSS定义SVG背景图案 */
-    .pattern-bg {
-      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-    }
-    
-    /* 优化：协商输入框扩展动画 */
-    #negotiationInput:focus { min-height: 80px; }
-    #negotiationInput { transition: min-height 0.2s ease; }
-    
-    /* 优化：快捷输入闪烁提示 */
-    @keyframes quickHint { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 0 2px rgba(99,102,241,0.3); } }
-    .quick-hint { animation: quickHint 2s ease-in-out 3; }
-    
-    /* 优化：返回按钮样式强化 */
-    .back-btn { transition: all 0.2s; }
-    .back-btn:hover { transform: translateX(-4px); background: #eef2ff; }
-    
-    /* 优化：AI助手入口高亮 */
-    .ai-btn-glow { box-shadow: 0 0 20px rgba(99,102,241,0.4); animation: aiGlow 2s ease-in-out infinite; }
-    @keyframes aiGlow { 0%,100% { box-shadow: 0 0 10px rgba(99,102,241,0.3); } 50% { box-shadow: 0 0 25px rgba(99,102,241,0.5); } }
-    
-    /* 优化：签名流程进度条 */
-    .sign-progress-step { transition: all 0.3s; }
-    .sign-progress-step.active { background: linear-gradient(135deg, #6366f1, #8b5cf6); color: white; }
-    .sign-progress-step.completed { background: #10b981; color: white; }
-    
-    /* 优化：移动端弹窗 */
-    @media (max-width: 640px) {
-      .onboarding-card, .modal-card { margin: 8px; max-height: 90vh; }
-      .modal-content { max-height: 70vh; overflow-y: auto; }
-    }
-    
-    /* 优化：空状态引导 */
-    .empty-action-btn { transition: all 0.3s; border: 2px dashed #c7d2fe; }
-    .empty-action-btn:hover { border-color: #6366f1; background: #eef2ff; transform: scale(1.02); }
-    
-    /* 多Agent并行处理样式 */
-    .agent-card {
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .agent-card.processing {
-      animation: agentPulse 1.5s ease-in-out infinite;
-    }
-    .agent-card.completed {
-      border-color: #10b981 !important;
-      background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
-    }
-    @keyframes agentPulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
-      50% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
-    }
-    @keyframes agentSuccess {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.05); }
-      100% { transform: scale(1); }
-    }
-    .agent-success-animation {
-      animation: agentSuccess 0.5s ease-out;
-    }
-    
-    /* 多Agent面板动画 */
-    @keyframes slideInFromBottom {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    #multiAgentPanel > div {
-      animation: slideInFromBottom 0.3s ease-out;
-    }
-    
-    /* Agent卡片渐进动画 */
-    .agent-card:nth-child(1) { animation-delay: 0s; }
-    .agent-card:nth-child(2) { animation-delay: 0.1s; }
-    .agent-card:nth-child(3) { animation-delay: 0.2s; }
-    .agent-card:nth-child(4) { animation-delay: 0.3s; }
-    .agent-card:nth-child(5) { animation-delay: 0.4s; }
-    .agent-card:nth-child(6) { animation-delay: 0.5s; }
-    .agent-card:nth-child(7) { animation-delay: 0.6s; }
-    .agent-card:nth-child(8) { animation-delay: 0.7s; }
-    
-    /* 路由动画 */
-    @keyframes routeFlow {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    .route-animation {
-      background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #6366f1);
-      background-size: 300% 300%;
-      animation: routeFlow 2s ease infinite;
-    }
-    
-    /* AI助手浮窗样式 */
-    .ai-assistant-fab {
-      position: fixed;
-      bottom: 24px;
-      right: 24px;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
-      cursor: pointer;
-      z-index: 1000;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .ai-assistant-fab:hover {
-      transform: scale(1.1);
-      box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
-    }
-    .ai-assistant-fab.has-unread::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 16px;
-      height: 16px;
-      background: #ef4444;
-      border-radius: 50%;
-      border: 3px solid white;
-    }
-    @keyframes bounce-gentle {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-    }
-    .ai-assistant-fab i {
-      font-size: 24px;
-      color: white;
-      animation: bounce-gentle 2s ease-in-out infinite;
-    }
-    
-    .ai-chat-window {
-      position: fixed;
-      bottom: 100px;
-      right: 24px;
-      width: 380px;
-      max-height: 550px;
-      background: white;
-      border-radius: 20px;
-      box-shadow: 0 10px 50px rgba(0, 0, 0, 0.15);
-      z-index: 999;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-      transform-origin: bottom right;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .ai-chat-window.hidden {
-      opacity: 0;
-      transform: scale(0.9);
-      pointer-events: none;
-    }
-    .ai-chat-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      padding: 16px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .ai-chat-messages {
-      flex: 1;
-      overflow-y: auto;
-      padding: 16px;
-      background: #f8fafc;
-      max-height: 350px;
-    }
-    .ai-message {
-      display: flex;
-      margin-bottom: 12px;
-      animation: fadeInUp 0.3s ease-out;
-    }
-    .ai-message.user {
-      flex-direction: row-reverse;
-    }
-    .ai-message-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-    .ai-message.assistant .ai-message-avatar {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-    }
-    .ai-message.user .ai-message-avatar {
-      background: #e0e7ff;
-      color: #4f46e5;
-    }
-    .ai-message-content {
-      max-width: 75%;
-      padding: 10px 14px;
-      border-radius: 16px;
-      font-size: 14px;
-      line-height: 1.5;
-      margin: 0 10px;
-    }
-    .ai-message.assistant .ai-message-content {
-      background: white;
-      color: #1f2937;
-      border-bottom-left-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
-    .ai-message.user .ai-message-content {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border-bottom-right-radius: 4px;
-    }
-    .ai-chat-input-area {
-      padding: 12px 16px;
-      background: white;
-      border-top: 1px solid #e5e7eb;
-    }
-    .ai-chat-input-wrapper {
-      display: flex;
-      align-items: center;
-      background: #f3f4f6;
-      border-radius: 24px;
-      padding: 4px 4px 4px 16px;
-    }
-    .ai-chat-input {
-      flex: 1;
-      border: none;
-      background: transparent;
-      outline: none;
-      font-size: 14px;
-      padding: 8px 0;
-    }
-    .ai-chat-send-btn {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s;
-    }
-    .ai-chat-send-btn:hover {
-      transform: scale(1.05);
-    }
-    .ai-chat-send-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .ai-typing-indicator {
-      display: flex;
-      align-items: center;
-      padding: 10px 14px;
-      background: white;
-      border-radius: 16px;
-      border-bottom-left-radius: 4px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      margin: 0 10px;
-    }
-    .ai-typing-dot {
-      width: 8px;
-      height: 8px;
-      background: #9ca3af;
-      border-radius: 50%;
-      margin: 0 2px;
-      animation: typing-bounce 1.4s infinite ease-in-out both;
-    }
-    .ai-typing-dot:nth-child(1) { animation-delay: -0.32s; }
-    .ai-typing-dot:nth-child(2) { animation-delay: -0.16s; }
-    @keyframes typing-bounce {
-      0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
-      40% { transform: scale(1); opacity: 1; }
-    }
-    .ai-quick-questions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      padding: 8px 16px 12px;
-      background: white;
-    }
-    .ai-quick-btn {
-      padding: 6px 12px;
-      font-size: 12px;
-      background: #f3f4f6;
-      border: 1px solid #e5e7eb;
-      border-radius: 16px;
-      cursor: pointer;
-      transition: all 0.2s;
-      white-space: nowrap;
-    }
-    .ai-quick-btn:hover {
-      background: #e0e7ff;
-      border-color: #c7d2fe;
-      color: #4f46e5;
-    }
-    
-    @media (max-width: 640px) {
-      .ai-chat-window {
-        width: calc(100vw - 32px);
-        right: 16px;
-        bottom: 90px;
-        max-height: 70vh;
-      }
-      .ai-assistant-fab {
-        bottom: 16px;
-        right: 16px;
-        width: 56px;
-        height: 56px;
-      }
-    }
-    
     /* ============================================================
        完整颜色系统 - 基于实际使用分析生成
        ============================================================ */
@@ -3399,15 +2991,15 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 页面0: 登录/注册页 ==================== -->
-  <div id="pageAuth" class="page active flex-col min-h-screen bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500">
-    <div class="flex-1 flex items-center justify-center p-4">
-      <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden">
+  <div id="pageAuth" class="page active flex-col min-h-screen cyber-bg particles-bg">
+    <div class="flex-1 flex items-center justify-center p-4 relative z-10">
+      <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in">
         <!-- Logo区域 -->
         <div class="p-8 text-center border-b border-gray-100">
-          <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg animate-float">
             <i class="fas fa-handshake text-white text-2xl"></i>
           </div>
-          <h1 class="text-2xl font-bold text-gray-900">收入分成融资协商平台</h1>
+          <h1 class="text-2xl font-bold text-gradient">收入分成融资协商平台</h1>
           <p class="text-gray-500 text-sm mt-1">Revenue-Based Financing Negotiation</p>
         </div>
         
@@ -3436,7 +3028,7 @@ app.get('/', (c) => {
               </label>
               <a href="#" class="text-indigo-600 hover:text-indigo-700">忘记密码？</a>
             </div>
-            <button onclick="handleLogin()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-lg">
+            <button onclick="handleLogin()" class="w-full py-3 btn-primary rounded-xl font-medium shadow-lg">
               <i class="fas fa-sign-in-alt mr-2"></i>登录
             </button>
             <button onclick="handleGuestLogin()" class="w-full py-3 border border-gray-200 text-gray-600 rounded-xl font-medium hover:bg-gray-50 transition-colors">
@@ -3522,16 +3114,16 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 页面0.5: 个人主页 ==================== -->
-  <div id="pageProfile" class="page flex-col min-h-screen">
+  <div id="pageProfile" class="page flex-col min-h-screen grid-bg">
     <!-- 顶部导航 -->
-    <nav class="bg-white border-b border-gray-200 px-6 py-4 sticky top-0 z-40">
+    <nav class="px-6 py-4">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center cursor-pointer" onclick="goToMyProjects()">
             <i class="fas fa-handshake text-white"></i>
           </div>
           <div>
-            <h1 class="text-xl font-bold text-gray-900">个人中心</h1>
+            <h1 class="text-xl font-bold nav-brand">个人中心</h1>
             <p class="text-xs text-gray-500">My Profile</p>
           </div>
         </div>
@@ -3547,10 +3139,10 @@ app.get('/', (c) => {
     </nav>
     
     <!-- 主内容区 -->
-    <div class="flex-1 p-6 bg-gray-50">
+    <div class="flex-1 p-6">
       <div class="max-w-7xl mx-auto">
         <!-- 个人信息卡片 -->
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+        <div class="card rounded-2xl overflow-hidden mb-6 animate-fade-in">
           <div class="h-32 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 relative">
             <button onclick="showEditProfileModal()" class="absolute top-4 right-4 px-3 py-1.5 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 text-sm">
               <i class="fas fa-edit mr-1"></i>编辑资料
@@ -3569,28 +3161,28 @@ app.get('/', (c) => {
               </div>
             </div>
             <div class="mt-6 grid grid-cols-4 gap-4">
-              <div class="text-center p-4 bg-gray-50 rounded-xl">
-                <p class="text-2xl font-bold text-indigo-600" id="profileStatProjects">0</p>
-                <p class="text-sm text-gray-500">总项目</p>
+              <div class="stat-card text-center animate-fade-in">
+                <p class="stat-value" id="profileStatProjects">0</p>
+                <p class="stat-label">总项目</p>
               </div>
-              <div class="text-center p-4 bg-gray-50 rounded-xl">
-                <p class="text-2xl font-bold text-amber-600" id="profileStatNegotiating">0</p>
-                <p class="text-sm text-gray-500">协商中</p>
+              <div class="stat-card text-center animate-fade-in delay-100">
+                <p class="stat-value" id="profileStatNegotiating">0</p>
+                <p class="stat-label">协商中</p>
               </div>
-              <div class="text-center p-4 bg-gray-50 rounded-xl">
-                <p class="text-2xl font-bold text-emerald-600" id="profileStatSigned">0</p>
-                <p class="text-sm text-gray-500">已签署</p>
+              <div class="stat-card text-center animate-fade-in delay-200">
+                <p class="stat-value" id="profileStatSigned">0</p>
+                <p class="stat-label">已签署</p>
               </div>
-              <div class="text-center p-4 bg-gray-50 rounded-xl">
-                <p class="text-2xl font-bold text-purple-600" id="profileStatAmount">¥0</p>
-                <p class="text-sm text-gray-500">总金额</p>
+              <div class="stat-card text-center animate-fade-in delay-300">
+                <p class="stat-value" id="profileStatAmount">¥0</p>
+                <p class="stat-label">总金额</p>
               </div>
             </div>
           </div>
         </div>
         
         <!-- 角色切换标签 -->
-        <div class="flex items-center space-x-4 mb-6">
+        <div class="flex items-center space-x-4 mb-6 animate-slide-up">
           <button onclick="switchProfileRole('borrower')" id="profileRoleBorrower" class="flex-1 py-4 bg-white rounded-xl border-2 border-amber-500 text-amber-700 font-medium flex items-center justify-center shadow-sm">
             <i class="fas fa-store mr-2 text-xl"></i>
             <div class="text-left">
@@ -3777,15 +3369,15 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 页面1: 项目列表 ==================== -->
-  <div id="pageProjects" class="page flex-col min-h-screen">
-    <nav class="bg-white/90 backdrop-blur-lg border-b border-gray-200/60 px-5 py-3 sticky top-0 z-40">
+  <div id="pageProjects" class="page flex-col min-h-screen grid-bg">
+    <nav class="px-5 py-3">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
             <i class="fas fa-handshake text-white text-sm"></i>
           </div>
           <div>
-            <h1 class="text-base font-bold text-gray-900 tracking-tight">RBF融资协商平台</h1>
+            <h1 class="text-base font-bold tracking-tight nav-brand">RBF融资协商平台</h1>
             <p class="text-xs text-gray-500 -mt-0.5">Revenue-Based Financing</p>
           </div>
         </div>
@@ -3830,46 +3422,46 @@ app.get('/', (c) => {
       <div class="max-w-7xl mx-auto">
         <!-- 统计卡片 - 紧凑型 -->
         <div class="grid grid-cols-4 gap-3 mb-4">
-          <div class="stat-card">
+          <div class="stat-card animate-fade-in">
             <div class="flex items-center justify-between">
               <div>
                 <p class="stat-label">全部项目</p>
-                <p class="stat-value text-gray-900" id="statTotal">0</p>
+                <p class="stat-value" id="statTotal">0</p>
               </div>
               <div class="icon-container icon-container-sm icon-gradient-primary">
                 <i class="fas fa-folder text-white text-sm"></i>
               </div>
             </div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card animate-fade-in delay-100">
             <div class="flex items-center justify-between">
               <div>
                 <p class="stat-label">协商中</p>
-                <p class="stat-value text-amber-600" id="statNegotiating">0</p>
+                <p class="stat-value" id="statNegotiating">0</p>
               </div>
-              <div class="icon-container icon-container-sm" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+              <div class="icon-container icon-container-sm icon-gradient-warning">
                 <i class="fas fa-comments text-white text-sm"></i>
               </div>
             </div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card animate-fade-in delay-200">
             <div class="flex items-center justify-between">
               <div>
                 <p class="stat-label">已签署</p>
-                <p class="stat-value text-emerald-600" id="statCompleted">0</p>
+                <p class="stat-value" id="statCompleted">0</p>
               </div>
               <div class="icon-container icon-container-sm icon-gradient-success">
                 <i class="fas fa-check-circle text-white text-sm"></i>
               </div>
             </div>
           </div>
-          <div class="stat-card">
+          <div class="stat-card animate-fade-in delay-300">
             <div class="flex items-center justify-between">
               <div>
                 <p class="stat-label">总融资额</p>
-                <p class="stat-value text-purple-600" id="statAmount">¥0</p>
+                <p class="stat-value" id="statAmount">¥0</p>
               </div>
-              <div class="icon-container icon-container-sm" style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%);">
+              <div class="icon-container icon-container-sm" style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
                 <i class="fas fa-yen-sign text-white text-sm"></i>
               </div>
             </div>
@@ -3892,10 +3484,10 @@ app.get('/', (c) => {
         
         <div id="projectGrid" class="grid grid-cols-3 gap-3"></div>
         
-        <div id="emptyState" class="hidden py-8">
+        <div id="emptyState" class="hidden py-8 animate-fade-in">
           <div class="max-w-xl mx-auto text-center">
             <!-- 欢迎标题 -->
-            <div class="empty-state-icon mx-auto">
+            <div class="empty-state-icon mx-auto animate-float">
               <i class="fas fa-handshake"></i>
             </div>
             <h3 class="text-xl font-bold text-gray-800 mb-2">欢迎使用RBF融资协商平台</h3>
@@ -3962,8 +3554,8 @@ app.get('/', (c) => {
   </div>
   
   <!-- ==================== 页面2: 协商界面 ==================== -->
-  <div id="pageNegotiation" class="page flex-col h-screen">
-    <nav class="bg-white/95 backdrop-blur-lg border-b border-gray-200/60 px-4 py-2.5 flex-shrink-0">
+  <div id="pageNegotiation" class="page flex-col h-screen grid-bg">
+    <nav class="px-4 py-2.5 flex-shrink-0">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
           <button onclick="goToProjects()" class="back-btn flex items-center px-2.5 py-1.5 text-gray-600 hover:text-indigo-600 rounded-lg text-sm">
@@ -6152,7 +5744,7 @@ app.get('/', (c) => {
       grid.classList.remove('hidden');
       empty.classList.add('hidden');
       
-      grid.innerHTML = projects.map(p => {
+      grid.innerHTML = projects.map((p, idx) => {
         const template = templates.find(t => t.id === p.templateId) || {};
         const statusConfig = {
           draft: { bg: 'bg-gray-100', text: 'text-gray-600', label: '草稿' },
@@ -6162,9 +5754,10 @@ app.get('/', (c) => {
         };
         const status = statusConfig[p.status] || statusConfig.draft;
         const changeCount = p.negotiations?.length || 0;
+        const animDelay = Math.min(idx * 60, 360);
         
         return \`
-          <div class="project-card cursor-pointer relative group" onclick="openProject('\${p.id}')">
+          <div class="project-card cursor-pointer relative group animate-slide-up" style="animation-delay: \${animDelay}ms; animation-fill-mode: both;" onclick="openProject('\${p.id}')">
             <!-- 操作按钮（悬停显示） -->
             <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1" onclick="event.stopPropagation()">
               <button onclick="showEditProjectModal('\${p.id}')" class="p-1.5 bg-white/95 hover:bg-indigo-100 rounded-md shadow-sm border border-gray-200 transition-colors" title="编辑">

@@ -1283,7 +1283,500 @@ input::placeholder, textarea::placeholder {
   100% { background-position: 200% 0; }
 }
 
-/* ========== 25. 打印样式 ========== */
+/* ========== 25. 图标容器系统 ========== */
+.icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  flex-shrink: 0;
+}
+
+.icon-container-sm {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+}
+
+.icon-container-md {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+}
+
+.icon-container-lg {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-lg);
+}
+
+.icon-gradient-primary {
+  background: var(--gradient-primary);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.icon-gradient-success {
+  background: var(--gradient-success);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+}
+
+.icon-gradient-warning {
+  background: var(--gradient-warning);
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.icon-gradient-danger {
+  background: var(--gradient-danger);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.icon-gradient-info {
+  background: var(--gradient-info);
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
+}
+
+/* ========== 26. 项目卡片增强 ========== */
+.project-card {
+  padding: 16px;
+  cursor: pointer;
+}
+
+/* ========== 27. 徽章系统 ========== */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+}
+
+.badge-primary {
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--color-primary);
+}
+
+.badge-success {
+  background: rgba(16, 185, 129, 0.1);
+  color: var(--color-accent-emerald);
+}
+
+.badge-warning {
+  background: rgba(245, 158, 11, 0.1);
+  color: var(--color-accent-amber);
+}
+
+.badge-danger {
+  background: rgba(244, 63, 94, 0.1);
+  color: var(--color-accent-rose);
+}
+
+.badge-info {
+  background: rgba(6, 182, 212, 0.1);
+  color: var(--color-accent-cyan);
+}
+
+.badge-glow {
+  box-shadow: 0 0 12px currentColor;
+}
+
+/* ========== 28. 空状态增强 ========== */
+.empty-state {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 20px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border-radius: var(--radius-2xl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: float 3s ease-in-out infinite;
+}
+
+.empty-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: var(--gradient-primary);
+  color: white;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+  font-size: 0.9rem;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
+  transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.empty-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(99, 102, 241, 0.45), var(--shadow-neon-primary);
+}
+
+/* ========== 29. 搜索输入框 ========== */
+.search-input {
+  padding: 8px 16px;
+  padding-left: 36px;
+  background: rgba(248, 250, 252, 0.8);
+  border: 1.5px solid #e2e8f0;
+  border-radius: var(--radius-lg);
+  font-size: 0.875rem;
+  transition: all var(--duration-normal) var(--ease-smooth);
+}
+
+.search-input:focus {
+  background: white;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+/* ========== 30. 快速输入按钮 ========== */
+.quick-input-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 14px;
+  background: rgba(99, 102, 241, 0.06);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  color: var(--color-primary);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.quick-input-btn:hover {
+  background: rgba(99, 102, 241, 0.12);
+  border-color: rgba(99, 102, 241, 0.3);
+  transform: translateY(-1px);
+}
+
+/* ========== 31. 协商面板 ========== */
+.negotiation-panel {
+  background: white;
+  border-radius: var(--radius-xl);
+  border: 1px solid #f1f5f9;
+  box-shadow: var(--shadow-sm);
+}
+
+.negotiation-item {
+  padding: 12px 16px;
+  border-bottom: 1px solid #f8fafc;
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.negotiation-item:hover {
+  background: rgba(99, 102, 241, 0.03);
+}
+
+.negotiation-item.investor {
+  border-left: 3px solid var(--color-primary);
+}
+
+.negotiation-item.borrower {
+  border-left: 3px solid var(--color-accent-amber);
+}
+
+.negotiation-input-area {
+  background: white;
+  border-top: 1px solid #f1f5f9;
+  padding: 16px;
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+}
+
+/* ========== 32. 签署进度 ========== */
+.sign-progress-step {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: var(--radius-md);
+  transition: all var(--duration-fast) var(--ease-smooth);
+}
+
+.sign-progress-step.active {
+  background: rgba(99, 102, 241, 0.08);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.sign-progress-step.completed {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.sign-progress-step.completed::before {
+  content: '\f058';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  color: var(--color-accent-emerald);
+  margin-right: 8px;
+}
+
+/* ========== 33. 模板卡片增强 ========== */
+.template-card {
+  padding: 16px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all var(--duration-normal) var(--ease-smooth);
+  background: white;
+}
+
+.template-card:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: var(--shadow-lg);
+}
+
+.template-card.selected {
+  border-color: var(--color-primary);
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+}
+
+.template-card.selected::after {
+  content: '\f058';
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  color: var(--color-primary);
+  font-size: 1.1rem;
+}
+
+/* ========== 34. 应用页面基础样式 ========== */
+.page { display: none; }
+.page.active { display: flex; }
+
+.change-badge {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.value-changed {
+  background: linear-gradient(120deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.value-old {
+  text-decoration: line-through;
+  color: #9ca3af;
+  font-size: 0.9em;
+}
+
+.contract-section { scroll-margin-top: 80px; }
+.contract-section.has-changes {
+  background: linear-gradient(90deg, #ecfdf5 0%, transparent 100%);
+  border-left: 4px solid #10b981;
+}
+
+.clause-param {
+  background: linear-gradient(120deg, #a78bfa 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.clause-param-changed {
+  background: linear-gradient(120deg, #10b981 0%, #059669 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.feature-coming { opacity: 0.7; }
+.feature-coming:hover { opacity: 1; }
+
+.version-item { transition: all 0.2s; }
+.version-item:hover { background: #f3f4f6; }
+.version-item.current { background: #dbeafe; border-left: 3px solid #3b82f6; }
+
+/* 引导教程补充样式 */
+.onboarding-step { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+.onboarding-step.active { opacity: 1; transform: translateX(0); }
+.onboarding-step.prev { opacity: 0; transform: translateX(-100%); position: absolute; }
+.onboarding-step.next { opacity: 0; transform: translateX(100%); position: absolute; }
+.feature-icon { transition: all 0.3s; }
+.feature-icon:hover { transform: scale(1.1); }
+
+/* SVG 背景图案 */
+.pattern-bg {
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* 协商输入框动画 */
+#negotiationInput:focus { min-height: 80px; }
+#negotiationInput { transition: min-height 0.2s ease; }
+
+/* 快捷输入提示 */
+@keyframes quickHint { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 0 2px rgba(99,102,241,0.3); } }
+.quick-hint { animation: quickHint 2s ease-in-out 3; }
+
+/* 返回按钮样式 */
+.back-btn { transition: all 0.2s; }
+.back-btn:hover { transform: translateX(-4px); background: #eef2ff; }
+
+/* 智能联动面板补充 */
+.smart-change-item input[type="checkbox"] { transition: all 0.2s; }
+.smart-change-item input[type="checkbox"]:checked { transform: scale(1.1); }
+
+.confidence-high {
+  animation: confidencePulse 2s ease-in-out infinite;
+}
+@keyframes confidencePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+  50% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0); }
+}
+
+.inferred-highlight {
+  animation: inferredBlink 1.5s ease-in-out 2;
+}
+@keyframes inferredBlink {
+  0%, 100% { background-color: rgba(251, 191, 36, 0.1); }
+  50% { background-color: rgba(251, 191, 36, 0.3); }
+}
+
+/* Agent 成功动画 */
+.agent-success-animation { animation: agentSuccess 0.5s ease-out; }
+@keyframes agentSuccess {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+#multiAgentPanel > div { animation: slideInFromBottom 0.3s ease-out; }
+@keyframes slideInFromBottom {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.agent-card:nth-child(6) { animation-delay: 0.5s; }
+.agent-card:nth-child(7) { animation-delay: 0.6s; }
+.agent-card:nth-child(8) { animation-delay: 0.7s; }
+
+/* 路由动画 */
+@keyframes routeFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.route-animation {
+  background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #6366f1);
+  background-size: 300% 300%;
+  animation: routeFlow 2s ease infinite;
+}
+
+/* AI 聊天输入区 */
+.ai-chat-input-area {
+  padding: 12px 16px;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+}
+
+.ai-chat-input-wrapper {
+  display: flex;
+  align-items: center;
+  background: #f3f4f6;
+  border-radius: 24px;
+  padding: 4px 4px 4px 16px;
+}
+
+.ai-chat-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 14px;
+  padding: 8px 0;
+}
+
+.ai-chat-send-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+.ai-chat-send-btn:hover { transform: scale(1.05); }
+.ai-chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* AI 打字动画 */
+.ai-typing-indicator {
+  display: flex;
+  align-items: center;
+  padding: 10px 14px;
+  background: white;
+  border-radius: 16px;
+  border-bottom-left-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  margin: 0 10px;
+}
+
+.ai-typing-dot {
+  width: 8px;
+  height: 8px;
+  background: #9ca3af;
+  border-radius: 50%;
+  margin: 0 2px;
+  animation: typing-bounce 1.4s infinite ease-in-out both;
+}
+.ai-typing-dot:nth-child(1) { animation-delay: -0.32s; }
+.ai-typing-dot:nth-child(2) { animation-delay: -0.16s; }
+
+@keyframes typing-bounce {
+  0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+  40% { transform: scale(1); opacity: 1; }
+}
+
+/* AI 快捷问题 */
+.ai-quick-questions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 16px 12px;
+  background: white;
+}
+
+.ai-quick-btn {
+  padding: 6px 12px;
+  font-size: 12px;
+  background: #f3f4f6;
+  border: 1px solid #e5e7eb;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.ai-quick-btn:hover {
+  background: #e0e7ff;
+  border-color: #c7d2fe;
+  color: #4f46e5;
+}
+
+/* 基础动画 */
+@keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.animate-in { animation: slideIn 0.3s ease-out; }
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
+.pulse { animation: pulse 2s infinite; }
+.float-animation { animation: float 3s ease-in-out infinite; }
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in-up { animation: fadeInUp 0.5s ease-out forwards; }
+
+/* ========== 35. 打印样式 ========== */
 @media print {
   nav, .navbar, .ai-assistant-fab, .ai-chat-window {
     display: none !important;
