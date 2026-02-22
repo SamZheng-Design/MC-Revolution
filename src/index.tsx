@@ -1643,7 +1643,7 @@ app.post('/api/agents/smart-change', async (c) => {
       analysisExplanation: result.analysisExplanation,
       // 直接修改（经法律顾问转化后的专业条款）
       primaryChanges: result.primaryChanges,
-      // 推断修改（AI分析的关联延申）
+      // 推断修改（AI分析的关联延伸）
       inferredChanges: result.inferredChanges,
       // 警告信息（包含法律风险警告）
       warnings: result.warnings,
@@ -1886,7 +1886,7 @@ ${template.modules.flatMap(m => m.clauses.map(c => `- ${c.key}: ${c.name} (当�
 
 ## 输出格式（严格JSON）：
 {
-  "understood": "简要复述理解的变动（1-2句话）",
+  "understood": "用一句完整通顺的中文复述您理解的变动内容",
   "changes": [
     {
       "moduleId": "模块ID",
@@ -1895,11 +1895,17 @@ ${template.modules.flatMap(m => m.clauses.map(c => `- ${c.key}: ${c.name} (当�
       "paramName": "参数名称",
       "oldValue": "原值",
       "newValue": "新值",
-      "clauseText": "转换后的合同条款语言"
+      "clauseText": "用正式、完整的合同条款语言描述变更，至少15字，主谓宾齐全"
     }
   ],
-  "suggestion": "从双方利益角度的建议（可选）"
+  "suggestion": "从双方利益角度提出的完整建议句子（可选）"
 }
+
+## 语言要求
+- understood必须是完整通顺的中文句子，如"投资方希望将联营资金从500万元提高至800万元"
+- clauseText必须是可以直接写入合同的正式条款语言，完整句子
+- suggestion必须是完整通顺的中文句子
+- 所有文本严禁出现断句、语病或碎片化表述
 
 注意：
 1. 只输出JSON，不要其他内容
@@ -6532,7 +6538,7 @@ app.get('/', (c) => {
               </div>
               <div>
                 <h3 class="font-semibold text-gray-800">关联修改建议</h3>
-                <p class="text-xs text-gray-500">AI推断的延申修改，请勾选确认需要的</p>
+                <p class="text-xs text-gray-500">AI推断可能需要联动调整的相关条款，请勾选确认</p>
               </div>
               <span class="ml-auto px-2 py-1 bg-amber-100 text-amber-700 rounded-full text-xs font-medium">
                 \${result.inferredChanges.length} 项
@@ -7261,7 +7267,7 @@ app.get('/', (c) => {
                 return \`
                   <div class="\${bgColor} rounded-lg p-2 border \${borderColor}">
                     <div class="flex items-center text-xs text-gray-500 mb-1">
-                      <i class="fas fa-folder-open mr-1"></i>\${c.moduleName || '模块'}
+                      <i class="fas fa-folder-open mr-1"></i>\${c.moduleName || c.paramName || '条款修改'}
                       \${isInferred ? \`
                         <span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px]">
                           <i class="fas fa-link mr-0.5"></i>联动修改

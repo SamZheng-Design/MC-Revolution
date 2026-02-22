@@ -159,7 +159,7 @@ export interface SmartChangeResult {
   success: boolean
   understood: string               // AI理解的用户意图
   primaryChanges: SmartChange[]    // 直接修改（用户明确要求的）
-  inferredChanges: SmartChange[]   // 推断修改（AI分析出的关联延申）
+  inferredChanges: SmartChange[]   // 推断修改（AI分析出的关联延伸变更）
   analysisExplanation: string      // AI对整体分析的解释
   warnings: string[]               // 风险警告
   agentResponses?: AgentResponse[] // 各Agent响应详情
@@ -413,8 +413,17 @@ export const contractAgents: Record<string, ContractAgent> = {
 当前参数值：
 ##PARAMS##
 
-请分析用户的修改意图并给出建议。输出纯JSON（不要markdown代码块）：
-{"understood":"简述意图","changes":[{"key":"investmentAmount","paramName":"联营资金金额","oldValue":"500万","newValue":"800万","clauseText":"本次联营资金金额为人民币800万元","impact":"融资方获得更多资金"}],"suggestions":[],"warnings":[]}`
+请分析用户的修改意图并给出建议。
+
+## 语言要求（非常重要）
+- understood：用一句完整、通顺的中文概括用户的修改意图，例如"投资方希望将联营资金从500万元提高至800万元"
+- clauseText：用正式、完整的合同条款语言描述变更内容，至少15字，要求主谓宾齐全
+- impact：用完整的陈述句说明变更的影响，不能只有短语
+- suggestions和warnings：每一条必须是完整通顺的中文句子，主语谓语宾语齐全
+- 所有输出文本必须语句通顺、表达清晰、没有语病，严禁输出断句或碎片化文本
+
+输出纯JSON（不要markdown代码块）：
+{"understood":"投资方希望将联营资金从500万元提高至800万元","changes":[{"key":"investmentAmount","paramName":"联营资金金额","oldValue":"500万元","newValue":"800万元","clauseText":"甲方同意将本次联营资金金额由人民币500万元调整为人民币800万元","impact":"投资方投入资金增加300万元，相应的年度分成收益也将按比例上升"}],"suggestions":["建议确认800万元的资金需求是否与项目实际规模匹配"],"warnings":["资金金额调整可能需要同步修订违约金条款和资金使用计划"]}`
   },
 
   // 2. 数据对账Agent
@@ -444,8 +453,17 @@ export const contractAgents: Record<string, ContractAgent> = {
 
 重要：数据延迟超30天=严重违约！
 
-请分析用户的修改意图并给出建议。输出纯JSON：
-{"understood":"简述意图","changes":[{"key":"dataReportFrequency","paramName":"数据传输频率","oldValue":"每自然日","newValue":"每周","clauseText":"数据传输频率为每周一次","impact":"降低数据上报工作量"}],"suggestions":[],"warnings":[]}`
+请分析用户的修改意图并给出建议。
+
+## 语言要求（非常重要）
+- understood：用一句完整、通顺的中文概括用户的修改意图
+- clauseText：用正式、完整的合同条款语言描述变更内容，至少15字，主谓宾齐全
+- impact：用完整的陈述句说明变更影响，不能只有短语
+- suggestions和warnings：每一条必须是完整通顺的中文句子
+- 所有输出文本必须语句通顺、表达清晰、没有语病
+
+输出纯JSON（不要markdown代码块）：
+{"understood":"融资方希望将数据传输频率从每日调整为每周一次","changes":[{"key":"dataReportFrequency","paramName":"数据传输频率","oldValue":"每自然日","newValue":"每周","clauseText":"乙方应于每周一将上周经营数据通过指定系统完整传输至甲方","impact":"数据上报频率降低后，可减轻融资方的日常运营负担，但投资方获取经营信息的时效性将有所下降"}],"suggestions":["建议评估每周传输是否满足投资方的风控监测需求"],"warnings":["数据传输周期拉长可能导致异常经营情况的发现延迟"]}`
   },
 
   // 3. 提前终止Agent
@@ -474,8 +492,17 @@ export const contractAgents: Record<string, ContractAgent> = {
 
 规则：提前终止需7天通知；补偿金=联营资金×(1+年化÷360×(已分成天数+7))；不满90天按90天
 
-请分析用户的修改意图并给出建议。输出纯JSON：
-{"understood":"简述意图","changes":[{"key":"lossClosurePeriod","paramName":"亏损闭店期限","oldValue":"3个月","newValue":"6个月","clauseText":"连续亏损6个月可申请闭店","impact":"延长观察期"}],"suggestions":[],"warnings":[]}`
+请分析用户的修改意图并给出建议。
+
+## 语言要求（非常重要）
+- understood：用一句完整、通顺的中文概括用户的修改意图
+- clauseText：用正式、完整的合同条款语言描述变更内容，至少15字，主谓宾齐全
+- impact：用完整的陈述句说明变更影响，不能只有短语
+- suggestions和warnings：每一条必须是完整通顺的中文句子
+- 所有输出文本必须语句通顺、表达清晰、没有语病
+
+输出纯JSON（不要markdown代码块）：
+{"understood":"融资方希望将亏损闭店的观察期限从3个月延长至6个月","changes":[{"key":"lossClosurePeriod","paramName":"亏损闭店期限","oldValue":"3个月","newValue":"6个月","clauseText":"如门店连续亏损达6个月，融资方有权向投资方提出闭店申请","impact":"延长亏损观察期后，融资方有更充裕的时间调整经营策略，但投资方承受损失的时间也相应延长"}],"suggestions":["建议明确亏损的具体计算标准和判定依据"],"warnings":["观察期延长意味着投资方可能面临更长时间的亏损风险敞口"]}`
   },
 
   // 4. 违约责任Agent - 最重要
@@ -502,8 +529,17 @@ export const contractAgents: Record<string, ContractAgent> = {
 
 严重违约情形包括：挪用资金、隐藏收入、失联、擅自停业、欺诈、数据延迟超30天、付款延迟超30天、品牌授权过期等。市场参考：违约金通常15-25%。
 
-请分析用户的修改意图并给出建议。输出纯JSON：
-{"understood":"简述意图","changes":[{"key":"breachPenalty","paramName":"违约金比例","oldValue":"20%","newValue":"15%","clauseText":"违约金为联营资金的15%","impact":"降低融资方违约成本"}],"suggestions":[],"warnings":[]}`
+请分析用户的修改意图并给出建议。
+
+## 语言要求（非常重要）
+- understood：用一句完整、通顺的中文概括用户的修改意图
+- clauseText：用正式、完整的合同条款语言描述变更内容，至少15字，主谓宾齐全
+- impact：用完整的陈述句说明变更影响，不能只有短语
+- suggestions和warnings：每一条必须是完整通顺的中文句子
+- 所有输出文本必须语句通顺、表达清晰、没有语病
+
+输出纯JSON（不要markdown代码块）：
+{"understood":"融资方希望将违约金比例从20%降低至15%","changes":[{"key":"breachPenalty","paramName":"违约金比例","oldValue":"20%","newValue":"15%","clauseText":"如乙方发生违约情形，应向甲方支付联营资金总额15%的违约金","impact":"违约金比例下降5个百分点，将降低融资方的违约成本，但同时也削弱了对投资方的保护力度"}],"suggestions":["建议评估15%的违约金是否足以覆盖投资方可能遭受的实际损失"],"warnings":["违约金比例低于市场常见水平，可能不足以起到有效的违约威慑作用"]}`
   },
 
   // 5. 禁止行为Agent
@@ -526,8 +562,17 @@ export const contractAgents: Record<string, ContractAgent> = {
 
 四大禁止行为：1.变更实际控制人(需同意) 2.转让品牌经营权 3.收入出售/贴现/保理 4.擅自停业/搬迁/变更业务
 
-请分析用户的修改意图并给出建议。输出纯JSON：
-{"understood":"简述意图","changes":[{"key":"controlChange","paramName":"控制权变更限制","oldValue":"需事先同意","newValue":"需提前30天通知","clauseText":"控制权变更需提前30天书面通知","impact":"增加融资方灵活性"}],"suggestions":[],"warnings":[]}`
+请分析用户的修改意图并给出建议。
+
+## 语言要求（非常重要）
+- understood：用一句完整、通顺的中文概括用户的修改意图
+- clauseText：用正式、完整的合同条款语言描述变更内容，至少15字，主谓宾齐全
+- impact：用完整的陈述句说明变更影响，不能只有短语
+- suggestions和warnings：每一条必须是完整通顺的中文句子
+- 所有输出文本必须语句通顺、表达清晰、没有语病
+
+输出纯JSON（不要markdown代码块）：
+{"understood":"融资方希望将控制权变更的审批机制从事先同意改为提前通知","changes":[{"key":"controlChange","paramName":"控制权变更限制","oldValue":"需事先同意","newValue":"需提前30天通知","clauseText":"乙方如发生实际控制人变更，应提前30日以书面形式通知甲方","impact":"将控制权变更从审批制改为通知制后，融资方的股权操作灵活性提高，但投资方将失去事前否决权"}],"suggestions":["建议增加通知期内投资方的审核权或异议权条款"],"warnings":["取消事先同意要求可能导致投资方在控制权变更后面临未知经营风险"]}`
   },
 
   // 6. 担保责任Agent
@@ -550,8 +595,17 @@ export const contractAgents: Record<string, ContractAgent> = {
 
 责任体系：联营方(MGU)第一责任 → 品牌方连带 → 品牌代理商连带 → 各方实际控制人无限连带
 
-请分析用户的修改意图并给出建议。输出纯JSON：
-{"understood":"简述意图","changes":[{"key":"controllerLiability","paramName":"实际控制人责任","oldValue":"无限连带","newValue":"有限连带","clauseText":"实际控制人承担有限连带责任","impact":"降低个人风险"}],"suggestions":[],"warnings":[]}`
+请分析用户的修改意图并给出建议。
+
+## 语言要求（非常重要）
+- understood：用一句完整、通顺的中文概括用户的修改意图
+- clauseText：用正式、完整的合同条款语言描述变更内容，至少15字，主谓宾齐全
+- impact：用完整的陈述句说明变更影响，不能只有短语
+- suggestions和warnings：每一条必须是完整通顺的中文句子
+- 所有输出文本必须语句通顺、表达清晰、没有语病
+
+输出纯JSON（不要markdown代码块）：
+{"understood":"融资方希望将实际控制人的连带责任从无限改为有限","changes":[{"key":"controllerLiability","paramName":"实际控制人责任","oldValue":"无限连带","newValue":"有限连带","clauseText":"各方实际控制人对本协议项下义务承担有限连带担保责任，担保范围以联营资金总额为上限","impact":"实际控制人的个人风险敞口将被限定在联营资金总额范围内，不再承担超出部分的赔偿义务"}],"suggestions":["建议明确有限连带责任的具体金额上限和责任范围"],"warnings":["将无限连带改为有限连带会削弱投资方的债权保障力度"]}`
   },
 
   // 7. 门店资产Agent
@@ -577,8 +631,17 @@ export const contractAgents: Record<string, ContractAgent> = {
 
 行业证照：餐饮(营业执照+食品许可)、医美(医疗执业+卫生)、教育(营业执照+办学许可)
 
-请分析用户的修改意图并给出建议。输出纯JSON：
-{"understood":"简述意图","changes":[{"key":"storeAddress","paramName":"门店地址","oldValue":"待确定","newValue":"深圳市南山区xxx","clauseText":"门店地址位于深圳市南山区xxx","impact":"明确经营地点"}],"suggestions":[],"warnings":[]}`
+请分析用户的修改意图并给出建议。
+
+## 语言要求（非常重要）
+- understood：用一句完整、通顺的中文概括用户的修改意图
+- clauseText：用正式、完整的合同条款语言描述变更内容，至少15字，主谓宾齐全
+- impact：用完整的陈述句说明变更影响，不能只有短语
+- suggestions和warnings：每一条必须是完整通顺的中文句子
+- 所有输出文本必须语句通顺、表达清晰、没有语病
+
+输出纯JSON（不要markdown代码块）：
+{"understood":"融资方希望将门店经营地址确定为深圳市南山区的指定位置","changes":[{"key":"storeAddress","paramName":"门店地址","oldValue":"待确定","newValue":"深圳市南山区xxx","clauseText":"本协议项下联营门店地址为深圳市南山区xxx，未经甲方书面同意不得变更","impact":"门店经营地址正式确定后，将作为合同履行地和日常经营监管的依据"}],"suggestions":["建议同时确认该地址的租赁合同期限是否覆盖联营期限"],"warnings":["门店地址一经确定，后续变更将需要甲方书面同意并可能涉及补充协议"]}`
   },
 
   // 8. 争议解决Agent
@@ -604,8 +667,17 @@ export const contractAgents: Record<string, ContractAgent> = {
 
 默认配置：仲裁机构=深圳国际仲裁院；仲裁地=深圳；保密期=协议终止后2-5年
 
-请分析用户的修改意图并给出建议。输出纯JSON：
-{"understood":"简述意图","changes":[{"key":"arbitrationPlace","paramName":"仲裁地","oldValue":"深圳","newValue":"北京","clauseText":"仲裁地点为北京","impact":"便于北京的当事方"}],"suggestions":[],"warnings":[]}`
+请分析用户的修改意图并给出建议。
+
+## 语言要求（非常重要）
+- understood：用一句完整、通顺的中文概括用户的修改意图
+- clauseText：用正式、完整的合同条款语言描述变更内容，至少15字，主谓宾齐全
+- impact：用完整的陈述句说明变更影响，不能只有短语
+- suggestions和warnings：每一条必须是完整通顺的中文句子
+- 所有输出文本必须语句通顺、表达清晰、没有语病
+
+输出纯JSON（不要markdown代码块）：
+{"understood":"一方希望将仲裁地从深圳变更为北京","changes":[{"key":"arbitrationPlace","paramName":"仲裁地","oldValue":"深圳","newValue":"北京","clauseText":"因本协议引起的或与本协议有关的争议，由北京仲裁委员会按其仲裁规则进行仲裁","impact":"仲裁地变更为北京后，将便于在北京一方当事人参与仲裁程序，但可能增加另一方的差旅和时间成本"}],"suggestions":["建议双方就仲裁机构的选择进行充分协商，确保程序公平性"],"warnings":["仲裁地变更将影响法律适用和执行管辖，建议同步确认适用的仲裁规则"]}`
   }
 }
 
@@ -1548,15 +1620,15 @@ const SMART_CHANGE_ANALYST_PROMPT = `你是一个专业的合同条款联动分�
 
 ## 输出格式（严格JSON）
 {
-  "understood": "对用户意图的简要理解",
-  "analysisExplanation": "对整体分析的解释，为什么推断这些联动修改",
+  "understood": "用一句完整通顺的中文概括用户的修改意图",
+  "analysisExplanation": "用2-3句完整通顺的中文解释联动分析的逻辑和结论",
   "primaryChanges": [
     {
       "key": "参数key",
       "paramName": "参数中文名",
       "oldValue": "原值",
       "newValue": "新值",
-      "clauseText": "合同条款语言",
+      "clauseText": "用完整的合同条款语言描述变更，至少15字",
       "changeType": "primary",
       "selected": true
     }
@@ -1567,17 +1639,22 @@ const SMART_CHANGE_ANALYST_PROMPT = `你是一个专业的合同条款联动分�
       "paramName": "参数中文名",
       "oldValue": "原值",
       "newValue": "推断的新值",
-      "clauseText": "合同条款语言",
+      "clauseText": "用完整的合同条款语言描述联动变更，至少15字",
       "changeType": "inferred",
       "confidence": "high/medium/low",
-      "reason": "为什么需要这个联动修改",
+      "reason": "用1-2句完整通顺的中文说明联动修改的原因",
       "relatedTo": "关联的直接修改key",
       "category": "unit_conversion/calculation_method/formula_update/related_term",
       "selected": false
     }
   ],
-  "warnings": ["风险警告（如有）"]
+  "warnings": ["每条警告必须是完整通顺的中文句子"]
 }
+
+## 语言要求（非常重要）
+- 所有中文文本必须语句通顺、表达清晰、没有语病
+- understood、analysisExplanation、clauseText、reason、warnings都必须是完整的中文句子，主谓宾齐全
+- 严禁输出断句、碎片化文本或只有关键词的短语
 
 ## 置信度说明
 - high: 逻辑必然，如利率换算
@@ -1964,11 +2041,17 @@ ${JSON.stringify(request.context.currentParams, null, 2)}
 ## 任务
 请将以上修改意图转化为专业的法律合同条款语言。
 
-**重要**：直接输出JSON对象，不要包裹在代码块中。legalClauseText请控制在80字以内。
+**重要**：直接输出JSON对象，不要包裹在代码块中。
+
+## 语言要求（非常重要）
+- legalSummary：用一句完整通顺的中文概括此次修改的法律要点
+- legalClauseText：用完整、规范的法律合同语言，控制在120字以内，必须是可以直接写入合同的正式条款
+- legalNotes、riskWarnings、clauseRecommendations：每一条都必须是完整通顺的中文句子，主谓宾齐全，严禁输出断句或碎片化文本
+- improvements：每条建议要具体、可操作，用完整句子表述
 
 输出JSON格式：
 {
-  "legalSummary": "简明摘要（50字以内）",
+  "legalSummary": "投资方申请将联营资金总额由1800万元调减至800万元，需同步调整相关违约责任条款。",
   "transformedChanges": [
     {
       "key": "参数key",
@@ -1976,14 +2059,14 @@ ${JSON.stringify(request.context.currentParams, null, 2)}
       "oldValue": "原值",
       "newValue": "新值",
       "originalExpression": "用户原始表达",
-      "clauseText": "简短条款描述",
-      "legalClauseText": "法律条款（80字以内）",
-      "legalNotes": ["注意事项"],
-      "legalReview": {"reviewed": true, "legalScore": 85, "improvements": ["改进建议"]}
+      "clauseText": "联营资金金额由1800万元调整为800万元",
+      "legalClauseText": "甲方同意向乙方提供联营资金人民币捌佰万元整（¥8,000,000.00），该款项应于本协议签署后五个工作日内一次性划入乙方指定账户。",
+      "legalNotes": ["联营资金减少55.56%，需评估对项目可行性的影响"],
+      "legalReview": {"reviewed": true, "legalScore": 85, "improvements": ["建议增加资金分期到账条款以降低投资方风险"]}
     }
   ],
-  "riskWarnings": ["风险提示"],
-  "clauseRecommendations": ["建议"]
+  "riskWarnings": ["投资金额大幅降低可能导致项目执行困难，建议重新评估演出规模和收益预期"],
+  "clauseRecommendations": ["建议增加资金使用监管条款，确保资金专款专用"]
 }`
 
   try {
@@ -1996,7 +2079,7 @@ ${JSON.stringify(request.context.currentParams, null, 2)}
       body: JSON.stringify({
         model: CONFIG.MODEL_QUALITY, // 法律转化使用高质量模型
         messages: [
-          { role: 'system', content: LEGAL_COUNSEL_SYSTEM_PROMPT + '\n\n重要：直接输出JSON对象，不要包裹在```代码块中。确保输出精炼，控制在1500字以内。' },
+          { role: 'system', content: LEGAL_COUNSEL_SYSTEM_PROMPT + '\n\n重要：直接输出JSON对象，不要包裹在```代码块中。确保输出精炼，控制在2000字以内。所有中文文本必须语句通顺、表达完整，严禁出现断句或语病。' },
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.3,
@@ -2203,8 +2286,17 @@ ${JSON.stringify(context.currentParams, null, 2)}
 4. 收益计算方式变化 → 对账周期、结算周期应同步调整
 5. 分成比例变化 → 预计回收期、年化回报率需要重新评估
 
-请输出严格的JSON格式（不要包含代码块标记）：
-{"analysisExplanation":"联动分析说明","inferredChanges":[{"key":"参数key","paramName":"参数中文名","oldValue":"原值","newValue":"建议新值","clauseText":"条款变更描述","changeType":"inferred","confidence":"high或medium或low","reason":"为什么需要联动修改","relatedTo":"关联的直接修改参数key","category":"calculation_method或unit_conversion或formula_update或related_term","selected":false}],"warnings":["风险提示字符串"]}`
+请输出严格的JSON格式（不要包含代码块标记）。
+
+## 语言要求（非常重要）
+- analysisExplanation：用2-3句完整通顺的中文说明联动分析的逻辑和结论
+- clauseText：每个联动修改的条款描述必须是完整的中文句子，至少15字
+- reason：每个联动修改的理由必须是1-2句完整通顺的中文句子，清晰说明为什么需要联动
+- warnings：每条警告必须是完整的中文句子，主谓宾齐全，不能只有短语或片段
+- 所有输出文本严禁出现断句、语病或碎片化表述
+
+输出格式：
+{"analysisExplanation":"投资金额从1800万元降至800万元，降幅达55.56%。根据合同条款间的逻辑关系，违约金金额应按投资额的固定比例同步调整。","inferredChanges":[{"key":"参数key","paramName":"参数中文名","oldValue":"原值","newValue":"建议新值","clauseText":"违约金金额由360万元调整为160万元，保持投资额20%的比例不变","changeType":"inferred","confidence":"high或medium或low","reason":"原违约金360万元占投资金额1800万元的20%，投资金额调整为800万元后，为保持合同条款的内在一致性，违约金应同比例调整为160万元","relatedTo":"关联的直接修改参数key","category":"calculation_method或unit_conversion或formula_update或related_term","selected":false}],"warnings":["投资金额大幅下降可能影响项目的可行性，建议重新评估收益预期"]}`
 
   let inferredChanges: SmartChange[] = []
   let analysisExplanation = '基于直接修改分析可能的联动影响'
@@ -2220,7 +2312,7 @@ ${JSON.stringify(context.currentParams, null, 2)}
       body: JSON.stringify({
         model: CONFIG.MODEL_QUALITY, // 使用高质量模型确保联动分析准确
         messages: [
-          { role: 'system', content: '你是合同条款联动分析专家。直接输出JSON对象，不要包裹在代码块中。所有字段必须是字符串类型。' },
+          { role: 'system', content: '你是合同条款联动分析专家。直接输出JSON对象，不要包裹在代码块中。所有字段必须是字符串类型。所有中文文本必须语句通顺、表达完整、没有语病，每一条reason、clauseText、warning都必须是完整的中文句子。' },
           { role: 'user', content: inferPrompt }
         ],
         temperature: 0.2,
@@ -2489,8 +2581,17 @@ ${JSON.stringify(context.currentParams, null, 2)}
 4. 收益计算方式变化 → 对账周期、结算周期应同步调整
 5. 分成比例变化 → 预计回收期、年化回报率需要重新评估
 
-直接输出JSON对象，不要包裹在代码块中：
-{"analysisExplanation":"联动分析说明","inferredChanges":[{"key":"参数key","paramName":"参数中文名","oldValue":"原值","newValue":"建议新值","clauseText":"条款变更描述","changeType":"inferred","confidence":"high或medium或low","reason":"为什么需要联动修改","relatedTo":"关联的直接修改参数key","category":"calculation_method或unit_conversion或formula_update或related_term","selected":false}],"warnings":["风险提示字符串"]}`
+直接输出JSON对象，不要包裹在代码块中。
+
+## 语言要求（非常重要）
+- analysisExplanation：用2-3句完整通顺的中文说明联动分析的逻辑和结论
+- clauseText：每个联动修改的条款描述必须是完整的中文句子，至少15字
+- reason：每个联动修改的理由必须是1-2句完整通顺的中文句子，清晰说明联动原因
+- warnings：每条警告必须是完整的中文句子，主谓宾齐全
+- 所有输出文本严禁出现断句、语病或碎片化表述
+
+输出格式：
+{"analysisExplanation":"联动分析说明","inferredChanges":[{"key":"参数key","paramName":"参数中文名","oldValue":"原值","newValue":"建议新值","clauseText":"条款变更描述","changeType":"inferred","confidence":"high或medium或low","reason":"联动修改的理由","relatedTo":"关联的直接修改参数key","category":"calculation_method或unit_conversion或formula_update或related_term","selected":false}],"warnings":["风险提示"]}`
 }
 
 /**
@@ -2511,7 +2612,7 @@ async function executeLLMInferAnalysis(
       body: JSON.stringify({
         model: CONFIG.MODEL_QUALITY,
         messages: [
-          { role: 'system', content: '你是合同条款联动分析专家。直接输出JSON对象，不要包裹在代码块中。所有字段必须是字符串类型。' },
+          { role: 'system', content: '你是合同条款联动分析专家。直接输出JSON对象，不要包裹在代码块中。所有字段必须是字符串类型。所有中文文本必须语句通顺、表达完整、没有语病，每一条reason、clauseText、warning都必须是完整的中文句子。' },
           { role: 'user', content: inferPrompt }
         ],
         temperature: 0.2,
