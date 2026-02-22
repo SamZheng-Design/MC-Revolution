@@ -395,6 +395,25 @@ const response = await fetch('/api/agents/process', {
 
 ## 最近更新
 
+### V10.1 版本 (2026-02-22) - AI Agent稳定性修复 + 关联修改功能完成
+- ✅ **修复法律顾问Agent频繁失败** - 根因：max_tokens=2000导致LLM响应截断(finish_reason=length)
+  - 法律顾问 max_tokens 从 2000 提升到 4000
+  - 联动分析 max_tokens 从 1500 提升到 3000
+  - 新增 `extractJsonFromContent()` 鲁棒JSON提取工具
+  - 新增 `repairTruncatedJson()` 截断JSON修复器（自动闭合括号/字符串）
+  - 即使被截断也能正确解析部分有效的JSON内容
+- ✅ **关联修改功能完善** - 修复inferredChanges无法生成的问题
+  - 联动分析现在可靠地输出高/中/低置信度的关联修改建议
+  - 规则引擎补充：投资金额→违约金、季度利率→年化换算/对账周期
+  - 前端面板正确展示所有关联修改，支持勾选确认
+- ✅ **warnings序列化修复** - 消除[object Object]渲染错误
+  - 所有warning/riskWarning在聚合和渲染时强制String转化
+  - 前端escapeHtml兼容string和object类型
+- ✅ **Prompt工程优化** - 减少LLM输出冗余
+  - 法律条款legalClauseText限制80字以内
+  - 系统提示强调"不要代码块"，减少被截断概率
+  - 所有JSON提取统一使用extractJsonFromContent工具
+
 ### V10 版本 (2026-02-22) - 设计系统整合 + CSS架构优化
 - ✅ **设计系统全面整合** - style.css 科技感UI设计系统 V10
   - 新增 icon-container/icon-gradient 组件系统

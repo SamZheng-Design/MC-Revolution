@@ -225,6 +225,146 @@ const CONFIG = {
   MODEL_QUALITY: 'claude-sonnet-4-5', // 高质量模型（需要更复杂分析时使用）
   MAX_TOKENS: 800,              // Agent最大token数
   ROUTER_MAX_TOKENS: 400,       // 路由器最大token数
+  LEGAL_MAX_TOKENS: 4000,       // 法律顾问最大token数（需要输出完整法律条款）
+  INFER_MAX_TOKENS: 3000,       // 联动分析最大token数
+}
+
+// ==================== JSON提取与修复工具 ====================
+
+/**
+ * 从LLM响应中鲁棒提取JSON
+ * 处理：代码块包裹、截断(finish_reason=length)、尾部逗号、控制字符等
+ */
+function extractJsonFromContent(content: string): any | null {
+  if (!content || content.trim().length === 0) return null
+  
+  // Step 1: 从代码块中提取
+  const codeBlockStart = content.indexOf('```')
+  if (codeBlockStart >= 0) {
+    const afterStart = content.substring(codeBlockStart + 3)
+    const lineBreak = afterStart.indexOf('\n')
+    const jsonStart = lineBreak >= 0 ? lineBreak + 1 : 0
+    const codeBlockEnd = afterStart.indexOf('```', jsonStart)
+    
+    if (codeBlockEnd > 0) {
+      // 有完整的代码块
+      const jsonContent = afterStart.substring(jsonStart, codeBlockEnd).trim()
+      const parsed = tryParseJson(jsonContent)
+      if (parsed) return parsed
+    }
+    
+    // 代码块未关闭（被截断） — 取代码块开始到内容末尾
+    const truncatedContent = afterStart.substring(jsonStart).trim()
+    const parsed = tryParseJson(truncatedContent)
+    if (parsed) return parsed
+    
+    // 尝试修复截断的JSON
+    const repaired = repairTruncatedJson(truncatedContent)
+    if (repaired) return repaired
+  }
+  
+  // Step 2: 花括号配对
+  const firstBrace = content.indexOf('{')
+  if (firstBrace >= 0) {
+    let depth = 0, endIdx = -1
+    for (let i = firstBrace; i < content.length; i++) {
+      if (content[i] === '{') depth++
+      else if (content[i] === '}') { depth--; if (depth === 0) { endIdx = i; break } }
+    }
+    if (endIdx > firstBrace) {
+      const jsonStr = content.substring(firstBrace, endIdx + 1)
+      const parsed = tryParseJson(jsonStr)
+      if (parsed) return parsed
+    }
+    
+    // 未找到配对的 } — JSON被截断
+    const truncated = content.substring(firstBrace)
+    const repaired = repairTruncatedJson(truncated)
+    if (repaired) return repaired
+  }
+  
+  // Step 3: 直接解析
+  return tryParseJson(content.trim())
+}
+
+/**
+ * 尝试解析JSON（含清理）
+ */
+function tryParseJson(str: string): any | null {
+  if (!str) return null
+  try {
+    return JSON.parse(str)
+  } catch (e) {
+    // 清理后重试
+    try {
+      const cleaned = str
+        .replace(/,(\s*[}\]])/g, '$1')       // 移除尾部逗号
+        .replace(/[\u0000-\u001F]+/g, ' ')   // 移除控制字符
+      return JSON.parse(cleaned)
+    } catch (e2) {
+      return null
+    }
+  }
+}
+
+/**
+ * 修复被截断的JSON（当 finish_reason=length 时）
+ * 策略：闭合所有未关闭的括号和字符串
+ */
+function repairTruncatedJson(str: string): any | null {
+  if (!str || !str.includes('{')) return null
+  
+  let repaired = str
+    .replace(/,(\s*[}\]])/g, '$1')
+    .replace(/[\u0000-\u001F]+/g, ' ')
+  
+  // 去掉最后一个不完整的键值对
+  // 例: ..."key": "unfinished value  →  移除最后的不完整部分
+  repaired = repaired
+    .replace(/,\s*"[^"]*"?\s*:?\s*"?[^"]*$/, '')   // 移除最后不完整的 key:value
+    .replace(/,\s*"[^"]*$/, '')                       // 移除最后不完整的string
+    .replace(/,\s*\[?\s*$/, '')                        // 移除最后不完整的array开头
+    .replace(/,\s*$/, '')                               // 移除尾部逗号
+  
+  // 关闭所有未关闭的字符串
+  let inString = false
+  let escaped = false
+  for (let i = 0; i < repaired.length; i++) {
+    if (escaped) { escaped = false; continue }
+    if (repaired[i] === '\\') { escaped = true; continue }
+    if (repaired[i] === '"') { inString = !inString }
+  }
+  if (inString) repaired += '"'
+  
+  // 计算并关闭未配对的括号
+  let braceDepth = 0, bracketDepth = 0
+  inString = false
+  escaped = false
+  for (let i = 0; i < repaired.length; i++) {
+    if (escaped) { escaped = false; continue }
+    if (repaired[i] === '\\') { escaped = true; continue }
+    if (repaired[i] === '"') { inString = !inString; continue }
+    if (inString) continue
+    if (repaired[i] === '{') braceDepth++
+    else if (repaired[i] === '}') braceDepth--
+    else if (repaired[i] === '[') bracketDepth++
+    else if (repaired[i] === ']') bracketDepth--
+  }
+  
+  // 先关闭数组，再关闭对象
+  while (bracketDepth > 0) { repaired += ']'; bracketDepth-- }
+  while (braceDepth > 0) { repaired += '}'; braceDepth-- }
+  
+  // 再次清理尾部逗号（关闭括号前）
+  repaired = repaired
+    .replace(/,(\s*[}\]])/g, '$1')
+  
+  try {
+    return JSON.parse(repaired)
+  } catch (e) {
+    console.log('[JSON Repair] Failed to repair truncated JSON, length:', str.length, 'error:', (e as Error).message)
+    return null
+  }
 }
 
 // ==================== Agent定义 ====================
@@ -903,37 +1043,10 @@ export async function executeAgentTask(
     const data = await response.json()
     const content = data.choices?.[0]?.message?.content || ''
     
-    // 尝试多种方式提取JSON
-    let jsonStr = ''
+    // 使用鲁棒JSON提取工具
+    const result = extractJsonFromContent(content)
     
-    // 方法1: 提取 ```json ... ``` 代码块
-    const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/)
-    if (codeBlockMatch) {
-      jsonStr = codeBlockMatch[1].trim()
-    }
-    
-    // 方法2: 直接匹配 { ... } 
-    if (!jsonStr) {
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        jsonStr = jsonMatch[0]
-      }
-    }
-    
-    // 方法3: 整个内容就是JSON
-    if (!jsonStr && content.trim().startsWith('{')) {
-      jsonStr = content.trim()
-    }
-    
-    if (jsonStr) {
-      try {
-        // 清理可能的问题字符
-        jsonStr = jsonStr
-          .replace(/[\u0000-\u001F]+/g, ' ')  // 移除控制字符
-          .replace(/,(\s*[}\]])/g, '$1')       // 移除尾部逗号
-        
-        const result = JSON.parse(jsonStr)
-        
+    if (result) {
         // 验证和标准化changes数组
         const changes = Array.isArray(result.changes) 
           ? result.changes.filter((c: any) => c && typeof c === 'object' && c.key)
@@ -945,14 +1058,11 @@ export async function executeAgentTask(
           success: true,
           understood: result.understood || '处理完成',
           changes,
-          suggestions: Array.isArray(result.suggestions) ? result.suggestions : [],
-          warnings: Array.isArray(result.warnings) ? result.warnings : [],
+          suggestions: Array.isArray(result.suggestions) ? result.suggestions.map((s: any) => typeof s === 'string' ? s : JSON.stringify(s)) : [],
+          warnings: Array.isArray(result.warnings) ? result.warnings.map((w: any) => typeof w === 'string' ? w : (typeof w === 'object' && w !== null ? (w.message || w.text || w.warning || JSON.stringify(w)) : String(w))) : [],
           processingTime: Date.now() - startTime,
           status: 'completed'
         }
-      } catch (parseError) {
-        console.error('JSON parse error:', parseError, 'Content:', jsonStr.slice(0, 200))
-      }
     }
 
     // 如果解析失败但有内容，尝试提取有用信息
@@ -1057,7 +1167,10 @@ export async function executeMultiAgentWorkflow(
       }
     }
     if (response.warnings) {
-      allWarnings.push(...response.warnings.map(w => `[${response.agentName}] ${w}`))
+      allWarnings.push(...response.warnings.map(w => {
+          const wStr = typeof w === 'string' ? w : (typeof w === 'object' && w !== null ? (w.message || w.text || w.warning || JSON.stringify(w)) : String(w))
+          return `[${response.agentName}] ${wStr}`
+        }))
     }
   }
 
@@ -1138,22 +1251,22 @@ function detectRuleBasedInferredChanges(
   
   // 已存在的推断修改key，避免重复
   const existingKeys = new Set(existingInferred.map(c => c.key))
+  // 直接修改的key也排除
+  const primaryKeys = new Set(primaryChanges.map(c => c.key))
   
   // 规则1：检测月度利率设置 → 资金成本计算方式联动
   const monthlyRatePattern = /按.{0,2}月.{0,5}(\d+\.?\d*)%|月.{0,2}(\d+\.?\d*)%|每月.{0,5}(\d+\.?\d*)%/
   const monthlyMatch = message.match(monthlyRatePattern)
   
   if (monthlyMatch || lowerMessage.includes('按月') || lowerMessage.includes('每月')) {
-    // 检查是否涉及收益/利率相关的直接修改
     const hasRateChange = primaryChanges.some(c => 
-      ['annualYieldRate', 'monthlyReturnRate', 'revenueShareRatio'].includes(c.key) ||
+      ['annualYieldRate', 'monthlyReturnRate', 'revenueShareRatio', 'annualReturnRate'].includes(c.key) ||
       c.paramName?.includes('收益') || c.paramName?.includes('利率') || c.paramName?.includes('分成')
     )
     
-    // 检查当前资金成本计算方式
     const currentCalcMethod = currentParams.fundCostCalculation || '按日计算'
     
-    if (hasRateChange && !existingKeys.has('fundCostCalculation') && !currentCalcMethod.includes('按月')) {
+    if (hasRateChange && !existingKeys.has('fundCostCalculation') && !primaryKeys.has('fundCostCalculation') && !currentCalcMethod.includes('按月')) {
       result.push({
         key: 'fundCostCalculation',
         paramName: '资金成本计算方式',
@@ -1170,18 +1283,88 @@ function detectRuleBasedInferredChanges(
     }
   }
   
+  // 规则1.5：检测季度利率设置 → 资金成本计算方式联动 + 年化换算
+  const quarterlyRatePattern = /按.{0,2}季.{0,5}(\d+\.?\d*)%|季.{0,2}(\d+\.?\d*)%|每.{0,2}季.{0,5}(\d+\.?\d*)%|一季.{0,5}(\d+\.?\d*)%/
+  const quarterlyMatch = message.match(quarterlyRatePattern)
+  
+  if (quarterlyMatch || message.includes('按季') || message.includes('每季') || message.includes('一季')) {
+    const hasRateChange = primaryChanges.some(c => 
+      ['annualYieldRate', 'annualReturnRate', 'quarterlyReturnRate', 'revenueShareRatio'].includes(c.key) ||
+      c.paramName?.includes('收益') || c.paramName?.includes('利率') || c.paramName?.includes('分成')
+    )
+    
+    const currentCalcMethod = currentParams.fundCostCalculation || ''
+    
+    if (hasRateChange && !existingKeys.has('fundCostCalculation') && !primaryKeys.has('fundCostCalculation') && !currentCalcMethod.includes('按季')) {
+      result.push({
+        key: 'fundCostCalculation',
+        paramName: '资金成本计算方式',
+        oldValue: currentCalcMethod || '未设置',
+        newValue: '按季计算',
+        clauseText: '资金成本按季度计算，每季度末结算一次，不足一季按实际天数折算',
+        changeType: 'inferred',
+        confidence: 'high',
+        reason: '用户指定按季度计算收益，资金成本计算方式应同步调整为按季计算',
+        relatedTo: primaryChanges.find(c => c.paramName?.includes('收益'))?.key || 'annualYieldRate',
+        category: 'calculation_method',
+        selected: false
+      })
+    }
+    
+    // 季度利率 → 年化换算
+    const qRate = parseFloat(quarterlyMatch?.[1] || quarterlyMatch?.[2] || quarterlyMatch?.[3] || quarterlyMatch?.[4] || '0')
+    if (qRate > 0) {
+      const annualRate = (qRate * 4).toFixed(2)
+      if (!existingKeys.has('annualYieldRateDisplay') && !primaryKeys.has('annualYieldRateDisplay')) {
+        result.push({
+          key: 'annualYieldRateDisplay',
+          paramName: '年化收益率换算',
+          oldValue: currentParams.annualYieldRate || currentParams.annualReturnRate || '未设置',
+          newValue: `${annualRate}%（季${qRate}%×4）`,
+          clauseText: `按季度收益率${qRate}%换算，年化收益率约为${annualRate}%`,
+          changeType: 'inferred',
+          confidence: 'high',
+          reason: `季度收益率${qRate}%乘以4个季度，年化收益率为${annualRate}%`,
+          relatedTo: 'quarterlyReturnRate',
+          category: 'unit_conversion',
+          selected: false
+        })
+      }
+    }
+    
+    // 季度利率 → 对账结算周期联动
+    if (!existingKeys.has('reconciliationDeadline') && !primaryKeys.has('reconciliationDeadline')) {
+      const currentRecon = currentParams.reconciliationDeadline || ''
+      if (!currentRecon.includes('季')) {
+        result.push({
+          key: 'reconciliationDeadline',
+          paramName: '对账结算周期',
+          oldValue: currentRecon || '每月15日前',
+          newValue: '每季度结束后15日内',
+          clauseText: '双方应于每个自然季度结束后十五（15）日内完成当季收入分成的对账确认',
+          changeType: 'inferred',
+          confidence: 'medium',
+          reason: '收益按季度计算，对账结算周期应同步调整为按季度对账',
+          relatedTo: 'fundCostCalculation',
+          category: 'related_term',
+          selected: false
+        })
+      }
+    }
+  }
+  
   // 规则2：检测日度利率设置 → 资金成本计算方式联动
   const dailyRatePattern = /按.{0,2}日.{0,5}(\d+\.?\d*)%|日.{0,2}(\d+\.?\d*)%|每日.{0,5}(\d+\.?\d*)%/
   
   if (message.match(dailyRatePattern) || lowerMessage.includes('按日') || lowerMessage.includes('每天')) {
     const hasRateChange = primaryChanges.some(c => 
-      ['annualYieldRate', 'dailyReturnRate'].includes(c.key) ||
+      ['annualYieldRate', 'dailyReturnRate', 'annualReturnRate'].includes(c.key) ||
       c.paramName?.includes('收益') || c.paramName?.includes('利率')
     )
     
     const currentCalcMethod = currentParams.fundCostCalculation || ''
     
-    if (hasRateChange && !existingKeys.has('fundCostCalculation') && !currentCalcMethod.includes('按日')) {
+    if (hasRateChange && !existingKeys.has('fundCostCalculation') && !primaryKeys.has('fundCostCalculation') && !currentCalcMethod.includes('按日')) {
       result.push({
         key: 'fundCostCalculation',
         paramName: '资金成本计算方式',
@@ -1446,7 +1629,7 @@ ${context.perspective === 'investor' ? '投资方' : '融资方'}
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.3,
-        max_tokens: 1500
+        max_tokens: CONFIG.INFER_MAX_TOKENS
       })
     })
 
@@ -1457,25 +1640,8 @@ ${context.perspective === 'investor' ? '投资方' : '融资方'}
     const data = await response.json()
     const content = data.choices?.[0]?.message?.content || ''
 
-    // 解析JSON
-    let result: any = null
-    
-    // 尝试多种方式提取JSON
-    const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/)
-    if (codeBlockMatch) {
-      try {
-        result = JSON.parse(codeBlockMatch[1].trim())
-      } catch (e) {}
-    }
-    
-    if (!result) {
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        try {
-          result = JSON.parse(jsonMatch[0])
-        } catch (e) {}
-      }
-    }
+    // 使用鲁棒JSON提取工具
+    const result = extractJsonFromContent(content)
 
     if (result) {
       // 标准化结果
@@ -1630,7 +1796,7 @@ ${JSON.stringify(context.currentParams, null, 2)}
           { role: 'user', content: inferPrompt }
         ],
         temperature: 0.2,
-        max_tokens: 1000
+        max_tokens: CONFIG.INFER_MAX_TOKENS
       })
     })
 
@@ -1641,20 +1807,15 @@ ${JSON.stringify(context.currentParams, null, 2)}
       const data = await response.json()
       const content = data.choices?.[0]?.message?.content || ''
 
-      // 解析JSON
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        try {
-          const result = JSON.parse(jsonMatch[0])
+      // 使用鲁棒JSON提取工具
+      const result = extractJsonFromContent(content)
+      if (result) {
           inferredChanges = (result.inferredChanges || []).map((c: any) => ({
             ...c,
             changeType: 'inferred' as ChangeType,
             selected: false
           }))
           analysisExplanation = result.analysisExplanation || analysisExplanation
-        } catch (e) {
-          console.error('Failed to parse inferred changes:', e)
-        }
       }
     }
 
@@ -1803,31 +1964,26 @@ ${JSON.stringify(request.context.currentParams, null, 2)}
 ## 任务
 请将以上修改意图转化为专业的法律合同条款语言。
 
-输出JSON格式（不要代码块）：
+**重要**：直接输出JSON对象，不要包裹在代码块中。legalClauseText请控制在80字以内。
+
+输出JSON格式：
 {
-  "legalSummary": "本次修改的法律层面摘要",
+  "legalSummary": "简明摘要（50字以内）",
   "transformedChanges": [
     {
-      "key": "investmentAmount",
-      "paramName": "联营资金金额",
-      "oldValue": "500万",
-      "newValue": "800万",
-      "originalExpression": "把投资金额改成800万",
-      "clauseText": "联营资金调整为800万元",
-      "legalClauseText": "甲方同意向乙方提供联营资金人民币捌佰万元整（¥8,000,000.00），该款项应于本协议生效后五（5）个工作日内，以银行转账方式划入乙方指定的银行账户。乙方应出具相应收款凭证。",
-      "legalNotes": [
-        "建议明确资金用途限制",
-        "建议增加分期支付条款（如适用）"
-      ],
-      "legalReview": {
-        "reviewed": true,
-        "legalScore": 90,
-        "improvements": ["可考虑增加资金监管账户条款"]
-      }
+      "key": "参数key",
+      "paramName": "参数中文名",
+      "oldValue": "原值",
+      "newValue": "新值",
+      "originalExpression": "用户原始表达",
+      "clauseText": "简短条款描述",
+      "legalClauseText": "法律条款（80字以内）",
+      "legalNotes": ["注意事项"],
+      "legalReview": {"reviewed": true, "legalScore": 85, "improvements": ["改进建议"]}
     }
   ],
-  "riskWarnings": ["法律风险提示"],
-  "clauseRecommendations": ["建议完善的条款"]
+  "riskWarnings": ["风险提示"],
+  "clauseRecommendations": ["建议"]
 }`
 
   try {
@@ -1840,11 +1996,11 @@ ${JSON.stringify(request.context.currentParams, null, 2)}
       body: JSON.stringify({
         model: CONFIG.MODEL_QUALITY, // 法律转化使用高质量模型
         messages: [
-          { role: 'system', content: LEGAL_COUNSEL_SYSTEM_PROMPT },
+          { role: 'system', content: LEGAL_COUNSEL_SYSTEM_PROMPT + '\n\n重要：直接输出JSON对象，不要包裹在```代码块中。确保输出精炼，控制在1500字以内。' },
           { role: 'user', content: userPrompt }
         ],
         temperature: 0.3,
-        max_tokens: 2000
+        max_tokens: CONFIG.LEGAL_MAX_TOKENS
       })
     })
 
@@ -1854,42 +2010,74 @@ ${JSON.stringify(request.context.currentParams, null, 2)}
 
     const data = await response.json()
     const content = data.choices?.[0]?.message?.content || ''
-
-    // 解析JSON
-    let result: any = null
-    const codeBlockMatch = content.match(/```(?:json)?\s*([\s\S]*?)```/)
-    if (codeBlockMatch) {
-      try {
-        result = JSON.parse(codeBlockMatch[1].trim())
-      } catch (e) {}
-    }
+    const finishReason = data.choices?.[0]?.finish_reason || 'unknown'
     
-    if (!result) {
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        try {
-          result = JSON.parse(jsonMatch[0])
-        } catch (e) {}
-      }
-    }
+    // Debug: 记录原始响应
+    console.log('[LegalCounsel] Raw content length:', content.length, 
+      'finish_reason:', finishReason,
+      'Has code block:', content.includes('```'), 
+      'Has transformedChanges:', content.includes('transformedChanges'))
 
-    if (result && result.transformedChanges) {
+    // 使用鲁棒JSON提取工具
+    const result = extractJsonFromContent(content)
+    
+    console.log('[LegalCounsel] Parse result:', result ? 'SUCCESS' : 'FAILED', 
+      result ? `transformedChanges: ${result.transformedChanges?.length || 0}` : 
+      `content preview: ${content.substring(0, 200)}`)
+
+    if (result && result.transformedChanges && Array.isArray(result.transformedChanges) && result.transformedChanges.length > 0) {
       return {
         success: true,
         transformedChanges: result.transformedChanges.map((c: any) => ({
-          ...c,
+          key: c.key || '',
+          paramName: c.paramName || '',
+          oldValue: c.oldValue || '',
+          newValue: c.newValue || '',
+          clauseText: c.clauseText || '',
+          originalExpression: c.originalExpression || request.originalInput,
+          legalClauseText: c.legalClauseText || '',
+          legalNotes: Array.isArray(c.legalNotes) ? c.legalNotes.map((n: any) => typeof n === 'string' ? n : String(n)) : [],
           changeType: 'primary' as ChangeType,
           selected: true,
           legalReview: {
-            ...c.legalReview,
             reviewed: true,
-            reviewedAt: new Date().toISOString()
+            reviewedAt: new Date().toISOString(),
+            legalScore: c.legalReview?.legalScore || 80,
+            improvements: Array.isArray(c.legalReview?.improvements) ? c.legalReview.improvements : []
           }
         })),
         legalSummary: result.legalSummary || '已完成法律语言转化',
-        riskWarnings: result.riskWarnings || [],
-        clauseRecommendations: result.clauseRecommendations || [],
+        riskWarnings: Array.isArray(result.riskWarnings) ? result.riskWarnings.map((w: any) => typeof w === 'string' ? w : String(w)) : [],
+        clauseRecommendations: Array.isArray(result.clauseRecommendations) ? result.clauseRecommendations : [],
         processingTime: Date.now() - startTime
+      }
+    }
+    
+    // 如果解析到了result但没有transformedChanges，尝试从原始agent changes中构建
+    if (result && !result.transformedChanges) {
+      // LLM可能返回了不同结构的结果，尝试适配
+      const changes = result.changes || result.modifications || result.items || []
+      if (Array.isArray(changes) && changes.length > 0) {
+        return {
+          success: true,
+          transformedChanges: changes.map((c: any) => ({
+            key: c.key || c.param || '',
+            paramName: c.paramName || c.name || '',
+            oldValue: c.oldValue || c.from || '',
+            newValue: c.newValue || c.to || '',
+            clauseText: c.clauseText || c.clause || c.description || '',
+            originalExpression: request.originalInput,
+            legalClauseText: c.legalClauseText || c.legalText || c.legal || '',
+            legalNotes: [],
+            changeType: 'primary' as ChangeType,
+            selected: true,
+            legalReview: { reviewed: true, reviewedAt: new Date().toISOString(), legalScore: 75, improvements: [] }
+          })),
+          legalSummary: result.legalSummary || result.summary || '已完成法律语言转化',
+          riskWarnings: Array.isArray(result.riskWarnings) ? result.riskWarnings.map((w: any) => typeof w === 'string' ? w : String(w)) : [],
+          clauseRecommendations: [],
+          processingTime: Date.now() - startTime
+        }
       }
     }
 
@@ -1996,11 +2184,11 @@ export async function executeSmartChangeWorkflowV3(
     }))
   }
 
-  // Step 3: 联动分析（保持原有逻辑）
+  // Step 3: 联动分析
   const inferPrompt = `你是合同条款联动分析专家。基于已识别的直接修改，分析可能需要联动调整的相关参数。
 
 ## 已识别的直接修改
-${JSON.stringify(primaryChanges.map(c => ({ key: c.key, paramName: c.paramName, oldValue: c.oldValue, newValue: c.newValue })), null, 2)}
+${primaryChanges.map(c => `- ${c.paramName}（${c.key}）：${c.oldValue} → ${c.newValue}`).join('\n')}
 
 ## 当前所有合同参数
 ${JSON.stringify(context.currentParams, null, 2)}
@@ -2008,35 +2196,19 @@ ${JSON.stringify(context.currentParams, null, 2)}
 ## 原始用户请求
 "${message}"
 
-## 重要的联动规则
-1. 月利率设置 → 年化利率换算 + 资金成本计算方式调整为"按月"
-2. 日利率设置 → 年化利率换算 + 资金成本计算方式调整为"按日"
-3. 投资金额变化 → 违约金金额可能需要按比例调整
-4. 分成期限变化 → 截止日期需要重新计算
+## 重要的联动规则（必须检查）
+1. 月利率/季度利率/日利率设置 → 年化利率必须同步换算，资金成本计算方式必须匹配
+2. 投资金额变化 → 违约金金额必须按比例重新计算（如违约金=投资额×20%）
+3. 分成期限变化 → 截止日期需要重新计算
+4. 收益计算方式变化 → 对账周期、结算周期应同步调整
+5. 分成比例变化 → 预计回收期、年化回报率需要重新评估
 
-输出JSON（不要代码块）：
-{
-  "analysisExplanation": "联动分析说明",
-  "inferredChanges": [
-    {
-      "key": "paramKey",
-      "paramName": "参数名",
-      "oldValue": "原值",
-      "newValue": "新值",
-      "clauseText": "条款描述",
-      "changeType": "inferred",
-      "confidence": "high",
-      "reason": "联动原因",
-      "relatedTo": "关联参数key",
-      "category": "calculation_method",
-      "selected": false
-    }
-  ],
-  "warnings": []
-}`
+请输出严格的JSON格式（不要包含代码块标记）：
+{"analysisExplanation":"联动分析说明","inferredChanges":[{"key":"参数key","paramName":"参数中文名","oldValue":"原值","newValue":"建议新值","clauseText":"条款变更描述","changeType":"inferred","confidence":"high或medium或low","reason":"为什么需要联动修改","relatedTo":"关联的直接修改参数key","category":"calculation_method或unit_conversion或formula_update或related_term","selected":false}],"warnings":["风险提示字符串"]}`
 
   let inferredChanges: SmartChange[] = []
   let analysisExplanation = '基于直接修改分析可能的联动影响'
+  let inferWarnings: string[] = []
 
   try {
     const inferResponse = await fetch(`${baseUrl}/chat/completions`, {
@@ -2046,29 +2218,42 @@ ${JSON.stringify(context.currentParams, null, 2)}
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: CONFIG.MODEL_FAST,
+        model: CONFIG.MODEL_QUALITY, // 使用高质量模型确保联动分析准确
         messages: [
+          { role: 'system', content: '你是合同条款联动分析专家。直接输出JSON对象，不要包裹在代码块中。所有字段必须是字符串类型。' },
           { role: 'user', content: inferPrompt }
         ],
         temperature: 0.2,
-        max_tokens: 1000
+        max_tokens: CONFIG.INFER_MAX_TOKENS
       })
     })
 
     if (inferResponse.ok) {
       const data = await inferResponse.json()
       const content = data.choices?.[0]?.message?.content || ''
-      const jsonMatch = content.match(/\{[\s\S]*\}/)
-      if (jsonMatch) {
-        try {
-          const result = JSON.parse(jsonMatch[0])
-          inferredChanges = (result.inferredChanges || []).map((c: any) => ({
-            ...c,
-            changeType: 'inferred' as ChangeType,
-            selected: false
-          }))
-          analysisExplanation = result.analysisExplanation || analysisExplanation
-        } catch (e) {}
+      const finishReason = data.choices?.[0]?.finish_reason || 'unknown'
+      
+      console.log('[InferAnalysis] content length:', content.length, 'finish_reason:', finishReason)
+      
+      // 使用鲁棒JSON提取工具
+      const parsed = extractJsonFromContent(content)
+      
+      if (parsed) {
+        inferredChanges = (parsed.inferredChanges || []).map((c: any) => ({
+          key: c.key || '',
+          paramName: c.paramName || '',
+          oldValue: c.oldValue || '',
+          newValue: c.newValue || '',
+          clauseText: c.clauseText || '',
+          changeType: 'inferred' as ChangeType,
+          confidence: c.confidence || 'medium',
+          reason: c.reason || '',
+          relatedTo: c.relatedTo || '',
+          category: c.category || 'related_term',
+          selected: false
+        }))
+        analysisExplanation = parsed.analysisExplanation || analysisExplanation
+        inferWarnings = Array.isArray(parsed.warnings) ? parsed.warnings.map((w: any) => typeof w === 'string' ? w : String(w)) : []
       }
     }
   } catch (e) {}
@@ -2093,7 +2278,8 @@ ${JSON.stringify(context.currentParams, null, 2)}
     analysisExplanation,
     warnings: [
       ...multiAgentResult.allWarnings,
-      ...(legalTransformResult?.riskWarnings || [])
+      ...(legalTransformResult?.riskWarnings || []),
+      ...inferWarnings
     ],
     agentResponses: multiAgentResult.agentResponses,
     processingTime: Date.now() - startTime,

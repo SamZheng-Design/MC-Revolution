@@ -6115,7 +6115,7 @@ app.get('/', (c) => {
         } else {
           // 没有识别到修改
           updateSmartChangeStatus('no-changes', result.warnings?.length > 0 
-            ? '提示: ' + result.warnings[0] 
+            ? '提示: ' + (typeof result.warnings[0] === 'string' ? result.warnings[0] : JSON.stringify(result.warnings[0])) 
             : 'AI未能理解您的变动描述，请尝试更具体的表述');
           setTimeout(() => hideSmartChangePanel(), 3000);
         }
@@ -6298,7 +6298,7 @@ app.get('/', (c) => {
                   <div class="mt-2 p-2 bg-red-50 rounded-lg">
                     <p class="text-xs font-medium text-red-700 mb-1"><i class="fas fa-exclamation-triangle mr-1"></i>法律风险提示：</p>
                     <ul class="text-xs text-red-600 space-y-1">
-                      \${result.legalTransform.riskWarnings.map(w => \`<li>\${escapeHtml(w)}</li>\`).join('')}
+                      \${result.legalTransform.riskWarnings.map(w => \`<li>\${escapeHtml(typeof w === 'string' ? w : JSON.stringify(w))}</li>\`).join('')}
                     </ul>
                   </div>
                 \` : ''}
@@ -6362,7 +6362,7 @@ app.get('/', (c) => {
               <i class="fas fa-exclamation-triangle text-red-600 mt-1"></i>
               <div>
                 <p class="text-sm font-medium text-red-800 mb-1">风险提示</p>
-                \${result.warnings.map(w => \`<p class="text-sm text-red-700">\${escapeHtml(w)}</p>\`).join('')}
+                \${result.warnings.map(w => \`<p class="text-sm text-red-700">\${escapeHtml(typeof w === 'string' ? w : JSON.stringify(w))}</p>\`).join('')}
               </div>
             </div>
           </div>
@@ -7097,7 +7097,7 @@ app.get('/', (c) => {
               
               \${n.warnings?.length > 0 ? \`
                 <div class="bg-red-50 rounded-lg p-2 border border-red-100">
-                  <p class="text-xs text-red-700"><i class="fas fa-exclamation-triangle mr-1"></i>\${n.warnings[0]}</p>
+                  <p class="text-xs text-red-700"><i class="fas fa-exclamation-triangle mr-1"></i>\${typeof n.warnings[0] === 'string' ? escapeHtml(n.warnings[0]) : escapeHtml(JSON.stringify(n.warnings[0]))}</p>
                 </div>
               \` : ''}
             </div>
