@@ -1,396 +1,356 @@
-# 合约通 Contract Connect — API接口状态与生产建议清单
+# 合约通 Contract Connect — 功能 & API 接口现状清单
 
-> 生成日期: 2026-02-23 | 版本: V10.2 | 总计: **56个API端点**
-
----
-
-## 一、功能模块总览
-
-| # | 模块 | 端点数 | 当前状态 | 数据层 | 生产就绪度 |
-|---|------|--------|---------|--------|-----------|
-| 1 | 个人账户体系 | 7 | ✅ 可用 | 内存 Map | 🟡 60% |
-| 2 | 企业SSO对接 | 3 | 🔧 预留桩 | — | 🔴 0% |
-| 3 | 项目管理（云端） | 5 | ⚠️ 需D1 | Cloudflare D1 | 🟡 50% |
-| 4 | 项目同步 | 1 | ⚠️ 需D1 | Cloudflare D1 | 🟡 50% |
-| 5 | 协作邀请 | 5 | ✅ 可用 | 内存 Map | 🟡 60% |
-| 6 | 版本管理 | 4 | 🔧 演示桩 | — | 🔴 10% |
-| 7 | 电子签章 | 7 | ✅ 完整可用 | 内存 Map | 🟡 65% |
-| 8 | 模板管理 | 8 | ✅ 完整可用 | 内存 Map + 内置 | 🟡 60% |
-| 9 | AI合同解析 | 1 | ✅ 可用 | 无状态 | 🟢 85% |
-| 10 | AI谈判助手 | 3 | ✅ 可用 | 无状态 | 🟢 85% |
-| 11 | AI聊天 | 1 | ✅ 可用 | 无状态 | 🟢 80% |
-| 12 | 多Agent工作流 | 7 | ✅ 完整可用 | 无状态 | 🟢 90% |
-| 13 | 存储状态 | 1 | ✅ 可用 | — | 🟢 80% |
-| 14 | 页面渲染 | 1 | ✅ 可用 | — | 🟢 90% |
-| 15 | 静态资源 | 2 | ✅ 可用 | 文件 | 🟢 95% |
+> 生成日期：2026-02-23 | 版本：V10.2 | 测试环境：Wrangler Pages Dev (本地)
 
 ---
 
-## 二、逐接口详细清单
+## 一、总览
 
-### 1. 个人账户体系（7个端点）
-
-| 接口 | 方法 | 当前状态 | 存储 | 备注 |
-|------|------|---------|------|------|
-| `/api/auth/register` | POST | ✅ 可用 | 内存 userStore | 支持用户名、邮箱、密码、角色、公司等字段 |
-| `/api/auth/login` | POST | ✅ 可用 | 内存 userStore | V10.2已修复密码校验；支持用户名或邮箱登录 |
-| `/api/auth/logout` | POST | ✅ 可用 | 内存 sessionStore | 删除会话token |
-| `/api/auth/me` | GET | ✅ 可用 | 内存 | Bearer Token认证，返回完整用户信息 |
-| `/api/auth/profile` | PUT | ✅ 可用 | 内存 userStore | 支持修改姓名、公司、职位、简介、默认角色 |
-| `/api/auth/my-stats` | GET | ✅ 可用 | 内存 | 按角色统计项目数（投资方/融资方维度） |
-
-**⚠️ 当前数据层：** 内存 `Map`，服务重启数据丢失
-
-| 生产建议 | 优先级 | 说明 |
-|---------|--------|------|
-| 密码哈希加密 | 🔴 必须 | 当前明文存储，生产需用 bcrypt/scrypt + 盐值 |
-| 持久化用户表 | 🔴 必须 | 迁移到 Cloudflare D1 / 公司MySQL / PostgreSQL |
-| JWT Token | 🟡 推荐 | 替代简单随机token，支持无状态验证和过期控制 |
-| 邮箱验证 | 🟡 推荐 | 注册时发送验证邮件，防止虚假注册 |
-| 密码强度校验 | 🟡 推荐 | 前后端统一校验（最少8位、大小写+数字） |
-| 登录频率限制 | 🟡 推荐 | 防暴力破解，如5次失败锁定15分钟 |
+| 维度 | 数据 |
+|------|------|
+| API 端点总数 | **56 个** |
+| 完全可用（生产就绪） | **23 个** |
+| 功能可用（演示/内存存储） | **21 个** |
+| 预留/桩接口（待实现） | **12 个** |
+| 前端页面 | 4 页面（认证、个人中心、项目列表、协商） |
+| 弹窗/模态框 | 27 个 |
+| 前端 JS 报错 | 0 |
+| AI 模型 | claude-sonnet-4-5（高质量）/ claude-haiku-4-5（快速） |
 
 ---
 
-### 2. 企业SSO对接（3个端点）
+## 二、功能模块总览
 
-| 接口 | 方法 | 当前状态 | 备注 |
-|------|------|---------|------|
-| `/api/auth/sso/callback` | GET | 🔧 预留桩 | 返回4步对接指南（配置端点→token验证→字段映射→权限同步） |
-| `/api/auth/sso/logout` | POST | 🔧 预留桩 | 预留通知公司SSO系统登出 |
-| `/api/auth/sync-company-user` | POST | 🔧 预留桩 | 预留从公司系统同步用户数据 |
-
-**当前数据层：** 用户模型已预留 `externalId`、`externalToken`、`ssoProvider` 字段
-
-| 生产建议 | 优先级 | 说明 |
-|---------|--------|------|
-| 实现OIDC/OAuth2回调 | 🔴 必须（如需SSO） | 对接公司身份提供商（如Azure AD、Okta、企业微信） |
-| Token交换逻辑 | 🔴 必须 | SSO Code → Access Token → 用户信息 → 本地会话 |
-| 用户字段映射配置 | 🟡 推荐 | 公司字段（工号、部门、职级）→ 平台字段的映射表 |
-| 权限同步机制 | 🟡 推荐 | 定期从公司HR系统同步用户状态（离职自动禁用） |
-| 多租户隔离 | 🟢 可选 | 如需同时服务多家公司，需加入 tenantId 维度 |
+| # | 模块 | 功能数 | 当前状态 | 存储方式 | 生产就绪度 |
+|---|------|--------|---------|---------|-----------|
+| 1 | 个人账户体系 | 8 API | ✅ 可用 | 内存 Map | ⚠️ 需持久化+密码加密 |
+| 2 | SSO 企业对接 | 3 API | 🔧 预留 | — | 接口骨架完整，待实现逻辑 |
+| 3 | 项目管理 | 5 API | ✅ 可用 | 前端 LocalStorage + 后端 D1 预留 | ⚠️ 后端需接 D1 |
+| 4 | 模板管理 | 8 API | ✅ 可用 | 系统模板硬编码 + 自定义模板内存 Map | ⚠️ 自定义模板需持久化 |
+| 5 | 协作功能 | 6 API | ✅ 可用 | 内存 Map | ⚠️ 需持久化 |
+| 6 | 版本管理 | 4 API | 🔧 桩接口 | 前端 LocalStorage 管理 | ❌ 后端逻辑未实现 |
+| 7 | 电子签章 | 7 API | ✅ 可用 | 内存 Map | ⚠️ 需持久化+法律合规 |
+| 8 | AI 合同解析 | 2 API | ✅ 可用 | 无状态 | ✅ 仅需 API Key |
+| 9 | 多 Agent 工作流 | 8 API | ✅ 可用 | 无状态 | ✅ 仅需 API Key |
+| 10 | AI 谈判助手 | 4 API | ✅ 可用 | 无状态 | ✅ 仅需 API Key |
+| 11 | 云端存储/同步 | 2 API | 🔧 预留 | D1 预留 | ❌ 需创建 D1 数据库 |
 
 ---
 
-### 3. 项目管理 - 云端（5个端点）
+## 三、API 接口逐项清单
 
-| 接口 | 方法 | 当前状态 | 存储 | 备注 |
-|------|------|---------|------|------|
-| `/api/projects` | GET | ⚠️ 需D1 | D1 / 返回空 | 无D1时返回空列表；前端用 LocalStorage 管理 |
-| `/api/projects` | POST | ⚠️ 需D1 | D1 / 返回失败 | 无D1时返回"云端存储功能开发中" |
-| `/api/projects/:id` | PUT | ⚠️ 需D1 | D1 / 返回失败 | 同上 |
-| `/api/projects/:id` | DELETE | ⚠️ 需D1 | D1 / 返回失败 | 同上 |
-| `/api/storage/status` | GET | ✅ 可用 | — | 检测D1是否可用，返回存储模式（cloud/local） |
+### 3.1 个人账户体系（8 个）
 
-**⚠️ 当前架构：** 前端 LocalStorage 为主，后端 D1 为可选云同步
+| # | 方法 | 路径 | 功能 | 当前状态 | 存储 | 生产建议 |
+|---|------|------|------|---------|------|---------|
+| 1 | POST | `/api/auth/register` | 用户注册（用户名/邮箱/密码/角色/公司等） | ✅ 可用 | 内存 userStore | 密码需 bcrypt 哈希；写入 D1/公司数据库 |
+| 2 | POST | `/api/auth/login` | 用户登录（密码验证已修复） | ✅ 可用 | 内存 userStore | 加入登录频率限制；接入公司 LDAP/SSO |
+| 3 | POST | `/api/auth/logout` | 用户登出（清除会话） | ✅ 可用 | 内存 sessionStore | 改为 JWT 黑名单或 KV 存储 |
+| 4 | GET | `/api/auth/me` | 获取当前登录用户信息 | ✅ 可用 | 内存 sessionStore | Token 改为 JWT；校验 expiresAt |
+| 5 | PUT | `/api/auth/profile` | 更新个人资料（姓名/公司/职位/简介/角色） | ✅ 可用 | 内存 userStore | 写入 D1；头像上传走 R2 |
+| 6 | GET | `/api/auth/my-stats` | 获取用户项目统计（按投资方/融资方分组） | ✅ 可用 | 需前端传数据 | 改为后端查 D1 聚合 |
+| 7 | — | — | 密码字段 | ⚠️ 明文存储 | 内存 | **高优先**：必须 bcrypt 加盐哈希 |
+| 8 | — | — | 会话 Token | ⚠️ 随机字符串 | 内存 | **高优先**：改为 JWT + 签名密钥 |
 
-| 生产建议 | 优先级 | 说明 |
-|---------|--------|------|
-| 配置 Cloudflare D1 | 🟡 推荐 | `wrangler d1 create` 创建数据库，绑定到 wrangler.jsonc |
-| 离线优先架构 | 🟢 可保留 | 当前 LocalStorage + 云同步 模式对弱网环境友好 |
-| 数据冲突策略 | 🟡 推荐 | 多端同步时的冲突解决（时间戳优先 / 手动合并） |
-| 项目关联用户 | 🔴 必须 | 当前项目无 ownerId，需关联创建者以做权限控制 |
-
----
-
-### 4. 项目同步（1个端点）
-
-| 接口 | 方法 | 当前状态 | 备注 |
-|------|------|---------|------|
-| `/api/projects/sync` | POST | ⚠️ 需D1 | 批量 UPSERT 本地项目到D1 |
-
-| 生产建议 | 优先级 | 说明 |
-|---------|--------|------|
-| 增量同步 | 🟡 推荐 | 当前全量覆盖，大数据量下应改为增量（基于 updatedAt） |
-| 同步冲突检测 | 🟡 推荐 | 对比云端和本地版本号，提示冲突 |
+**数据模型 userStore 字段**：
+```
+id, username, email, password, phone, displayName, avatar,
+company, title, bio, defaultRole(investor|borrower|both),
+createdAt, updatedAt,
+externalId?, externalToken?, ssoProvider?  ← SSO预留字段
+```
 
 ---
 
-### 5. 协作邀请（5个端点）
+### 3.2 企业 SSO 对接（3 个 · 预留）
 
-| 接口 | 方法 | 当前状态 | 存储 | 备注 |
-|------|------|---------|------|------|
-| `/api/projects/:id/invite` | POST | ✅ 可用 | 内存 inviteStore | 生成邀请码，支持角色和有效期配置 |
-| `/api/invite/:code/verify` | GET | ✅ 可用 | 内存 inviteStore | 验证邀请码有效性，返回角色和过期时间 |
-| `/api/join/:code` | POST | ✅ 可用 | 内存 inviteStore | 加入协作，邀请码一次性消费 |
-| `/api/projects/:id/collaborators` | GET | 🔧 演示桩 | — | 固定返回空列表 |
-| `/api/projects/:id/collaborators/:odId` | DELETE | 🔧 演示桩 | — | 固定返回成功（无实际操作） |
+| # | 方法 | 路径 | 功能 | 当前状态 | 生产建议 |
+|---|------|------|------|---------|---------|
+| 9 | GET | `/api/auth/sso/callback` | 公司 SSO 登录回调 | 🔧 返回对接指南 | 实现 OAuth2/SAML 回调：验证 token→查找/创建用户→建立会话 |
+| 10 | POST | `/api/auth/sso/logout` | 公司 SSO 登出 | 🔧 桩接口 | 清除本地会话 + 通知公司 SSO 端 |
+| 11 | POST | `/api/auth/sync-company-user` | 同步公司用户数据 | 🔧 桩接口 | 定时/Webhook 拉取公司员工信息，映射角色权限 |
 
-| 生产建议 | 优先级 | 说明 |
-|---------|--------|------|
-| 持久化邀请记录 | 🔴 必须 | 迁移到D1，支持重启后邀请码依然有效 |
-| 协作者真实存储 | 🔴 必须 | 将协作关系存入项目的关联表 |
-| 邀请通知 | 🟡 推荐 | 邮件/短信/企业微信通知被邀请方 |
-| 权限矩阵 | 🟡 推荐 | 细分协作者权限：查看/编辑/审批/签署 |
+**SSO 对接步骤（已预留在代码注释中）**：
+1. 配置公司 SSO 服务端点（OAuth2 authorize/token URL）
+2. 实现 token 验证逻辑
+3. 映射用户字段（externalId、ssoProvider）
+4. 同步用户权限（部门、职位、审批权限）
 
 ---
 
-### 6. 版本管理（4个端点）
+### 3.3 项目管理（5 个）
 
-| 接口 | 方法 | 当前状态 | 备注 |
-|------|------|---------|------|
-| `/api/projects/:id/versions` | GET | 🔧 演示桩 | 固定返回空列表 + "功能开发中" |
-| `/api/projects/:id/versions` | POST | 🔧 演示桩 | 返回随机 versionId，不做实际存储 |
-| `/api/projects/:id/versions/:versionId/restore` | POST | 🔧 演示桩 | 固定返回"功能开发中" |
-| `/api/projects/:id/versions/compare` | GET | 🔧 演示桩 | 固定返回空 diff |
+| # | 方法 | 路径 | 功能 | 当前状态 | 存储 | 生产建议 |
+|---|------|------|------|---------|------|---------|
+| 12 | GET | `/api/projects` | 获取项目列表 | ⚠️ 需 D1 | D1 预留 | 接入 D1 后完全可用；当前前端 LocalStorage 自管理 |
+| 13 | POST | `/api/projects` | 创建项目 | ⚠️ 需 D1 | D1 预留 | 同上；当前前端 LocalStorage 自管理 |
+| 14 | PUT | `/api/projects/:id` | 更新项目 | ⚠️ 需 D1 | D1 预留 | 同上 |
+| 15 | DELETE | `/api/projects/:id` | 删除项目 | ⚠️ 需 D1 | D1 预留 | 同上；需要软删除+关联数据清理 |
+| 16 | POST | `/api/projects/sync` | 本地数据同步到云端 | ⚠️ 需 D1 | D1 预留 | UPSERT 逻辑已写好，接入 D1 即可用 |
 
-**⚠️ 注意：** 后端是桩接口，但前端 LocalStorage 已实现完整的版本管理逻辑（快照、回退、对比均可用）
-
-| 生产建议 | 优先级 | 说明 |
-|---------|--------|------|
-| 后端持久化版本 | 🟡 推荐 | D1建 versions 表，存储快照JSON |
-| 版本 Diff 引擎 | 🟡 推荐 | 后端实现合同参数逐字段对比 |
-| 版本数量限制 | 🟢 可选 | 每项目限制50个版本，防数据膨胀 |
+**说明**：项目管理采用「前端 LocalStorage 为主 + 后端 D1 同步」的双轨架构。后端代码已经写好了完整的 D1 SQL（INSERT/UPDATE/DELETE/SELECT），只需创建 D1 数据库并绑定即可。
 
 ---
 
-### 7. 电子签章（7个端点）
+### 3.4 模板管理（8 个）
 
-| 接口 | 方法 | 当前状态 | 存储 | 备注 |
-|------|------|---------|------|------|
-| `/api/projects/:id/sign/initiate` | POST | ✅ 完整可用 | 内存 signatureStore | 创建签署流程，设置多签署人 |
-| `/api/projects/:id/sign/status` | GET | ✅ 完整可用 | 内存 signatureStore | 返回签署进度（0/2 → 1/2 → 2/2） |
-| `/api/sign/:signId/execute` | POST | ✅ 完整可用 | 内存 signatureStore | 单人签署（含签名图片Base64 + 验证码） |
-| `/api/sign/:signId` | GET | ✅ 完整可用 | 内存 signatureStore | 签署详情（含所有签署人状态和时间戳） |
-| `/api/sign/:signId/cancel` | POST | ✅ 完整可用 | 内存 signatureStore | 取消签署（已完成的不可取消） |
-| `/api/sign/:signId/remind` | POST | ✅ 可用 | 内存 signatureStore | 发送提醒（目前仅返回成功，无实际推送） |
-| `/api/sign/:signId/update-signer` | PUT | ✅ 完整可用 | 内存 signatureStore | 更新签署人信息（已签署的锁定保护） |
+| # | 方法 | 路径 | 功能 | 当前状态 | 存储 | 生产建议 |
+|---|------|------|------|---------|------|---------|
+| 17 | GET | `/api/templates` | 获取系统模板列表（5个行业） | ✅ 可用 | 硬编码 | 稳定，无需改动 |
+| 18 | GET | `/api/templates/:id` | 获取单个系统模板详情 | ✅ 可用 | 硬编码 | 稳定 |
+| 19 | GET | `/api/custom-templates` | 获取自定义模板列表 | ✅ 可用 | 内存 Map | 持久化到 D1 |
+| 20 | GET | `/api/custom-templates/:id` | 获取单个自定义模板 | ✅ 可用 | 内存 Map | 同上 |
+| 21 | POST | `/api/custom-templates` | 创建自定义模板 | ✅ 可用 | 内存 Map | 同上 |
+| 22 | PUT | `/api/custom-templates/:id` | 更新自定义模板 | ✅ 可用 | 内存 Map | 同上 |
+| 23 | DELETE | `/api/custom-templates/:id` | 删除自定义模板 | ✅ 可用 | 内存 Map | 同上 |
+| 24 | POST | `/api/custom-templates/clone/:sourceId` | 克隆系统模板为自定义模板 | ✅ 可用 | 内存 Map | 同上 |
+| 25 | POST | `/api/custom-templates/from-project` | 从项目保存为模板 | ⚠️ 部分可用 | 内存 Map | 需要关联项目 ID 查找参数 |
 
-| 生产建议 | 优先级 | 说明 |
-|---------|--------|------|
-| 持久化签署记录 | 🔴 必须 | 签署记录法律效力要求永久保存，迁移到D1 |
-| 对接电子签章服务 | 🔴 必须（合规） | 集成 e签宝/法大大/DocuSign，获得法律效力 |
-| 验证码真实验证 | 🔴 必须 | 当前验证码无实际校验，需接入短信服务（阿里云/腾讯云） |
-| 合同哈希上链 | 🟡 推荐 | 签署完成后生成合同Hash，可选区块链存证 |
-| 签名图片存储 | 🟡 推荐 | Base64签名迁移到 R2 对象存储 |
-| 提醒推送实现 | 🟡 推荐 | 对接邮件/短信/企业微信发送签署提醒 |
-
----
-
-### 8. 模板管理（8个端点）
-
-| 接口 | 方法 | 当前状态 | 存储 | 备注 |
-|------|------|---------|------|------|
-| `/api/templates` | GET | ✅ 可用 | 代码内置 | 5个系统模板（演唱会、餐饮、零售、医美、教育） |
-| `/api/templates/:id` | GET | ✅ 可用 | 代码内置 | 获取单个模板详情 |
-| `/api/custom-templates` | GET | ✅ 可用 | 内存 customTemplateStore | 获取自定义模板列表 |
-| `/api/custom-templates/:id` | GET | ✅ 可用 | 内存 customTemplateStore | 获取单个自定义模板 |
-| `/api/custom-templates` | POST | ✅ 可用 | 内存 customTemplateStore | 创建自定义模板 |
-| `/api/custom-templates/:id` | PUT | ✅ 可用 | 内存 customTemplateStore | 更新自定义模板 |
-| `/api/custom-templates/:id` | DELETE | ✅ 可用 | 内存 customTemplateStore | 删除自定义模板 |
-| `/api/custom-templates/clone/:sourceId` | POST | ✅ 可用 | 内存 customTemplateStore | 克隆系统模板为自定义模板 |
-| `/api/custom-templates/from-project` | POST | ✅ 可用 | 内存 customTemplateStore | 从项目保存为模板（需传sourceTemplateId） |
-
-| 生产建议 | 优先级 | 说明 |
-|---------|--------|------|
-| 持久化自定义模板 | 🟡 推荐 | 迁移到D1，支持企业级模板库 |
-| 模板审批流程 | 🟢 可选 | 公司内部自定义模板需审批后方可使用 |
-| 模板版本控制 | 🟢 可选 | 系统模板升级后，已创建项目保持原版本 |
+**系统模板**（5个行业 · 基于滴灌通联营协议V3标准）：
+- `concert` 演唱会/演出
+- `catering` 餐饮连锁
+- `retail` 零售门店
+- `healthcare` 医美/健康
+- `education` 教育培训
 
 ---
 
-### 9. AI 合同解析（1个端点）
+### 3.5 协作功能（6 个）
 
-| 接口 | 方法 | 当前状态 | AI模型 | 响应时间 |
-|------|------|---------|--------|---------|
-| `/api/parse-change` | POST | ✅ 可用 | claude-sonnet-4-5 | ~16秒 |
-
-**功能：** 自然语言 → 结构化合同参数变更 + 法律条文生成
-
-| 生产建议 | 优先级 | 说明 |
-|---------|--------|------|
-| 流式响应 | 🟡 推荐 | 16s等待体验差，改为SSE流式返回 |
-| 结果缓存 | 🟢 可选 | 相同输入缓存结果，避免重复调用 |
+| # | 方法 | 路径 | 功能 | 当前状态 | 存储 | 生产建议 |
+|---|------|------|------|---------|------|---------|
+| 26 | POST | `/api/projects/:id/invite` | 生成邀请链接（含角色/有效期） | ✅ 可用 | 内存 inviteStore | 持久化到 KV（自带 TTL 过期） |
+| 27 | GET | `/api/invite/:code/verify` | 验证邀请码有效性 | ✅ 可用 | 内存 inviteStore | 同上 |
+| 28 | POST | `/api/join/:code` | 通过邀请码加入协作 | ✅ 可用 | 内存 inviteStore | 同上；需写入项目协作者表 |
+| 29 | GET | `/api/projects/:id/collaborators` | 获取协作者列表 | 🔧 返回空数组 | — | 需从 D1 查询实际协作者 |
+| 30 | DELETE | `/api/projects/:id/collaborators/:odId` | 移除协作者 | 🔧 桩接口 | — | 需操作 D1 + 权限校验 |
+| 31 | PUT | `/api/projects/:id/collaborators/:odId` | 更新协作者权限 | 🔧 桩接口 | — | 需操作 D1 |
 
 ---
 
-### 10. AI 谈判助手（3个端点）
+### 3.6 版本管理（4 个 · 前端管理为主）
 
-| 接口 | 方法 | 当前状态 | AI模型 | 响应时间 |
-|------|------|---------|--------|---------|
-| `/api/ai/negotiate-advice` | POST | ✅ 可用 | claude-sonnet-4-5 | ~37秒 |
-| `/api/ai/risk-assessment` | POST | ✅ 可用 | claude-sonnet-4-5 | ~25秒 |
-| `/api/ai/market-benchmark` | POST | ✅ 可用 | claude-sonnet-4-5 | ~26秒 |
+| # | 方法 | 路径 | 功能 | 当前状态 | 存储 | 生产建议 |
+|---|------|------|------|---------|------|---------|
+| 32 | GET | `/api/projects/:id/versions` | 获取版本列表 | 🔧 返回空数组 | — | 接入 D1 versions 表 |
+| 33 | POST | `/api/projects/:id/versions` | 创建版本快照 | ⚠️ 返回演示 ID | — | 写入 D1；存储完整参数快照 |
+| 34 | POST | `/api/projects/:id/versions/:versionId/restore` | 恢复到指定版本 | 🔧 桩接口 | — | 从 D1 读取快照 → 覆盖当前参数 |
+| 35 | GET | `/api/projects/:id/versions/compare` | 版本对比（两版本 diff） | 🔧 桩接口 | — | JSON diff 算法 + 字段中文名映射 |
 
-| 生产建议 | 优先级 | 说明 |
-|---------|--------|------|
-| 流式响应 | 🟡 推荐 | 25-37s等待时间长，建议SSE逐段返回 |
-| 行业数据库 | 🟡 推荐 | 接入真实市场数据（如滴灌通历史案例）替代Prompt中硬编码的参考数据 |
-| AI网关替换 | 🟡 推荐 | 生产环境可替换为公司AI网关/私有部署模型 |
-| 调用频率限制 | 🟡 推荐 | 防滥用，按用户/IP限流 |
+**说明**：版本管理核心逻辑在前端 LocalStorage 中已完整实现（创建快照、回退、对比）。后端接口是为云端持久化预留的。
 
 ---
 
-### 11. AI 聊天（1个端点）
+### 3.7 电子签章（7 个）
 
-| 接口 | 方法 | 当前状态 | AI模型 | 备注 |
-|------|------|---------|--------|------|
-| `/api/ai/chat` | POST | ✅ 可用 | claude-haiku-4-5 | 保留最近10轮对话历史，max_tokens=500 |
+| # | 方法 | 路径 | 功能 | 当前状态 | 存储 | 生产建议 |
+|---|------|------|------|---------|------|---------|
+| 36 | POST | `/api/projects/:id/sign/initiate` | 发起签署流程（设置签署人） | ✅ 可用 | 内存 signatureStore | 持久化到 D1；签署人需关联账户 |
+| 37 | GET | `/api/projects/:id/sign/status` | 获取签署状态和进度 | ✅ 可用 | 内存 signatureStore | 同上 |
+| 38 | POST | `/api/sign/:signId/execute` | 执行签署（提交签名+验证码） | ✅ 可用 | 内存 signatureStore | 验证码需改为真实短信/邮件发送 |
+| 39 | GET | `/api/sign/:signId` | 获取签署详情（含签名数据） | ✅ 可用 | 内存 signatureStore | 签名图片存 R2；合同 PDF 归档 |
+| 40 | POST | `/api/sign/:signId/cancel` | 取消签署流程 | ✅ 可用 | 内存 signatureStore | 状态保护逻辑完善 |
+| 41 | POST | `/api/sign/:signId/remind` | 发送签署提醒 | ⚠️ 模拟 | 内存 signatureStore | 接入邮件/短信通知服务 |
+| 42 | PUT | `/api/sign/:signId/update-signer` | 更新签署人信息 | ✅ 可用 | 内存 signatureStore | 已签署的签署人信息锁定保护 ✅ |
 
-| 生产建议 | 优先级 | 说明 |
-|---------|--------|------|
-| 对话历史持久化 | 🟢 可选 | 当前纯前端传递history，可选存入KV |
-| 知识库增强 | 🟡 推荐 | 接入滴灌通合约知识库做RAG检索增强 |
+**签署流程**：发起(signing) → 各方签署(execute) → 全部完成(completed)，逻辑闭环完整。
 
 ---
 
-### 12. 多Agent工作流（7个端点）
+### 3.8 AI 合同解析（2 个）
 
-| 接口 | 方法 | 当前状态 | AI模型 | 响应时间 |
-|------|------|---------|--------|---------|
-| `/api/agents` | GET | ✅ 可用 | — | <10ms，返回8个Agent列表 |
-| `/api/agents/:id` | GET | ✅ 可用 | — | <10ms，返回单个Agent详情 |
-| `/api/agents/route` | POST | ✅ 可用 | claude-haiku-4-5 | <1s（关键词匹配）或~10s（LLM验证） |
-| `/api/agents/process` | POST | ✅ 可用 | claude-sonnet-4-5 | ~5.5秒，最多3个Agent并行 |
-| `/api/agents/:id/process` | POST | ✅ 可用 | claude-sonnet-4-5 | ~5秒，单Agent独立处理 |
-| `/api/agents/smart-change` | POST | ✅ 可用 | sonnet + haiku | ~38秒，含联动分析+法律顾问 |
-| `/api/agents/smart-change-stream` | POST | ✅ 可用 | sonnet + haiku | SSE流式版本 |
-| `/api/agents/legal-transform` | POST | ✅ 可用 | claude-sonnet-4-5 | ~15秒，法律条文转化 |
-| `/api/agents/smart-change/confirm` | POST | ✅ 可用 | — | <10ms，确认并应用选中修改 |
+| # | 方法 | 路径 | 功能 | 当前状态 | 模型 | 生产建议 |
+|---|------|------|------|---------|------|---------|
+| 43 | POST | `/api/parse-change` | AI 解析自然语言变更（单一模式） | ✅ 可用 ~16s | claude-sonnet-4-5 | 可直接生产使用；建议加结果缓存 |
+| 44 | POST | `/api/ai/chat` | AI 智能聊天助手 | ✅ 可用 | claude-haiku-4-5 | 可直接生产使用 |
 
-**8个专业Agent：**
-| Agent | 专长 | 关键词 |
-|-------|------|--------|
+---
+
+### 3.9 多 Agent 并行工作流（8 个）
+
+| # | 方法 | 路径 | 功能 | 当前状态 | 模型 | 生产建议 |
+|---|------|------|------|---------|------|---------|
+| 45 | GET | `/api/agents` | 获取所有 Agent 列表（8个专家） | ✅ 可用 | — | 静态数据，可直接使用 |
+| 46 | GET | `/api/agents/:id` | 获取单个 Agent 详情 | ✅ 可用 | — | 同上 |
+| 47 | POST | `/api/agents/route` | 智能路由分析（关键词+LLM） | ✅ 可用 <1s | haiku | 关键词匹配快速；LLM 兜底 |
+| 48 | POST | `/api/agents/process` | 多 Agent 并行处理（核心API） | ✅ 可用 ~5.5s | sonnet+haiku | 可直接生产使用；已有超时降级 |
+| 49 | POST | `/api/agents/:id/process` | 单 Agent 独立处理 | ✅ 可用 | sonnet | 可直接生产使用 |
+| 50 | POST | `/api/agents/smart-change` | 智能联动分析V3（直接+推断修改） | ✅ 可用 ~38s | sonnet | 核心功能；建议加进度回调 |
+| 51 | POST | `/api/agents/smart-change-stream` | 智能联动分析（流式响应） | ✅ 可用 | sonnet | SSE 流式输出，体验更好 |
+| 52 | POST | `/api/agents/smart-change/confirm` | 确认并应用选中的联动修改 | ✅ 可用 | — | 纯逻辑，无 AI 调用 |
+| 53 | POST | `/api/agents/legal-transform` | 法律顾问 Agent 条文转化 | ✅ 可用 | sonnet | max_tokens=4000 已优化 |
+
+**8 个专业 Agent**：
+| Agent | 负责模块 | 关键词触发示例 |
+|-------|---------|---------------|
 | 投资分成专家 | 联营资金、分成比例、年化收益率 | 投资、资金、分成、金额、万元 |
-| 数据对账专家 | 数据传输、频率、对账、付款 | 数据、上报、对账、POS、结算 |
+| 数据对账专家 | 数据传输、频率、对账、付款 | 数据、上报、POS、结算 |
 | 终止条款专家 | 提前终止、亏损闭店、补偿金 | 终止、退出、闭店、亏损 |
-| 违约责任专家 | 违约情形、违约金、严重违约 | 违约、罚款、处罚、赔偿 |
-| 合规管控专家 | 控制权变更、品牌转让、禁止事项 | 禁止、控制权、转让 |
-| 担保责任专家 | 连带责任、实控人责任、品牌担保 | 担保、连带、保证 |
-| 资产信息专家 | 门店信息、品牌、证照、设备 | 门店、地址、品牌、设备 |
-| 法律事务专家 | 仲裁、保密、通知、合规 | 仲裁、法律、争议、保密 |
-
-| 生产建议 | 优先级 | 说明 |
-|---------|--------|------|
-| Agent知识库更新 | 🟡 推荐 | 定期更新Agent的行业知识和法规变化 |
-| 处理结果审计 | 🟡 推荐 | 记录每次Agent处理的完整日志供审计 |
-| 自定义Agent | 🟢 可选 | 允许企业配置自己的专业Agent |
+| 违约责任专家 | 违约情形、违约金、严重违约 | 违约、罚款、赔偿 |
+| 合规管控专家 | 控制权变更、品牌转让 | 禁止、控制权、转让 |
+| 担保责任专家 | 连带责任、实控人责任 | 担保、连带、保证 |
+| 资产信息专家 | 门店信息、品牌、证照 | 门店、地址、品牌 |
+| 法律事务专家 | 仲裁、保密、通知 | 仲裁、法律、争议 |
 
 ---
 
-## 三、数据存储层总览
+### 3.10 AI 谈判助手（3 个）
 
-### 当前状态（5个内存Store）
+| # | 方法 | 路径 | 功能 | 当前状态 | 模型 | 响应时间 | 生产建议 |
+|---|------|------|------|---------|------|---------|---------|
+| 54 | POST | `/api/ai/negotiate-advice` | 谈判建议（态势分析+策略+话术） | ✅ 可用 | claude-sonnet-4-5 | ~37s | 建议加结果缓存；可并行调用 |
+| 55 | POST | `/api/ai/risk-assessment` | 风险评估（多维度评分） | ✅ 可用 | claude-sonnet-4-5 | ~25s | 同上 |
+| 56 | POST | `/api/ai/market-benchmark` | 市场对标分析（行业数据对比） | ✅ 可用 | claude-sonnet-4-5 | ~26s | 同上；可补充真实市场数据库 |
 
-| 存储 | 类型 | 数据内容 | 重启后 |
-|------|------|---------|--------|
-| `userStore` | Map\<string, User\> | 用户账号信息（含预留SSO字段） | ❌ 丢失 |
-| `sessionStore` | Map\<string, Session\> | 登录会话token | ❌ 丢失 |
-| `inviteStore` | Map\<string, Invite\> | 协作邀请码 | ❌ 丢失 |
-| `signatureStore` | Map\<string, SignProcess\> | 电子签署流程 | ❌ 丢失 |
-| `customTemplateStore` | Map\<string, Template\> | 自定义模板 | ❌ 丢失 |
+---
 
-### 前端本地存储
+### 3.11 云端存储/同步（1 个 · 预留）
 
-| Key | 数据内容 | 备注 |
-|-----|---------|------|
-| `rbf_projects` | 项目完整数据 | 含合同参数、协商历史、版本快照、协作者 |
-| `rbf_auth_token` | 登录token | 自动登录用 |
-| `rbf_user` | 用户信息缓存 | 本地用户显示 |
+| # | 方法 | 路径 | 功能 | 当前状态 | 生产建议 |
+|---|------|------|------|---------|---------|
+| — | GET | `/api/storage/status` | 检查存储模式（cloud/local） | ⚠️ 始终返回 local | 接入 D1 后自动切换 |
 
-### 生产迁移方案
+---
+
+## 四、内存存储层清单（5 个 Map）
+
+| 存储名 | 数据类型 | 当前状态 | 生产迁移方案 |
+|--------|---------|---------|-------------|
+| `userStore` | 用户账户信息 | 内存 Map（重启丢失） | → Cloudflare D1 `users` 表 或 公司数据库 |
+| `sessionStore` | 登录会话/Token | 内存 Map（重启丢失） | → Cloudflare KV（自带 TTL 过期） 或 JWT |
+| `inviteStore` | 邀请链接信息 | 内存 Map（重启丢失） | → Cloudflare KV（TTL = 邀请有效期） |
+| `signatureStore` | 电子签章信息 | 内存 Map（重启丢失） | → Cloudflare D1 `sign_processes` 表 |
+| `customTemplateStore` | 自定义模板 | 内存 Map（重启丢失） | → Cloudflare D1 `custom_templates` 表 |
+
+---
+
+## 五、前端功能清单
+
+### 5.1 页面结构
+
+| 页面 | 元素 ID | 功能 |
+|------|---------|------|
+| 认证页 | `pageAuth` | 登录/注册/游客模式，切换标签动效 |
+| 个人中心 | `pageProfile` | 个人信息、投资方/融资方统计、合同列表 |
+| 项目列表 | `pageProjects` | 项目卡片、新建按钮、空状态引导 |
+| 协商页 | `pageNegotiation` | 合同条款编辑、AI 输入框、工具栏 |
+
+### 5.2 弹窗清单（27 个）
+
+| 类别 | 弹窗 | 功能 |
+|------|------|------|
+| 引导 | `onboardingModal` | 新手引导步骤教程 |
+| 个人 | `editProfileModal` | 编辑个人资料 |
+| 项目 | `newProjectModal` | 新建项目（步骤+模板选择） |
+| 云端 | `cloudSyncModal` | 云端同步状态 |
+| 协作 | `collaboratorModal` | 协作者管理+邀请生成 |
+| 协作 | `joinCollabModal` | 通过邀请码加入 |
+| 版本 | `versionModal` | 版本快照创建 |
+| 版本 | `versionCompareModal` | 版本对比 |
+| 版本 | `versionDetailModal` | 版本详情 |
+| AI | `aiAdvisorModal` | AI 谈判助手（建议/风险/对标 三标签） |
+| 签署 | `signModal` | 签署流程主弹窗 |
+| 签署 | `signaturePadModal` | 手写签名板 |
+| 签署 | `signCompleteModal` | 签署完成确认 |
+| 其他 | 确认弹窗 ×14 | 删除项目/协商记录/版本/协作者/模板等确认 |
+
+### 5.3 前端数据管理
+
+| 数据 | 存储位置 | Key |
+|------|---------|-----|
+| 项目列表 | LocalStorage | `rbf_projects` |
+| 登录 Token | LocalStorage | `rbf_auth_token` |
+| 用户信息 | LocalStorage | `rbf_user` |
+| Onboarding | LocalStorage | `rbf_onboarding_done` |
+
+---
+
+## 六、本地化部署 & 公司账户接入评估
+
+### 6.1 当前架构对接能力
 
 ```
-当前架构                          生产架构
-─────────                        ─────────
-内存 userStore      ──→    Cloudflare D1 users 表 / 公司数据库
-内存 sessionStore   ──→    Cloudflare KV / JWT无状态 / 公司SSO
-内存 inviteStore    ──→    Cloudflare D1 invites 表
-内存 signatureStore ──→    Cloudflare D1 signatures 表
-内存 customTemplate ──→    Cloudflare D1 templates 表
-前端 LocalStorage   ──→    保留（离线优先）+ D1 云同步
-签名图片 Base64     ──→    Cloudflare R2 对象存储
+┌─────────────────────────────────────────────────┐
+│               合约通 Contract Connect             │
+├────────────────────┬────────────────────────────┤
+│   前端 (Browser)    │     后端 (Hono/Workers)     │
+│                    │                            │
+│  LocalStorage      │  ┌─ userStore (内存)        │
+│  ├─ rbf_projects   │  ├─ sessionStore (内存)     │
+│  ├─ rbf_auth_token │  ├─ inviteStore (内存)      │
+│  └─ rbf_user       │  ├─ signatureStore (内存)   │
+│                    │  └─ customTemplateStore     │
+│                    │                            │
+│                    │  ┌─ AI API (claude)         │
+│                    │  └─ D1 接口 (已预留)         │
+├────────────────────┴────────────────────────────┤
+│              SSO 对接点（3 个预留接口）             │
+│  /api/auth/sso/callback  → 公司 OAuth2 回调      │
+│  /api/auth/sso/logout    → 公司 SSO 登出         │
+│  /api/auth/sync-company-user → 员工数据同步       │
+├─────────────────────────────────────────────────┤
+│              用户模型预留字段                       │
+│  externalId    → 公司系统用户ID                   │
+│  externalToken → 公司系统 Token                   │
+│  ssoProvider   → SSO 提供方标识                   │
+│  ssoSessionId  → 公司 SSO 会话ID                  │
+└─────────────────────────────────────────────────┘
+```
+
+### 6.2 生产部署必做清单（按优先级）
+
+| 优先级 | 事项 | 工作量 | 说明 |
+|--------|------|--------|------|
+| 🔴 P0 | 密码 bcrypt 哈希 | 0.5 天 | 当前明文存储，必须加密 |
+| 🔴 P0 | 创建 D1 数据库 + 迁移 | 1 天 | users/projects/versions/sign_processes/custom_templates |
+| 🔴 P0 | 5 个内存 Map → D1/KV | 2 天 | 重启不丢数据 |
+| 🟡 P1 | JWT 替代简单 Token | 1 天 | 签名验证 + 自动刷新 |
+| 🟡 P1 | SSO 对接实现 | 2-3 天 | 取决于公司 SSO 协议（OAuth2/SAML/OIDC） |
+| 🟡 P1 | 验证码真实发送 | 1 天 | 签署环节：接入短信/邮件服务 |
+| 🟢 P2 | 版本管理后端实现 | 1 天 | 4 个桩接口补全逻辑 |
+| 🟢 P2 | 协作者后端实现 | 1 天 | 3 个桩接口补全逻辑 |
+| 🟢 P2 | 签名图片存 R2 | 0.5 天 | base64 → R2 对象存储 |
+| 🟢 P2 | AI 结果缓存 | 1 天 | 相似请求 KV 缓存，减少 API 调用 |
+| ⚪ P3 | Tailwind CSS 本地化 | 0.5 天 | 去掉 CDN，本地编译 |
+| ⚪ P3 | 合同 PDF 导出 | 2 天 | 签署完成后生成 PDF 归档 |
+
+### 6.3 接入公司账户体系的具体步骤
+
+```
+步骤 1：配置公司 SSO 端点
+  └─ .dev.vars 添加：
+     SSO_AUTHORIZE_URL=https://sso.company.com/oauth2/authorize
+     SSO_TOKEN_URL=https://sso.company.com/oauth2/token
+     SSO_CLIENT_ID=xxx
+     SSO_CLIENT_SECRET=xxx
+
+步骤 2：实现 /api/auth/sso/callback
+  └─ 接收 code → 换取 access_token → 调用 userinfo 接口
+  └─ 查找或创建本地用户（映射 externalId）
+  └─ 创建会话 → 返回 JWT
+
+步骤 3：前端添加「公司账户登录」按钮
+  └─ 跳转 SSO_AUTHORIZE_URL?redirect_uri=.../api/auth/sso/callback
+
+步骤 4：实现 /api/auth/sync-company-user
+  └─ 定时/Webhook 同步员工信息
+  └─ 映射部门→角色权限
 ```
 
 ---
 
-## 四、本地化部署对接清单
+## 七、AI 服务配置
 
-### 对接公司账户体系（SSO集成）
+| 配置项 | 当前值 | 说明 |
+|--------|--------|------|
+| API Key | `.dev.vars` → `OPENAI_API_KEY` | 生产环境用 `wrangler secret put` |
+| Base URL | `https://www.genspark.ai/api/llm_proxy/v1` | OpenAI 兼容代理 |
+| 快速模型 | `claude-haiku-4-5` | 路由分析、AI 聊天 |
+| 高质量模型 | `claude-sonnet-4-5` | Agent 处理、谈判建议、风险评估、法律转化 |
+| 超时控制 | 路由 10s / Agent 20s | 自动降级到备用模式 |
 
-| 步骤 | 工作内容 | 工作量预估 |
-|------|---------|-----------|
-| 1 | 确定SSO协议（OIDC / SAML / OAuth2 / 企业微信） | 0.5天 |
-| 2 | 实现 `/api/auth/sso/callback` 回调逻辑 | 2天 |
-| 3 | 实现 Token 交换和用户信息获取 | 1天 |
-| 4 | 用户字段映射（工号→externalId，部门→company） | 0.5天 |
-| 5 | 实现 `/api/auth/sync-company-user` 定期同步 | 1天 |
-| 6 | 权限矩阵设计（查看/编辑/审批/签署） | 1天 |
-| 7 | 联调测试 | 1-2天 |
-| **合计** | | **7-8个工作日** |
-
-### 数据层持久化
-
-| 步骤 | 工作内容 | 工作量预估 |
-|------|---------|-----------|
-| 1 | 设计D1数据库表结构（users, projects, signatures, invites, templates, versions） | 1天 |
-| 2 | 编写Migration文件 | 0.5天 |
-| 3 | 改造5个内存Store为D1读写 | 3天 |
-| 4 | 密码加密（bcrypt） | 0.5天 |
-| 5 | JWT会话管理 | 1天 |
-| 6 | 数据迁移脚本 | 0.5天 |
-| **合计** | | **6-7个工作日** |
-
-### 第三方服务集成
-
-| 服务 | 用途 | 推荐方案 | 工作量 |
-|------|------|---------|--------|
-| 短信验证码 | 签署验证、登录验证 | 阿里云SMS / 腾讯云SMS | 1天 |
-| 邮件通知 | 邀请、签署提醒、注册验证 | SendGrid / 阿里云邮件 | 1天 |
-| 电子签章 | 合规电子签署 | e签宝 / 法大大 / DocuSign | 3-5天 |
-| 文件存储 | 签名图片、合同PDF | Cloudflare R2 / 阿里OSS | 0.5天 |
-| AI服务 | 私有化AI网关 | 公司自建 / 火山引擎 | 1天（换接口） |
+**替换为公司 AI 网关**：只需修改 `.dev.vars` 中的 `OPENAI_BASE_URL` 和 `OPENAI_API_KEY`，无需改代码（兼容 OpenAI Chat Completions 格式）。
 
 ---
 
-## 五、优先级排序建议
-
-### 🔴 P0 — 上线前必须完成
-
-1. 密码哈希加密（bcrypt）
-2. 数据持久化（D1或公司数据库）
-3. JWT Token替代简单随机token
-4. 项目关联用户（ownerId字段）
-5. 签署记录持久化（法律要求）
-6. 验证码真实校验（短信/邮件）
-
-### 🟡 P1 — 上线后优先迭代
-
-7. SSO回调逻辑实现
-8. AI流式响应（SSE）减少等待感
-9. 邮件/消息通知
-10. 协作者真实存储
-11. 版本管理后端实现
-12. 调用频率限制
-13. 行业真实数据接入
-
-### 🟢 P2 — 中长期规划
-
-14. 对接电子签章服务（e签宝/法大大）
-15. 合同PDF生成与导出
-16. 多租户架构
-17. 审计日志
-18. 自定义Agent
-19. 区块链存证
-20. 移动端App（或PWA）
-
----
-
-## 六、技术指标
-
-| 指标 | 当前值 |
-|------|-------|
-| 总API端点 | 56个 |
-| 完整可用 | 39个（70%） |
-| 演示桩/预留 | 12个（21%） |
-| 需D1依赖 | 5个（9%） |
-| 构建产物 | 607 KB |
-| 首屏HTML | 421 KB |
-| CSS设计系统 | 59 KB |
-| 前端弹窗数 | 27个 |
-| 前端页面数 | 4个（认证/个人中心/项目列表/协商） |
-| AI模型 | claude-sonnet-4-5（质量）+ claude-haiku-4-5（速度） |
-| 8个专业Agent | 投资分成/数据对账/终止条款/违约责任/合规管控/担保责任/资产信息/法律事务 |
-| 系统模板 | 5个行业（演唱会/餐饮/零售/医美/教育） |
-| 页面加载 | ~10秒（含CDN资源） |
-| AI响应 | 5-38秒（视复杂度） |
+*报告完毕。如需某个模块的详细实现代码或迁移方案，可单独展开。*
