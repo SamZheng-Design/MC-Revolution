@@ -218,15 +218,15 @@ export interface WorkflowResult {
 // ==================== 配置常量 ====================
 
 const CONFIG = {
-  AGENT_TIMEOUT_MS: 20000,      // 单Agent超时：20秒
-  ROUTER_TIMEOUT_MS: 10000,     // 路由器超时：10秒
+  AGENT_TIMEOUT_MS: 15000,      // 单Agent超时：15秒
+  ROUTER_TIMEOUT_MS: 8000,      // 路由器超时：8秒
   MAX_PARALLEL_AGENTS: 3,       // 最大并行Agent数
-  MODEL_FAST: 'claude-haiku-4-5', // 快速非reasoning模型（速度快，无reasoning延迟）
-  MODEL_QUALITY: 'claude-sonnet-4-5', // 高质量模型（需要更复杂分析时使用）
-  MAX_TOKENS: 800,              // Agent最大token数
-  ROUTER_MAX_TOKENS: 400,       // 路由器最大token数
-  LEGAL_MAX_TOKENS: 4000,       // 法律顾问最大token数（需要输出完整法律条款）
-  INFER_MAX_TOKENS: 3000,       // 联动分析最大token数
+  MODEL_FAST: 'claude-haiku-4-5', // 快速模型（Phase1识别 + 路由）
+  MODEL_QUALITY: 'claude-haiku-4-5', // Phase2也用快速模型，演示优先速度
+  MAX_TOKENS: 600,              // Agent最大token数（精简输出）
+  ROUTER_MAX_TOKENS: 300,       // 路由器最大token数
+  LEGAL_MAX_TOKENS: 2000,       // 法律顾问最大token数（精简但保持质量）
+  INFER_MAX_TOKENS: 1500,       // 联动分析最大token数
 }
 
 // ==================== JSON提取与修复工具 ====================

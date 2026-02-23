@@ -1219,7 +1219,7 @@ ${negotiationHistory?.length > 0 ? negotiationHistory.map((n: any, i: number) =>
         'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-haiku-4-5',
         max_tokens: 4000,
         messages: [
           { role: 'system', content: systemPrompt },
@@ -1300,7 +1300,7 @@ app.post('/api/ai/risk-assessment', async (c) => {
         'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-haiku-4-5',
         max_tokens: 4000,
         messages: [
           { role: 'system', content: systemPrompt },
@@ -1369,7 +1369,7 @@ app.post('/api/ai/market-benchmark', async (c) => {
         'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-haiku-4-5',
         max_tokens: 4000,
         messages: [
           { role: 'system', content: systemPrompt },
@@ -1926,7 +1926,7 @@ ${template.modules.flatMap(m => m.clauses.map(c => `- ${c.key}: ${c.name} (å½“å‰
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-5',
+        model: 'claude-haiku-4-5',
         max_tokens: 4000,
         messages: [
           { role: 'system', content: systemPrompt },
