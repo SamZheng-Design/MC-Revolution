@@ -3511,42 +3511,51 @@ app.get('/', (c) => {
             <p class="text-xs -mt-0.5" style="color:#86868b; font-family:'Montserrat',sans-serif; letter-spacing:0.05em; font-weight:600; font-size:9px;">CONTRACT CONNECT</p>
           </div>
         </div>
-        <div class="flex items-center space-x-2">
+        <div class="flex items-center space-x-1.5">
           <!-- 云端同步状态 -->
-          <button onclick="showCloudSyncModal()" id="btnCloudSync" class="tooltip px-2.5 py-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg flex items-center text-xs" data-tip="数据管理">
-            <i class="fas fa-database mr-1.5"></i>
+          <button onclick="showCloudSyncModal()" id="btnCloudSync" class="tooltip flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all" style="background: rgba(93,196,179,0.08); color: #3D8F83; border: 1px solid rgba(93,196,179,0.15);" data-tip="数据管理"
+            onmouseover="this.style.background='rgba(93,196,179,0.15)'; this.style.borderColor='rgba(93,196,179,0.3)'" onmouseout="this.style.background='rgba(93,196,179,0.08)'; this.style.borderColor='rgba(93,196,179,0.15)'">
+            <i class="fas fa-database text-xs" style="color: #5DC4B3;"></i>
             <span id="navStorageText">本地</span>
-            <span id="navSyncIndicator" class="ml-1.5 w-1.5 h-1.5 bg-emerald-400 rounded-full"></span>
+            <span id="navSyncIndicator" class="w-1.5 h-1.5 bg-emerald-400 rounded-full" style="box-shadow: 0 0 4px rgba(16,185,129,0.5);"></span>
           </button>
           <!-- 使用帮助 -->
-          <button onclick="showOnboarding()" class="tooltip p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg text-sm" data-tip="帮助">
+          <button onclick="showOnboarding()" class="tooltip w-8 h-8 flex items-center justify-center rounded-full text-sm transition-all" style="color: #86868b; background: rgba(0,0,0,0.03);" data-tip="帮助"
+            onmouseover="this.style.background='rgba(93,196,179,0.1)'; this.style.color='#5DC4B3'" onmouseout="this.style.background='rgba(0,0,0,0.03)'; this.style.color='#86868b'">
             <i class="fas fa-question-circle"></i>
           </button>
           <!-- 模板管理 -->
-          <button onclick="showTemplateManagerModal()" class="tooltip p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg text-sm" data-tip="模板">
+          <button onclick="showTemplateManagerModal()" class="tooltip w-8 h-8 flex items-center justify-center rounded-full text-sm transition-all" style="color: #86868b; background: rgba(0,0,0,0.03);" data-tip="模板管理"
+            onmouseover="this.style.background='rgba(93,196,179,0.1)'; this.style.color='#5DC4B3'" onmouseout="this.style.background='rgba(0,0,0,0.03)'; this.style.color='#86868b'">
             <i class="fas fa-layer-group"></i>
           </button>
+          <!-- 分隔线 -->
+          <div class="h-5 mx-0.5" style="width: 1px; background: rgba(0,0,0,0.08);"></div>
           <!-- 加入协作 -->
-          <button onclick="showJoinCollabModal()" class="tooltip px-2.5 py-1.5 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 rounded-lg flex items-center text-xs" data-tip="邀请码加入">
-            <i class="fas fa-user-plus mr-1"></i>
+          <button onclick="showJoinCollabModal()" class="tooltip flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all" style="color: #49A89A; background: rgba(93,196,179,0.06); border: 1px solid rgba(93,196,179,0.12);" data-tip="邀请码加入"
+            onmouseover="this.style.background='rgba(93,196,179,0.12)'; this.style.borderColor='rgba(93,196,179,0.25)'" onmouseout="this.style.background='rgba(93,196,179,0.06)'; this.style.borderColor='rgba(93,196,179,0.12)'">
+            <i class="fas fa-user-plus"></i>
             <span>加入</span>
           </button>
-          <button onclick="showNewProjectModal()" class="btn-primary text-xs">
-            <i class="fas fa-plus mr-1.5"></i>新建项目
+          <!-- 新建项目 - 突出CTA -->
+          <button onclick="showNewProjectModal()" class="flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold text-white transition-all" style="background: linear-gradient(135deg, #5DC4B3, #49A89A); box-shadow: 0 2px 8px rgba(93,196,179,0.35);"
+            onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 14px rgba(93,196,179,0.45)'" onmouseout="this.style.transform='none'; this.style.boxShadow='0 2px 8px rgba(93,196,179,0.35)'">
+            <i class="fas fa-plus" style="font-size: 10px;"></i>新建项目
           </button>
           <!-- 用户头像/登录入口 -->
-          <div class="border-l border-gray-200 pl-2 ml-1 relative">
-            <button onclick="toggleUserDropdown(event)" id="navUserBtn" class="flex items-center space-x-1.5 px-2 py-1.5 hover:bg-gray-100 rounded-lg">
-              <div id="navUserAvatar" class="w-7 h-7 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+          <div class="pl-1.5 ml-0.5 relative">
+            <button onclick="toggleUserDropdown(event)" id="navUserBtn" class="flex items-center space-x-2 px-2 py-1.5 rounded-full transition-all" style="background: rgba(0,0,0,0.02);"
+              onmouseover="this.style.background='rgba(93,196,179,0.08)'" onmouseout="this.style.background='rgba(0,0,0,0.02)'">
+              <div id="navUserAvatar" class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background: linear-gradient(135deg, #5DC4B3, #3D8F83); box-shadow: 0 2px 8px rgba(93,196,179,0.3);">
                 U
               </div>
-              <span id="navUserName" class="text-xs font-medium text-gray-700 max-w-[60px] truncate">用户</span>
-              <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="navUserChevron"></i>
+              <span id="navUserName" class="text-xs font-semibold max-w-[70px] truncate" style="color: #374151;">用户</span>
+              <i class="fas fa-chevron-down text-xs transition-transform" id="navUserChevron" style="color: #9ca3af; font-size: 10px;"></i>
             </button>
             <div id="userDropdown" class="user-dropdown">
               <div class="user-dropdown-header">
                 <div class="flex items-center space-x-3">
-                  <div id="dropdownAvatar" class="w-10 h-10 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold">U</div>
+                  <div id="dropdownAvatar" class="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold" style="background: linear-gradient(135deg, #5DC4B3, #3D8F83); box-shadow: 0 2px 8px rgba(93,196,179,0.3);">U</div>
                   <div>
                     <div id="dropdownName" class="font-semibold text-gray-900 text-sm">用户</div>
                     <div id="dropdownRole" class="text-xs text-gray-500">游客模式</div>
