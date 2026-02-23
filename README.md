@@ -85,10 +85,11 @@ webapp/
 | 接口 | 方法 | 描述 |
 |------|------|------|
 | `/api/projects/:projectId/invite` | POST | 生成邀请链接 |
-| `/api/invite/verify` | GET | 验证邀请码 |
+| `/api/invite/:code/verify` | GET | 验证邀请码 |
 | `/api/projects/:projectId/join` | POST | 加入协作 |
 | `/api/projects/:projectId/collaborators` | GET | 获取协作者列表 |
 | `/api/projects/:projectId/collaborators/:odId` | DELETE | 移除协作者 |
+| `/api/sign/:signId` | GET | 获取签署详情 |
 
 ### 版本管理
 | 接口 | 方法 | 描述 |
@@ -107,7 +108,7 @@ webapp/
 | `/api/sign/:signId/execute` | POST | 执行签署 |
 | `/api/sign/:signId/cancel` | POST | 取消签署 |
 | `/api/sign/:signId/remind` | POST | 发送提醒 |
-| `/api/sign/:signId/detail` | GET | 获取签署详情 |
+
 | `/api/sign/:signId/update-signer` | PUT | 更新签署人信息 |
 
 ### 个人账户系统
@@ -394,6 +395,12 @@ const response = await fetch('/api/agents/process', {
 ```
 
 ## 最近更新
+
+### V10.2 版本 (2026-02-23) - 全面功能测试 + 关键修复
+- ✅ **密码验证修复** - 修复注册时密码未存储、登录时未验证的安全漏洞
+- ✅ **AI模型切换** - 将AI谈判助手、风险评估、市场对标、AI聊天从 gpt-5/gpt-5-mini 切换为 claude-sonnet-4-5/claude-haiku-4-5，解决超时问题
+- ✅ **API文档修正** - 修正 README 中多个接口路径与实际实现不一致的问题
+- ✅ **全覆盖功能测试** - 测试了所有API接口、边界条件、错误处理
 
 ### V10.1 版本 (2026-02-22) - AI Agent稳定性修复 + 关联修改功能完成
 - ✅ **修复法律顾问Agent频繁失败** - 根因：max_tokens=2000导致LLM响应截断(finish_reason=length)

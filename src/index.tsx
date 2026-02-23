@@ -903,6 +903,7 @@ app.post('/api/auth/register', async (c) => {
     id: userId,
     username,
     email,
+    password,
     phone: phone || '',
     displayName: displayName || username,
     company: company || '',
@@ -962,8 +963,10 @@ app.post('/api/auth/login', async (c) => {
     return c.json({ success: false, message: '用户不存在' }, 401)
   }
   
-  // 模拟密码验证（演示模式：任意密码都可登录）
-  // TODO: 生产环境需要真实密码验证
+  // 密码验证
+  if (foundUser.password !== password) {
+    return c.json({ success: false, message: '密码错误' }, 401)
+  }
   
   // 创建会话
   const token = 'tok_' + Date.now().toString(36) + '_' + Math.random().toString(36).substring(2, 10)
@@ -1216,7 +1219,8 @@ ${negotiationHistory?.length > 0 ? negotiationHistory.map((n: any, i: number) =>
         'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
-        model: 'gpt-5',
+        model: 'claude-sonnet-4-5',
+        max_tokens: 4000,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: '请基于以上信息，为我提供详细的谈判建议。' }
@@ -1296,7 +1300,8 @@ app.post('/api/ai/risk-assessment', async (c) => {
         'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
-        model: 'gpt-5',
+        model: 'claude-sonnet-4-5',
+        max_tokens: 4000,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: '请进行风险评估' }
@@ -1364,7 +1369,8 @@ app.post('/api/ai/market-benchmark', async (c) => {
         'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
-        model: 'gpt-5',
+        model: 'claude-sonnet-4-5',
+        max_tokens: 4000,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: '请进行市场对标分析' }
@@ -1920,7 +1926,8 @@ ${template.modules.flatMap(m => m.clauses.map(c => `- ${c.key}: ${c.name} (当�
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-5',
+        model: 'claude-sonnet-4-5',
+        max_tokens: 4000,
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
@@ -2055,7 +2062,7 @@ app.post('/api/ai/chat', async (c) => {
         'Authorization': 'Bearer ' + apiKey
       },
       body: JSON.stringify({
-        model: 'gpt-5-mini',
+        model: 'claude-haiku-4-5',
         messages: [
           { role: 'system', content: AI_ASSISTANT_SYSTEM_PROMPT },
           ...messages.slice(-10) // 保留最近10条对话历史
