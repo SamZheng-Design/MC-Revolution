@@ -1,6 +1,6 @@
 /* ================================================
-   合约通 Contract Connect - Premium Design System V16
-   2026年2月 - Apple-Inspired Precision Design
+   合约通 Contract Connect - Premium Design System V18
+   2026年2月 - Apple-Inspired Precision Design + Micro-Interactions
    Powered by Micro Connect Group
    ================================================ */
 
@@ -2533,4 +2533,971 @@ input[type="radio"] {
     box-shadow: none;
     border: 1px solid #e2e8f0;
   }
+}
+
+/* =================================================================
+   49. 微交互增强系统 V18 - Polished Micro-Interactions
+   2026年2月 - 全局交互感受优化
+   ================================================================= */
+
+/* ---------- 49.1 统计卡片 hover 增强 ---------- */
+.stat-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(93,196,179,0.06) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.35s var(--ease-apple);
+  pointer-events: none;
+}
+
+.stat-card:hover::after {
+  opacity: 1;
+}
+
+.stat-card:hover .icon-container {
+  transform: scale(1.12) rotate(-4deg);
+  transition: transform 0.4s var(--ease-bounce);
+}
+
+.stat-card:hover .stat-value {
+  transform: scale(1.05);
+  transition: transform 0.35s var(--ease-bounce);
+}
+
+.stat-card .stat-value,
+.stat-card .icon-container {
+  transition: transform 0.3s var(--ease-apple);
+}
+
+/* 统计卡片悬浮时label 微妙上移 */
+.stat-card:hover .stat-label {
+  transform: translateY(-1px);
+  color: #64748b;
+  transition: all 0.3s var(--ease-apple);
+}
+
+.stat-card .stat-label {
+  transition: all 0.3s var(--ease-apple);
+}
+
+/* ---------- 49.2 项目卡片 hover 高级效果 ---------- */
+.project-card {
+  transform-style: preserve-3d;
+  will-change: transform, box-shadow;
+}
+
+.project-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(93,196,179,0.04) 0%, transparent 40%, transparent 60%, rgba(93,196,179,0.02) 100%);
+  opacity: 0;
+  transition: opacity 0.4s var(--ease-apple);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.project-card:hover::after {
+  opacity: 1;
+}
+
+/* 项目卡片图标容器动效 */
+.project-card:hover .rounded-xl:first-child {
+  transform: scale(1.08) rotate(-3deg);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+
+.project-card .rounded-xl:first-child {
+  transition: all 0.35s var(--ease-bounce);
+}
+
+/* 项目卡片底部分割线展开 */
+.project-card .border-t {
+  position: relative;
+}
+
+.project-card .border-t::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 50%;
+  right: 50%;
+  height: 1px;
+  background: var(--gradient-primary);
+  transition: all 0.4s var(--ease-spring);
+  opacity: 0;
+}
+
+.project-card:hover .border-t::before {
+  left: 0;
+  right: 0;
+  opacity: 1;
+}
+
+/* ---------- 49.3 导航按钮微交互 ---------- */
+/* 导航栏中的圆形按钮（帮助、模板等） */
+nav button[class*="rounded-full"],
+nav button[class*="rounded-lg"] {
+  position: relative;
+  transition: all 0.25s var(--ease-apple);
+}
+
+nav button[class*="rounded-full"]:hover,
+nav button[class*="rounded-lg"]:hover {
+  transform: translateY(-1px);
+}
+
+nav button[class*="rounded-full"]:active,
+nav button[class*="rounded-lg"]:active {
+  transform: translateY(0) scale(0.95);
+  transition-duration: 0.1s;
+}
+
+/* 导航栏图标 hover 旋转 */
+nav button:hover > i.fa-question-circle,
+nav button:hover > i.fa-th-large,
+nav button:hover > i.fa-cog {
+  animation: iconWiggle 0.5s var(--ease-bounce);
+}
+
+@keyframes iconWiggle {
+  0% { transform: rotate(0deg); }
+  25% { transform: rotate(-8deg); }
+  50% { transform: rotate(8deg); }
+  75% { transform: rotate(-4deg); }
+  100% { transform: rotate(0deg); }
+}
+
+/* 返回按钮箭头动画增强 */
+.back-btn:hover > i.fa-arrow-left {
+  animation: arrowSlide 0.4s var(--ease-apple);
+}
+
+@keyframes arrowSlide {
+  0% { transform: translateX(0); }
+  40% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
+
+/* ---------- 49.4 视角切换按钮动效 ---------- */
+.perspective-badge {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.perspective-badge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.2) 0%, transparent 60%);
+  opacity: 0;
+  transition: opacity 0.25s;
+  z-index: 0;
+}
+
+.perspective-badge:hover::before {
+  opacity: 1;
+}
+
+.perspective-badge:active {
+  transform: scale(0.96);
+  transition-duration: 0.1s;
+}
+
+/* ---------- 49.5 表单输入框聚焦涟漪 ---------- */
+.form-group, .password-wrapper {
+  position: relative;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):focus,
+textarea:focus,
+select:focus {
+  border-color: var(--color-primary);
+  box-shadow: 
+    0 0 0 3px rgba(93, 196, 179, 0.12),
+    var(--shadow-sm);
+  animation: inputFocusPulse 0.5s var(--ease-apple);
+}
+
+@keyframes inputFocusPulse {
+  0% { box-shadow: 0 0 0 0 rgba(93,196,179,0.2); }
+  50% { box-shadow: 0 0 0 5px rgba(93,196,179,0.08), var(--shadow-sm); }
+  100% { box-shadow: 0 0 0 3px rgba(93,196,179,0.12), var(--shadow-sm); }
+}
+
+/* ---------- 49.6 模态框进出动画增强 ---------- */
+.modal-overlay, .modal-backdrop {
+  transition: backdrop-filter 0.3s var(--ease-apple);
+}
+
+.modal-card, .modal-content, .modal-dialog {
+  animation: modalEnterV18 0.4s var(--ease-spring);
+}
+
+@keyframes modalEnterV18 {
+  0% {
+    opacity: 0;
+    transform: translateY(40px) scale(0.92);
+    filter: blur(4px);
+  }
+  60% {
+    opacity: 1;
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.modal-closing .modal-card,
+.modal-closing .modal-content,
+.modal-closing .modal-dialog {
+  animation: modalExitV18 0.25s var(--ease-smooth) forwards;
+}
+
+@keyframes modalExitV18 {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(24px) scale(0.95);
+    filter: blur(3px);
+  }
+}
+
+/* ---------- 49.7 模块卡片悬浮揭示效果 ---------- */
+.module-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.module-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(93,196,179,0.04), transparent);
+  transition: left 0.6s var(--ease-apple);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.module-card:hover::before {
+  left: 100%;
+}
+
+.module-card:hover {
+  border-color: rgba(93,196,179,0.2);
+  box-shadow: var(--shadow-md), 0 0 0 1px rgba(93,196,179,0.06);
+}
+
+/* ---------- 49.8 协商消息气泡交互增强 ---------- */
+.negotiation-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.negotiation-item::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--gradient-primary);
+  opacity: 0.08;
+  transition: width 0.4s var(--ease-apple);
+  pointer-events: none;
+}
+
+.negotiation-item:hover::after {
+  width: 100%;
+}
+
+.negotiation-item:hover {
+  transform: translateX(3px);
+  box-shadow: var(--shadow-sm);
+}
+
+/* 协商消息时间戳悬浮显示增强 */
+.negotiation-item .text-xs.text-gray-400 {
+  transition: all 0.25s var(--ease-apple);
+}
+
+.negotiation-item:hover .text-xs.text-gray-400 {
+  color: #6b7280;
+}
+
+/* ---------- 49.9 快捷按钮弹性动效 ---------- */
+.quick-input-btn, .ai-quick-btn {
+  transform-origin: center;
+}
+
+.quick-input-btn:hover, .ai-quick-btn:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 4px 12px rgba(93,196,179,0.12);
+}
+
+.quick-input-btn:active, .ai-quick-btn:active {
+  transform: translateY(0) scale(0.97);
+  transition-duration: 0.08s;
+}
+
+/* ---------- 49.10 模板卡片选择动效 ---------- */
+.template-card {
+  position: relative;
+  overflow: hidden;
+}
+
+.template-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(93,196,179,0.06) 0%, transparent 50%);
+  transform: scale(0);
+  transition: transform 0.5s var(--ease-spring);
+  pointer-events: none;
+}
+
+.template-card:hover::before {
+  transform: scale(1);
+}
+
+.template-card:hover .rounded-lg,
+.template-card:hover .rounded-xl {
+  transform: scale(1.1) rotate(-3deg);
+  transition: transform 0.4s var(--ease-bounce);
+}
+
+/* 模板卡片选中时弹跳 */
+.template-card.selected {
+  animation: templateSelect 0.45s var(--ease-bounce);
+}
+
+@keyframes templateSelect {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.04); }
+  60% { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- 49.11 徽章悬浮效果 ---------- */
+.badge {
+  transition: all 0.25s var(--ease-apple);
+  cursor: default;
+}
+
+.badge:hover {
+  transform: translateY(-1px) scale(1.06);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+/* 状态徽章闪光效果 */
+.badge-success, .badge-warning, .badge-danger {
+  position: relative;
+  overflow: hidden;
+}
+
+.badge-success::after, .badge-warning::after, .badge-danger::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 40%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: badgeShine 3s ease-in-out infinite;
+}
+
+@keyframes badgeShine {
+  0%, 80%, 100% { left: -100%; }
+  40% { left: 150%; }
+}
+
+/* ---------- 49.12 空状态卡片互动增强 ---------- */
+.empty-state .group {
+  transition: all 0.35s var(--ease-apple);
+}
+
+.empty-state .group:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(93,196,179,0.1);
+}
+
+/* 空状态特性图标hover动画 */
+.empty-state .text-center .rounded-xl {
+  transition: all 0.35s var(--ease-bounce);
+}
+
+.empty-state .text-center:hover .rounded-xl {
+  transform: scale(1.15) rotate(-5deg);
+  box-shadow: 0 4px 16px rgba(93,196,179,0.15);
+}
+
+.empty-state .text-center:hover .font-medium {
+  color: var(--color-primary-dark);
+  transition: color 0.25s;
+}
+
+/* ---------- 49.13 用户头像 hover 光环 ---------- */
+.user-dropdown-header .rounded-xl {
+  transition: all 0.35s var(--ease-bounce);
+}
+
+.user-dropdown-header:hover .rounded-xl {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 3px rgba(93,196,179,0.2), 0 4px 12px rgba(93,196,179,0.3);
+}
+
+/* 下拉菜单项波纹效果 */
+.user-dropdown-item {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s var(--ease-apple);
+}
+
+.user-dropdown-item::after {
+  content: '';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%) translateX(8px);
+  opacity: 0;
+  font-family: 'Font Awesome 6 Free';
+  font-weight: 900;
+  font-size: 10px;
+  color: rgba(93,196,179,0.5);
+  content: '\f054';
+  transition: all 0.25s var(--ease-apple);
+}
+
+.user-dropdown-item:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+.user-dropdown-item:hover {
+  padding-left: 20px;
+}
+
+.user-dropdown-item.danger::after {
+  color: rgba(220,38,38,0.4);
+}
+
+/* ---------- 49.14 签署进度步骤动效 ---------- */
+.sign-progress-step {
+  transition: all 0.35s var(--ease-apple);
+}
+
+.sign-progress-step:hover {
+  transform: translateY(-2px);
+}
+
+.sign-progress-step.active {
+  animation: stepActivePulse 2s ease-in-out infinite;
+}
+
+@keyframes stepActivePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(93,196,179,0.3); }
+  50% { box-shadow: 0 0 0 6px rgba(93,196,179,0); }
+}
+
+/* ---------- 49.15 Toast 通知悬停暂停 ---------- */
+.toast {
+  transition: transform 0.2s var(--ease-apple);
+}
+
+.toast:hover {
+  transform: translateX(-4px);
+}
+
+.toast:hover .toast-progress {
+  animation-play-state: paused;
+}
+
+/* ---------- 49.16 Agent卡片处理中增强 ---------- */
+.agent-card {
+  transition: all 0.35s var(--ease-apple);
+}
+
+.agent-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.agent-card.processing {
+  position: relative;
+  overflow: hidden;
+}
+
+.agent-card.processing::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--gradient-neon);
+  background-size: 200% 100%;
+  animation: agentProgressBar 1.5s ease-in-out infinite;
+  width: 100%;
+}
+
+@keyframes agentProgressBar {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+/* ---------- 49.17 滚动揭示动画 (Intersection Observer 辅助) ---------- */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s var(--ease-apple), transform 0.6s var(--ease-apple);
+}
+
+.reveal-on-scroll.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ---------- 49.18 图标容器全局hover增强 ---------- */
+.icon-container {
+  transition: all 0.3s var(--ease-bounce);
+}
+
+.icon-container:hover,
+*:hover > .icon-container {
+  transform: scale(1.1) rotate(-4deg);
+}
+
+.icon-container i {
+  transition: transform 0.3s var(--ease-bounce);
+}
+
+.icon-container:hover i {
+  transform: scale(1.1);
+}
+
+/* ---------- 49.19 全局按钮按下反馈增强 ---------- */
+.btn:active,
+button:active {
+  transform: scale(0.97);
+  transition-duration: 0.08s;
+}
+
+/* 按钮内图标悬浮微妙动画 */
+.btn:hover i, button:hover i {
+  transition: transform 0.3s var(--ease-bounce);
+}
+
+.btn-primary:hover i.fa-plus,
+button:hover i.fa-plus {
+  transform: rotate(90deg);
+}
+
+.btn-primary:hover i.fa-save,
+button:hover i.fa-save {
+  animation: saveWiggle 0.5s var(--ease-bounce);
+}
+
+@keyframes saveWiggle {
+  0%, 100% { transform: rotate(0); }
+  25% { transform: rotate(-10deg); }
+  75% { transform: rotate(10deg); }
+}
+
+.btn-primary:hover i.fa-download,
+button:hover i.fa-download {
+  animation: downloadBounce 0.5s var(--ease-bounce);
+}
+
+@keyframes downloadBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(3px); }
+}
+
+.btn-primary:hover i.fa-signature,
+button:hover i.fa-signature {
+  animation: signatureWrite 0.6s var(--ease-apple);
+}
+
+@keyframes signatureWrite {
+  0% { transform: translateX(0) rotate(0); }
+  30% { transform: translateX(2px) rotate(-3deg); }
+  60% { transform: translateX(-1px) rotate(2deg); }
+  100% { transform: translateX(0) rotate(0); }
+}
+
+/* ---------- 49.20 选择器/筛选器 hover ---------- */
+select {
+  transition: all 0.2s var(--ease-apple);
+  cursor: pointer;
+}
+
+select:hover {
+  border-color: rgba(93,196,179,0.4);
+  box-shadow: 0 2px 8px rgba(93,196,179,0.06);
+}
+
+/* ---------- 49.21 智能联动面板条目滑入 ---------- */
+.smart-change-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.smart-change-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--gradient-primary);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: transform 0.35s var(--ease-spring);
+}
+
+.smart-change-item:hover::before {
+  transform: scaleY(1);
+}
+
+/* ---------- 49.22 欢迎banner hover光效 ---------- */
+.cyber-bg:hover::before {
+  background: 
+    radial-gradient(ellipse at 20% 50%, rgba(93, 196, 179, 0.28) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(73, 168, 154, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 40% 80%, rgba(50, 173, 230, 0.15) 0%, transparent 50%);
+  transition: background 0.8s var(--ease-apple);
+}
+
+/* 欢迎banner按钮增强 */
+.cyber-bg button {
+  transition: all 0.3s var(--ease-apple);
+}
+
+.cyber-bg button:hover {
+  transform: translateY(-2px);
+}
+
+.cyber-bg button:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* ---------- 49.23 AI聊天窗口消息滑入增强 ---------- */
+.ai-message {
+  animation: aiMsgSlideIn 0.35s var(--ease-spring);
+}
+
+@keyframes aiMsgSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.ai-message.user {
+  animation: aiMsgSlideInUser 0.3s var(--ease-spring);
+}
+
+@keyframes aiMsgSlideInUser {
+  from {
+    opacity: 0;
+    transform: translateX(14px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+/* AI消息头像hover */
+.ai-message-avatar {
+  transition: all 0.3s var(--ease-bounce);
+}
+
+.ai-message:hover .ai-message-avatar {
+  transform: scale(1.12);
+}
+
+/* AI发送按钮发送动画 */
+.ai-chat-send-btn:hover:not(:disabled) {
+  transform: scale(1.1);
+  box-shadow: 0 4px 16px rgba(93,196,179,0.35);
+}
+
+.ai-chat-send-btn:active:not(:disabled) {
+  transform: scale(0.92);
+  transition-duration: 0.08s;
+}
+
+/* ---------- 49.24 链接/可点击文本 hover ---------- */
+a, [onclick], [role="button"] {
+  cursor: pointer;
+}
+
+/* 下划线链接滑入效果 */
+.text-teal-500, .text-teal-600 {
+  position: relative;
+}
+
+button.text-teal-500::after,
+button.text-teal-600::after,
+a.text-teal-500::after,
+a.text-teal-600::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.3s var(--ease-apple);
+}
+
+button.text-teal-500:hover::after,
+button.text-teal-600:hover::after,
+a.text-teal-500:hover::after,
+a.text-teal-600:hover::after {
+  width: 100%;
+}
+
+/* ---------- 49.25 标签切换(Tab)增强 ---------- */
+.ai-tab, .negotiation-tab, [id^="tab"] {
+  position: relative;
+  transition: all 0.25s var(--ease-apple);
+}
+
+.ai-tab:hover, .negotiation-tab:hover {
+  color: var(--color-primary) !important;
+}
+
+.ai-tab::after, .negotiation-tab::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: var(--color-primary);
+  transition: all 0.3s var(--ease-spring);
+  transform: translateX(-50%);
+}
+
+.ai-tab:hover::after, .negotiation-tab:hover::after {
+  width: 60%;
+}
+
+.ai-tab.active::after, .negotiation-tab.active::after {
+  width: 100%;
+}
+
+/* ---------- 49.26 引导教程增强 ---------- */
+.onboarding-card {
+  animation: onboardEnter 0.5s var(--ease-spring);
+}
+
+@keyframes onboardEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(48px) scale(0.9);
+    filter: blur(6px);
+  }
+  70% { filter: blur(0); }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+.step-dot {
+  transition: all 0.3s var(--ease-bounce);
+}
+
+.step-dot:hover {
+  transform: scale(1.4);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+/* ---------- 49.27 确认对话框增强 ---------- */
+.confirm-icon {
+  transition: all 0.4s var(--ease-bounce);
+}
+
+.confirm-dialog:hover .confirm-icon {
+  transform: scale(1.08);
+}
+
+.confirm-icon.warning {
+  animation: warnPulse 2s ease-in-out infinite;
+}
+
+@keyframes warnPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(245,158,11,0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(245,158,11,0); }
+}
+
+.confirm-icon.danger {
+  animation: dangerPulse 2s ease-in-out infinite;
+}
+
+@keyframes dangerPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.2); }
+  50% { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+}
+
+/* ---------- 49.28 拖拽提示和交互状态 ---------- */
+.draggable, [draggable="true"] {
+  cursor: grab;
+  transition: all 0.25s var(--ease-apple);
+}
+
+.draggable:active, [draggable="true"]:active {
+  cursor: grabbing;
+  opacity: 0.85;
+  transform: scale(1.02) rotate(1deg);
+  box-shadow: var(--shadow-xl);
+}
+
+/* ---------- 49.29 焦点可见性(Accessibility) ---------- */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+button:focus-visible, .btn:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(93,196,179,0.15);
+}
+
+/* ---------- 49.30 页面进入交错动画增强 ---------- */
+.page.active .stat-card {
+  animation: staggerFadeIn 0.45s var(--ease-apple) both;
+}
+
+.page.active .stat-card:nth-child(1) { animation-delay: 0.05s; }
+.page.active .stat-card:nth-child(2) { animation-delay: 0.1s; }
+.page.active .stat-card:nth-child(3) { animation-delay: 0.15s; }
+.page.active .stat-card:nth-child(4) { animation-delay: 0.2s; }
+
+@keyframes staggerFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- 49.31 密码切换按钮微动效 ---------- */
+.password-toggle:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+.password-toggle:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* ---------- 49.32 版本项目hover增强 ---------- */
+.version-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.version-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--gradient-primary);
+  transform: scaleY(0);
+  transform-origin: top;
+  transition: transform 0.3s var(--ease-spring);
+}
+
+.version-item:hover::before {
+  transform: scaleY(1);
+}
+
+.version-item:hover {
+  padding-left: calc(0.75rem + 3px);
+}
+
+/* ---------- 49.33 减弱动画 (prefers-reduced-motion) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  
+  .stat-card:hover .icon-container,
+  .project-card:hover,
+  .template-card:hover,
+  .ai-assistant-fab:hover {
+    transform: none !important;
+  }
+}
+
+/* ---------- 49.34 键盘导航焦点增强 ---------- */
+body:not(.keyboard-nav) :focus {
+  outline: none;
+}
+
+body.keyboard-nav :focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(93,196,179,0.15);
+}
+
+/* ---------- 49.35 全局hover光标提示 ---------- */
+.project-card, .template-card, .module-card, .agent-card,
+.stat-card, .negotiation-item, .smart-change-item, .version-item {
+  cursor: pointer;
+}
+
+/* ---------- 49.36 数字变化闪烁高亮 ---------- */
+.stat-value[data-animated="true"] {
+  transition: color 0.3s;
+}
+
+/* ---------- 49.37 滚动条出现渐变 ---------- */
+.modal-body::-webkit-scrollbar-thumb,
+.ai-chat-messages::-webkit-scrollbar-thumb,
+.onboarding-content::-webkit-scrollbar-thumb {
+  transition: background 0.3s;
+}
+
+.modal-body:hover::-webkit-scrollbar-thumb,
+.ai-chat-messages:hover::-webkit-scrollbar-thumb,
+.onboarding-content:hover::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
 }

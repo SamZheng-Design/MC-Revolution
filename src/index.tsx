@@ -6550,6 +6550,9 @@ app.get('/', (c) => {
       // 初始化按钮ripple效果
       initRippleEffect();
       
+      // V18: 初始化微交互增强系统
+      initMicroInteractions();
+      
       // 登录页回车键支持
       ['loginUsername', 'loginPassword'].forEach(function(id) {
         const el = document.getElementById(id);
@@ -6620,6 +6623,128 @@ app.get('/', (c) => {
         btn.appendChild(ripple);
         setTimeout(function() { ripple.remove(); }, 600);
       });
+    }
+    
+    // ==================== V18 微交互增强系统 ====================
+    function initMicroInteractions() {
+      // 1) 统计卡片鼠标追踪光效
+      document.addEventListener('mousemove', function(e) {
+        const card = e.target.closest('.stat-card');
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        const mx = ((e.clientX - rect.left) / rect.width * 100).toFixed(1);
+        const my = ((e.clientY - rect.top) / rect.height * 100).toFixed(1);
+        card.style.setProperty('--mx', mx + '%');
+        card.style.setProperty('--my', my + '%');
+      });
+      
+      // 2) 项目卡片3D微倾斜效果
+      document.addEventListener('mousemove', function(e) {
+        const card = e.target.closest('.project-card');
+        if (!card) return;
+        const rect = card.getBoundingClientRect();
+        const cx = e.clientX - rect.left - rect.width / 2;
+        const cy = e.clientY - rect.top - rect.height / 2;
+        const rx = (cy / rect.height * -5).toFixed(2);
+        const ry = (cx / rect.width * 5).toFixed(2);
+        card.style.transform = 'perspective(600px) rotateX(' + rx + 'deg) rotateY(' + ry + 'deg) translateY(-3px)';
+      });
+      
+      document.addEventListener('mouseleave', function(e) {
+        if (e.target && e.target.classList && e.target.classList.contains('project-card')) {
+          e.target.style.transform = '';
+        }
+      }, true);
+      
+      // 用事件委托处理 mouseleave
+      document.addEventListener('mouseout', function(e) {
+        const card = e.target.closest && e.target.closest('.project-card');
+        if (card && !card.contains(e.relatedTarget)) {
+          card.style.transform = '';
+        }
+      });
+      
+      // 3) 数字变化计数动画
+      var _counterObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            animateCounterOnce(entry.target);
+          }
+        });
+      }, { threshold: 0.5 });
+      
+      function observeCounters() {
+        document.querySelectorAll('.stat-value').forEach(function(el) {
+          _counterObserver.observe(el);
+        });
+      }
+      setTimeout(observeCounters, 500);
+      
+      // 4) 滚动揭示动画
+      var _revealObserver = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('revealed');
+          }
+        });
+      }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
+      
+      document.querySelectorAll('.reveal-on-scroll').forEach(function(el) {
+        _revealObserver.observe(el);
+      });
+      
+      // 5) 导航栏滚动隐藏/缩小效果
+      var _lastScrollY = 0;
+      var _navEl = document.querySelector('nav');
+      window.addEventListener('scroll', function() {
+        var currentY = window.scrollY;
+        if (_navEl) {
+          if (currentY > 80) {
+            _navEl.style.boxShadow = '0 1px 0 rgba(0,0,0,0.04), 0 4px 20px rgba(0,0,0,0.06)';
+          } else {
+            _navEl.style.boxShadow = '';
+          }
+        }
+        _lastScrollY = currentY;
+      }, { passive: true });
+      
+      // 6) 键盘导航焦点环
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Tab') {
+          document.body.classList.add('keyboard-nav');
+        }
+      });
+      document.addEventListener('mousedown', function() {
+        document.body.classList.remove('keyboard-nav');
+      });
+    }
+    
+    function animateCounterOnce(el) {
+      if (el.dataset.animated === 'true') return;
+      el.dataset.animated = 'true';
+      var text = el.textContent || '';
+      var match = text.match(/([¥$]?)([\\d,.]+)(.*)/);
+      if (!match) return;
+      var prefix = match[1];
+      var numStr = match[2].replace(/,/g, '');
+      var suffix = match[3];
+      var target = parseFloat(numStr);
+      if (isNaN(target) || target === 0) return;
+      var duration = 600;
+      var startTime = null;
+      function step(ts) {
+        if (!startTime) startTime = ts;
+        var progress = Math.min((ts - startTime) / duration, 1);
+        var eased = 1 - Math.pow(1 - progress, 3);
+        var current = target * eased;
+        if (target >= 100) {
+          el.textContent = prefix + Math.round(current).toLocaleString() + suffix;
+        } else {
+          el.textContent = prefix + current.toFixed(target % 1 !== 0 ? 1 : 0) + suffix;
+        }
+        if (progress < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
     }
     
     async function loadTemplates() {
