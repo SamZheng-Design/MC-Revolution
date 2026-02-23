@@ -2096,7 +2096,12 @@ app.get('/', (c) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>收入分成融资协商平台</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <!-- Tailwind CSS CDN - 大幅提升性能 -->
+  <!-- DNS预解析加速 -->
+  <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
+  <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- FontAwesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -2894,7 +2899,10 @@ app.get('/', (c) => {
   <div id="app-loading">
     <div class="loading-spinner"></div>
     <div class="loading-text">收入分成融资协商平台</div>
-    <div class="loading-sub">正在加载资源...</div>
+    <div class="loading-sub" id="loadingStatus">正在初始化...</div>
+    <div style="width: 200px; height: 3px; background: rgba(255,255,255,0.15); border-radius: 99px; margin-top: 16px; overflow: hidden;">
+      <div id="loadingBar" style="height: 100%; width: 0%; background: white; border-radius: 99px; transition: width 0.4s ease;"></div>
+    </div>
   </div>
 
   <!-- ==================== 产品引导教程弹窗 ==================== -->
@@ -3101,16 +3109,23 @@ app.get('/', (c) => {
         
         <!-- 登录表单 -->
         <div id="formLogin" class="p-6">
+          <form onsubmit="event.preventDefault(); handleLogin();" autocomplete="on">
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">用户名 / 邮箱</label>
-              <input type="text" id="loginUsername" placeholder="请输入用户名或邮箱" 
-                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <input type="text" id="loginUsername" placeholder="请输入用户名或邮箱" autocomplete="username"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                onkeydown="if(event.key==='Enter')document.getElementById('loginPassword').focus()">
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">密码</label>
-              <input type="password" id="loginPassword" placeholder="请输入密码" 
-                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <div class="password-wrapper">
+                <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password"
+                  class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" class="password-toggle" tabindex="-1">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
             </div>
             <div class="flex items-center justify-between text-sm">
               <label class="flex items-center text-gray-600">
@@ -3118,14 +3133,15 @@ app.get('/', (c) => {
               </label>
               <a href="#" class="text-indigo-600 hover:text-indigo-700">忘记密码？</a>
             </div>
-            <button onclick="handleLogin()" class="w-full py-3 btn-primary rounded-xl font-medium shadow-lg">
+            <button type="submit" class="w-full py-3 btn-primary rounded-xl font-medium shadow-lg">
               <i class="fas fa-sign-in-alt mr-2"></i>登录
             </button>
-            <button onclick="handleGuestLogin()" class="w-full py-3 border border-gray-200 text-gray-600 rounded-xl font-medium hover:bg-gray-50 transition-colors">
+            <button type="button" onclick="handleGuestLogin()" class="w-full py-3 border border-gray-200 text-gray-600 rounded-xl font-medium hover:bg-gray-50 transition-colors">
               <i class="fas fa-user-secret mr-2"></i>游客模式（体验功能）
             </button>
           </div>
           <p id="loginError" class="hidden mt-4 text-sm text-red-500 text-center"></p>
+          </form>
           
           <!-- 预留：公司SSO登录入口 -->
           <div class="mt-6 pt-6 border-t border-gray-100">
@@ -3138,6 +3154,7 @@ app.get('/', (c) => {
         
         <!-- 注册表单 -->
         <div id="formRegister" class="hidden p-6">
+          <form onsubmit="event.preventDefault(); handleRegister();" autocomplete="on">
           <div class="space-y-4">
             <div class="grid grid-cols-2 gap-3">
               <div>
@@ -3163,8 +3180,14 @@ app.get('/', (c) => {
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">密码 <span class="text-red-500">*</span></label>
-              <input type="password" id="regPassword" placeholder="至少6位" 
-                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+              <div class="password-wrapper">
+                <input type="password" id="regPassword" placeholder="至少6位" autocomplete="new-password"
+                  class="w-full px-4 py-2.5 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  onkeydown="if(event.key==='Enter')handleRegister()">
+                <button type="button" onclick="togglePasswordVisibility('regPassword', this)" class="password-toggle" tabindex="-1">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">默认角色</label>
@@ -3192,15 +3215,16 @@ app.get('/', (c) => {
                   class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
               </div>
             </div>
-            <button onclick="handleRegister()" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-lg">
+            <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-lg">
               <i class="fas fa-user-plus mr-2"></i>注册
             </button>
           </div>
           <p id="registerError" class="hidden mt-4 text-sm text-red-500 text-center"></p>
+          </form>
         </div>
       </div>
     </div>
-    <p class="text-center text-white/60 text-sm pb-4">© 2024 RBF协商平台 · 预留公司系统对接接口</p>
+    <p class="text-center text-white/60 text-sm pb-4">&copy; 2026 RBF协商平台 · 预留公司系统对接接口</p>
   </div>
   
   <!-- ==================== 页面0.5: 个人主页 ==================== -->
@@ -3495,14 +3519,37 @@ app.get('/', (c) => {
             <i class="fas fa-plus mr-1.5"></i>新建项目
           </button>
           <!-- 用户头像/登录入口 -->
-          <div class="border-l border-gray-200 pl-2 ml-1">
-            <button onclick="goToProfile()" id="navUserBtn" class="flex items-center space-x-1.5 px-2 py-1.5 hover:bg-gray-100 rounded-lg">
+          <div class="border-l border-gray-200 pl-2 ml-1 relative">
+            <button onclick="toggleUserDropdown(event)" id="navUserBtn" class="flex items-center space-x-1.5 px-2 py-1.5 hover:bg-gray-100 rounded-lg">
               <div id="navUserAvatar" class="w-7 h-7 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
                 U
               </div>
               <span id="navUserName" class="text-xs font-medium text-gray-700 max-w-[60px] truncate">用户</span>
-              <i class="fas fa-chevron-down text-gray-400 text-xs"></i>
+              <i class="fas fa-chevron-down text-gray-400 text-xs transition-transform" id="navUserChevron"></i>
             </button>
+            <div id="userDropdown" class="user-dropdown">
+              <div class="user-dropdown-header">
+                <div class="flex items-center space-x-3">
+                  <div id="dropdownAvatar" class="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold">U</div>
+                  <div>
+                    <div id="dropdownName" class="font-semibold text-gray-900 text-sm">用户</div>
+                    <div id="dropdownRole" class="text-xs text-gray-500">游客模式</div>
+                  </div>
+                </div>
+              </div>
+              <div class="py-1">
+                <button class="user-dropdown-item" onclick="goToProfile(); closeUserDropdown();">
+                  <i class="fas fa-user-circle"></i>个人中心
+                </button>
+                <button class="user-dropdown-item" onclick="showOnboarding(); closeUserDropdown();">
+                  <i class="fas fa-graduation-cap"></i>新手引导
+                </button>
+                <div class="user-dropdown-divider"></div>
+                <button class="user-dropdown-item danger" onclick="closeUserDropdown(); handleLogout();">
+                  <i class="fas fa-sign-out-alt"></i>退出登录
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -3510,8 +3557,8 @@ app.get('/', (c) => {
     
     <div class="flex-1 p-4">
       <div class="max-w-7xl mx-auto">
-        <!-- 统计卡片 - 紧凑型 -->
-        <div class="grid grid-cols-4 gap-3 mb-4">
+        <!-- 统计卡片 - 紧凑型 / 移动2列 -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
           <div class="stat-card animate-fade-in">
             <div class="flex items-center justify-between">
               <div>
@@ -3562,7 +3609,7 @@ app.get('/', (c) => {
         <div class="flex items-center justify-between mb-3">
           <h2 class="text-base font-bold text-gray-800">我的项目</h2>
           <div class="flex items-center space-x-2">
-            <select class="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white" id="filterStatus">
+            <select class="px-3 py-1.5 border border-gray-200 rounded-lg text-xs bg-white" id="filterStatus" onchange="renderProjects()">
               <option value="all">全部状态</option>
               <option value="negotiating">协商中</option>
               <option value="completed">已完成</option>
@@ -3572,7 +3619,7 @@ app.get('/', (c) => {
           </div>
         </div>
         
-        <div id="projectGrid" class="grid grid-cols-3 gap-3"></div>
+        <div id="projectGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
         
         <div id="emptyState" class="hidden py-8 animate-fade-in">
           <div class="max-w-xl mx-auto text-center">
@@ -3709,7 +3756,7 @@ app.get('/', (c) => {
             </button>
           </div>
           <textarea id="negotiationInput" rows="2" 
-            placeholder="用自然语言描述变动...&#10;例如：投资金额改成600万，分成比例降到12%"
+            placeholder="用自然语言描述变动...&#10;例如：投资金额改成600万，分成比例降到12%&#10;提示：Ctrl+Enter 快速发送"
             class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-sm"></textarea>
           
           <!-- 快捷输入提示 - 更紧凑 -->
@@ -3734,7 +3781,13 @@ app.get('/', (c) => {
             </div>
           </div>
           
-          <div class="flex items-center justify-end mt-2">
+          <div class="flex items-center justify-between mt-2">
+            <span class="text-xs text-gray-300 flex items-center">
+              <kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-200 rounded text-gray-400 text-xs font-mono mr-0.5">Ctrl</kbd>
+              <span class="text-gray-300 mx-0.5">+</span>
+              <kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-200 rounded text-gray-400 text-xs font-mono">Enter</kbd>
+              <span class="ml-1.5 text-gray-400">快速发送</span>
+            </span>
             <button onclick="submitNegotiation()" id="btnSubmit" class="btn-primary text-sm flex items-center">
               <i class="fas fa-paper-plane mr-1.5"></i>发送变更
             </button>
@@ -5232,9 +5285,113 @@ app.get('/', (c) => {
     let currentPerspective = 'investor';
     let contractView = 'card';
     
+    // ==================== Toast通知系统 ====================
+    function initToastContainer() {
+      if (!document.getElementById('toastContainer')) {
+        const c = document.createElement('div');
+        c.id = 'toastContainer';
+        c.className = 'toast-container';
+        document.body.appendChild(c);
+      }
+    }
+    
+    function showToast(typeOrMsg, titleOrType, message, duration) {
+      // 兼容两种调用方式:
+      // 新: showToast('success', '标题', '消息')
+      // 旧: showToast('消息文本', 'success') 或 showToast('消息文本')
+      const validTypes = ['success', 'error', 'warning', 'info'];
+      let type, title;
+      if (validTypes.includes(typeOrMsg)) {
+        type = typeOrMsg;
+        title = titleOrType || '';
+      } else {
+        type = validTypes.includes(titleOrType) ? titleOrType : 'info';
+        title = typeOrMsg || '';
+        message = '';
+      }
+      
+      initToastContainer();
+      const container = document.getElementById('toastContainer');
+      const icons = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-times-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle'
+      };
+      duration = duration || (type === 'error' ? 5000 : 3000);
+      const toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.innerHTML = \`
+        <div class="toast-icon"><i class="\${icons[type] || icons.info}"></i></div>
+        <div class="toast-body">
+          <div class="toast-title">\${title}</div>
+          \${message ? '<div class="toast-message">' + message + '</div>' : ''}
+        </div>
+        <button class="toast-close" onclick="this.parentElement.classList.add('toast-exit'); setTimeout(() => this.parentElement.remove(), 300);">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="toast-progress" style="animation-duration: \${duration}ms;"></div>
+      \`;
+      container.appendChild(toast);
+      setTimeout(() => {
+        if (toast.parentElement) {
+          toast.classList.add('toast-exit');
+          setTimeout(() => toast.remove(), 300);
+        }
+      }, duration);
+    }
+    
     // ==================== 弹窗滚动锁定工具 ====================
     let _scrollLockCount = 0;
     let _savedScrollY = 0;
+    
+    // ==================== 密码可见性切换 ====================
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      const icon = btn.querySelector('i');
+      if (input.type === 'password') {
+        input.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+      } else {
+        input.type = 'password';
+        icon.className = 'fas fa-eye';
+      }
+    }
+    
+    // ==================== 按钮Ripple效果 ====================
+    function addRippleEffect(e) {
+      const btn = e.currentTarget;
+      if (btn.classList.contains('btn-loading') || btn.disabled) return;
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      ripple.style.width = ripple.style.height = size + 'px';
+      ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+      ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+      btn.appendChild(ripple);
+      setTimeout(() => ripple.remove(), 600);
+    }
+    
+    // ripple效果已由 initRippleEffect() 统一处理，此处不再重复绑定
+    
+    // ==================== 按钮Loading状态 ====================
+    function setBtnLoading(btn, loading) {
+      if (!btn) return;
+      if (loading) {
+        btn._originalHTML = btn.innerHTML;
+        btn.classList.add('btn-loading');
+        btn.disabled = true;
+      } else {
+        btn.classList.remove('btn-loading');
+        btn.disabled = false;
+        if (btn._originalHTML) {
+          btn.innerHTML = btn._originalHTML;
+          delete btn._originalHTML;
+        }
+      }
+    }
     
     function lockBodyScroll() {
       if (_scrollLockCount === 0) {
@@ -5282,10 +5439,30 @@ app.get('/', (c) => {
     
     // 点击蒙层关闭弹窗
     document.addEventListener('click', function(e) {
-      if (e.target.classList.contains('backdrop-blur-sm') || 
-          e.target.classList.contains('onboarding-modal')) {
-        // 只有点到蒙层本身才关闭（不是内部元素冒泡）
-        if (e.target === e.currentTarget) return;
+      const target = e.target;
+      // 点到蒙层本身（fixed inset-0 的div）才关闭
+      if (target.classList.contains('backdrop-blur-sm') && target.id && target.id.endsWith('Modal')) {
+        hideModal(target.id);
+      }
+      if (target.classList.contains('onboarding-modal') && target.id === 'onboardingModal') {
+        closeOnboarding();
+      }
+    });
+    
+    // ESC键关闭最上层弹窗
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        // 先检查引导弹窗
+        const onboarding = document.getElementById('onboardingModal');
+        if (onboarding && !onboarding.classList.contains('hidden')) {
+          closeOnboarding();
+          return;
+        }
+        // 关闭最后一个打开的modal
+        const modals = document.querySelectorAll('[id$="Modal"]:not(.hidden)');
+        if (modals.length > 0) {
+          hideModal(modals[modals.length - 1].id);
+        }
       }
     });
     
@@ -5323,12 +5500,16 @@ app.get('/', (c) => {
       const username = document.getElementById('loginUsername').value.trim();
       const password = document.getElementById('loginPassword').value;
       const errorEl = document.getElementById('loginError');
+      const loginBtn = document.querySelector('#formLogin .btn-primary, #formLogin button[onclick*="handleLogin"]');
       
       if (!username || !password) {
-        errorEl.textContent = '请输入用户名和密码';
-        errorEl.classList.remove('hidden');
+        errorEl.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>请输入用户名和密码';
+        errorEl.className = 'form-error mt-4';
         return;
       }
+      
+      // Loading状态
+      if (loginBtn) { loginBtn.classList.add('btn-loading'); loginBtn.disabled = true; }
       
       try {
         const res = await fetch('/api/auth/login', {
@@ -5343,15 +5524,17 @@ app.get('/', (c) => {
           authToken = data.token;
           localStorage.setItem('rbf_current_user', JSON.stringify(currentUser));
           localStorage.setItem('rbf_auth_token', authToken);
-          errorEl.classList.add('hidden');
+          errorEl.className = 'hidden';
           onLoginSuccess();
         } else {
-          errorEl.textContent = data.message || '登录失败';
-          errorEl.classList.remove('hidden');
+          errorEl.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>' + (data.message || '登录失败');
+          errorEl.className = 'form-error mt-4';
         }
       } catch (e) {
-        errorEl.textContent = '网络错误，请重试';
-        errorEl.classList.remove('hidden');
+        errorEl.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>网络错误，请重试';
+        errorEl.className = 'form-error mt-4';
+      } finally {
+        if (loginBtn) { loginBtn.classList.remove('btn-loading'); loginBtn.disabled = false; }
       }
     }
     
@@ -5364,18 +5547,21 @@ app.get('/', (c) => {
       const company = document.getElementById('regCompany').value.trim();
       const title = document.getElementById('regTitle').value.trim();
       const errorEl = document.getElementById('registerError');
+      const regBtn = document.querySelector('#formRegister button[onclick*="handleRegister"]');
       
       if (!username || !email || !password) {
-        errorEl.textContent = '请填写必填项（用户名、邮箱、密码）';
-        errorEl.classList.remove('hidden');
+        errorEl.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>请填写必填项（用户名、邮箱、密码）';
+        errorEl.className = 'form-error mt-4';
         return;
       }
       
       if (password.length < 6) {
-        errorEl.textContent = '密码至少6位';
-        errorEl.classList.remove('hidden');
+        errorEl.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>密码至少6位';
+        errorEl.className = 'form-error mt-4';
         return;
       }
+      
+      if (regBtn) { regBtn.classList.add('btn-loading'); regBtn.disabled = true; }
       
       try {
         const res = await fetch('/api/auth/register', {
@@ -5390,15 +5576,18 @@ app.get('/', (c) => {
           authToken = data.token;
           localStorage.setItem('rbf_current_user', JSON.stringify(currentUser));
           localStorage.setItem('rbf_auth_token', authToken);
-          errorEl.classList.add('hidden');
+          errorEl.className = 'hidden';
+          showToast('success', '注册成功', '欢迎加入RBF融资协商平台！');
           onLoginSuccess();
         } else {
-          errorEl.textContent = data.message || '注册失败';
-          errorEl.classList.remove('hidden');
+          errorEl.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>' + (data.message || '注册失败');
+          errorEl.className = 'form-error mt-4';
         }
       } catch (e) {
-        errorEl.textContent = '网络错误，请重试';
-        errorEl.classList.remove('hidden');
+        errorEl.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>网络错误，请重试';
+        errorEl.className = 'form-error mt-4';
+      } finally {
+        if (regBtn) { regBtn.classList.remove('btn-loading'); regBtn.disabled = false; }
       }
     }
     
@@ -5415,27 +5604,76 @@ app.get('/', (c) => {
       authToken = 'guest_token';
       localStorage.setItem('rbf_current_user', JSON.stringify(currentUser));
       localStorage.setItem('rbf_auth_token', authToken);
+      showToast('info', '游客模式', '数据仅保存在本地，注册后可享受完整功能');
       onLoginSuccess();
     }
     
     function handleSSOLogin() {
-      alert('公司SSO登录功能即将上线，敬请期待！\\n\\n接口已预留，可对接企业统一认证系统。');
+      showToast('info', 'SSO登录即将上线', '企业统一认证接口已预留，敬请期待');
     }
     
     function handleLogout() {
-      if (confirm('确定要退出登录吗？')) {
-        currentUser = null;
-        authToken = null;
-        localStorage.removeItem('rbf_current_user');
-        localStorage.removeItem('rbf_auth_token');
-        showPage('pageAuth');
-      }
+      showConfirmDialog({
+        icon: 'warning',
+        title: '确认退出',
+        message: '退出后需要重新登录才能使用平台功能',
+        confirmText: '退出登录',
+        cancelText: '取消',
+        confirmClass: 'btn-danger',
+        onConfirm: function() {
+          currentUser = null;
+          authToken = null;
+          localStorage.removeItem('rbf_current_user');
+          localStorage.removeItem('rbf_auth_token');
+          showToast('info', '已退出', '您已安全退出账号');
+          showPage('pageAuth');
+        }
+      });
     }
     
     function onLoginSuccess() {
       updateNavUserInfo();
       showPage('pageProjects');
+      showToast('success', '登录成功', '欢迎回来，' + (currentUser?.displayName || currentUser?.username || '用户'));
       checkShowOnboarding();
+    }
+    
+    // ==================== 美化确认对话框 ====================
+    function showConfirmDialog(opts) {
+      const id = 'confirmDialog_' + Date.now();
+      const iconHtml = opts.icon ? '<div class="confirm-icon ' + opts.icon + '"><i class="fas ' + 
+        (opts.icon === 'warning' ? 'fa-exclamation-triangle' : opts.icon === 'danger' ? 'fa-trash-alt' : 'fa-info-circle') + '"></i></div>' : '';
+      const div = document.createElement('div');
+      div.id = id;
+      div.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]';
+      div.innerHTML = \`
+        <div class="bg-white rounded-2xl max-w-sm w-full mx-4 animate-in overflow-hidden" style="isolation: isolate;">
+          <div class="confirm-dialog">
+            \${iconHtml}
+            <div class="confirm-title">\${opts.title || '确认操作'}</div>
+            <div class="confirm-message">\${opts.message || '确定要执行此操作吗？'}</div>
+            <div class="confirm-actions">
+              <button onclick="document.getElementById('\${id}').remove(); unlockBodyScroll();" class="btn-secondary">\${opts.cancelText || '取消'}</button>
+              <button id="\${id}_confirm" class="\${opts.confirmClass || 'btn-primary'}">\${opts.confirmText || '确认'}</button>
+            </div>
+          </div>
+        </div>
+      \`;
+      document.body.appendChild(div);
+      lockBodyScroll();
+      // 绑定确认事件
+      document.getElementById(id + '_confirm').addEventListener('click', function() {
+        div.remove();
+        unlockBodyScroll();
+        if (opts.onConfirm) opts.onConfirm();
+      });
+      // 点击蒙层关闭
+      div.addEventListener('click', function(e) {
+        if (e.target === div) {
+          div.remove();
+          unlockBodyScroll();
+        }
+      });
     }
     
     function updateNavUserInfo() {
@@ -5443,8 +5681,41 @@ app.get('/', (c) => {
         const initial = (currentUser.displayName || currentUser.username || 'U').charAt(0).toUpperCase();
         document.getElementById('navUserAvatar').textContent = initial;
         document.getElementById('navUserName').textContent = currentUser.displayName || currentUser.username || '用户';
+        // 更新下拉菜单
+        const da = document.getElementById('dropdownAvatar');
+        const dn = document.getElementById('dropdownName');
+        const dr = document.getElementById('dropdownRole');
+        if (da) da.textContent = initial;
+        if (dn) dn.textContent = currentUser.displayName || currentUser.username || '用户';
+        if (dr) dr.textContent = currentUser.isGuest ? '游客模式' : (currentUser.company || currentUser.email || '已登录');
       }
     }
+    
+    // ==================== 用户下拉菜单 ====================
+    function toggleUserDropdown(e) {
+      e.stopPropagation();
+      const dropdown = document.getElementById('userDropdown');
+      const chevron = document.getElementById('navUserChevron');
+      if (dropdown) {
+        const isOpen = dropdown.classList.contains('show');
+        dropdown.classList.toggle('show');
+        if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+      }
+    }
+    
+    function closeUserDropdown() {
+      const dropdown = document.getElementById('userDropdown');
+      const chevron = document.getElementById('navUserChevron');
+      if (dropdown) dropdown.classList.remove('show');
+      if (chevron) chevron.style.transform = '';
+    }
+    
+    // 点击页面其他地方关闭下拉菜单
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#navUserBtn') && !e.target.closest('#userDropdown')) {
+        closeUserDropdown();
+      }
+    });
     
     function goToProfile() {
       updateProfilePage();
@@ -5456,8 +5727,21 @@ app.get('/', (c) => {
     }
     
     function showPage(pageId) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(pageId).classList.add('active');
+      const currentPage = document.querySelector('.page.active');
+      const nextPage = document.getElementById(pageId);
+      if (!nextPage || (currentPage && currentPage.id === pageId)) return;
+      
+      if (currentPage) {
+        currentPage.style.animation = 'pageExit 0.2s ease forwards';
+        setTimeout(() => {
+          currentPage.classList.remove('active');
+          currentPage.style.animation = '';
+          nextPage.classList.add('active');
+          window.scrollTo(0, 0);
+        }, 180);
+      } else {
+        nextPage.classList.add('active');
+      }
     }
     
     function switchProfileRole(role) {
@@ -5692,6 +5976,7 @@ app.get('/', (c) => {
       updateNavUserInfo();
       updateProfilePage();
       hideEditProfileModal();
+      showToast('success', '资料已更新', '个人信息保存成功');
     }
     
     // 检查登录状态
@@ -5718,8 +6003,11 @@ app.get('/', (c) => {
     ];
     
     function checkShowOnboarding() {
-      // 每次登录都显示教程浮窗（无论之前是否看过）
-      showOnboarding();
+      // 首次登录或未看过教程才弹出
+      const seen = localStorage.getItem('rbf_onboarding_seen');
+      if (!seen) {
+        showOnboarding();
+      }
     }
     
     function showOnboarding() {
@@ -5846,18 +6134,67 @@ app.get('/', (c) => {
         loading.classList.add('fade-out');
         setTimeout(() => {
           loading.style.display = 'none';
-        }, 500);
+        }, 600);
       }
     }
     
+    function updateLoadingProgress(pct, text) {
+      const bar = document.getElementById('loadingBar');
+      const status = document.getElementById('loadingStatus');
+      if (bar) bar.style.width = pct + '%';
+      if (status) status.textContent = text;
+    }
+    
     async function init() {
+      updateLoadingProgress(20, '正在加载模板数据...');
       await loadTemplates();
+      
+      updateLoadingProgress(50, '正在加载用户数据...');
       await loadCustomTemplatesOnInit();
+      
+      updateLoadingProgress(75, '正在渲染界面...');
       renderProjects();
       updateStats();
       
-      // 隐藏loading屏幕
-      hideLoadingScreen();
+      updateLoadingProgress(100, '准备就绪');
+      
+      // 短暂延迟后隐藏loading，让用户看到100%
+      setTimeout(() => hideLoadingScreen(), 300);
+      
+      // 初始化按钮ripple效果
+      initRippleEffect();
+      
+      // 登录页回车键支持
+      ['loginUsername', 'loginPassword'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') handleLogin();
+        });
+      });
+      
+      // 注册页回车键支持
+      ['regUsername', 'regEmail', 'regPassword'].forEach(function(id) {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') handleRegister();
+        });
+      });
+      
+      // 协商输入框回车键支持（Ctrl+Enter发送）
+      const negInput = document.getElementById('negotiationInput');
+      if (negInput) negInput.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') submitNegotiation();
+      });
+      
+      // 新建项目名称回车键：聚焦模板区域
+      const projNameInput = document.getElementById('newProjectName');
+      if (projNameInput) projNameInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const grid = document.getElementById('templateGrid');
+          if (grid) grid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
       
       // 检查用户是否已登录
       if (currentUser) {
@@ -5869,6 +6206,23 @@ app.get('/', (c) => {
         }, 500);
       }
       // 未登录用户：保持在登录页，等待登录成功后再显示教程
+    }
+    
+    // ==================== 按钮Ripple效果 ====================
+    function initRippleEffect() {
+      document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.btn-primary, .btn-secondary, .btn-success, .btn-danger');
+        if (!btn) return;
+        const rect = btn.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height) * 2;
+        const ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+        btn.appendChild(ripple);
+        setTimeout(function() { ripple.remove(); }, 600);
+      });
     }
     
     async function loadTemplates() {
@@ -5890,6 +6244,12 @@ app.get('/', (c) => {
     function renderProjects() {
       const grid = document.getElementById('projectGrid');
       const empty = document.getElementById('emptyState');
+      const filterVal = document.getElementById('filterStatus')?.value || 'all';
+      
+      const filtered = filterVal === 'all' ? projects : projects.filter(function(p) {
+        if (filterVal === 'completed') return p.status === 'completed' || p.status === 'signed';
+        return p.status === filterVal;
+      });
       
       if (projects.length === 0) {
         grid.classList.add('hidden');
@@ -5900,47 +6260,68 @@ app.get('/', (c) => {
       grid.classList.remove('hidden');
       empty.classList.add('hidden');
       
-      grid.innerHTML = projects.map((p, idx) => {
+      if (filtered.length === 0) {
+        grid.innerHTML = '<div class="col-span-3 text-center py-12 text-gray-400"><i class="fas fa-filter text-3xl mb-3 opacity-50"></i><p class="text-sm font-medium">没有符合筛选条件的项目</p><p class="text-xs mt-1">尝试更改筛选条件查看更多项目</p></div>';
+        return;
+      }
+      
+      // 模板颜色映射 - 直接用真实颜色值，避免CSS变量缺失
+      const colorMap = {
+        purple: { bg: 'rgba(147,51,234,0.12)', bgHover: 'rgba(147,51,234,0.18)', text: '#7c3aed', icon: '#9333ea' },
+        orange: { bg: 'rgba(249,115,22,0.12)', bgHover: 'rgba(249,115,22,0.18)', text: '#ea580c', icon: '#f97316' },
+        blue: { bg: 'rgba(59,130,246,0.12)', bgHover: 'rgba(59,130,246,0.18)', text: '#2563eb', icon: '#3b82f6' },
+        pink: { bg: 'rgba(236,72,153,0.12)', bgHover: 'rgba(236,72,153,0.18)', text: '#db2777', icon: '#ec4899' },
+        green: { bg: 'rgba(16,185,129,0.12)', bgHover: 'rgba(16,185,129,0.18)', text: '#059669', icon: '#10b981' },
+        gray: { bg: 'rgba(107,114,128,0.12)', bgHover: 'rgba(107,114,128,0.18)', text: '#4b5563', icon: '#6b7280' },
+        red: { bg: 'rgba(239,68,68,0.12)', bgHover: 'rgba(239,68,68,0.18)', text: '#dc2626', icon: '#ef4444' },
+        indigo: { bg: 'rgba(99,102,241,0.12)', bgHover: 'rgba(99,102,241,0.18)', text: '#4f46e5', icon: '#6366f1' },
+      };
+      
+      grid.innerHTML = filtered.map((p, idx) => {
         const template = templates.find(t => t.id === p.templateId) || {};
         const statusConfig = {
-          draft: { bg: 'bg-gray-100', text: 'text-gray-600', label: '草稿' },
-          negotiating: { bg: 'bg-amber-100', text: 'text-amber-700', label: '协商中' },
-          completed: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: '已完成' },
-          signed: { bg: 'bg-blue-100', text: 'text-blue-700', label: '已签署' }
+          draft: { bg: 'bg-gray-100', text: 'text-gray-600', label: '草稿', dot: '#9ca3af' },
+          negotiating: { bg: 'bg-amber-50', text: 'text-amber-700', label: '协商中', dot: '#f59e0b' },
+          completed: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: '已完成', dot: '#10b981' },
+          signed: { bg: 'bg-blue-50', text: 'text-blue-700', label: '已签署', dot: '#3b82f6' }
         };
         const status = statusConfig[p.status] || statusConfig.draft;
         const changeCount = p.negotiations?.length || 0;
         const animDelay = Math.min(idx * 60, 360);
+        const colors = colorMap[template.color] || colorMap.gray;
         
         return \`
           <div class="project-card cursor-pointer relative group animate-slide-up" style="animation-delay: \${animDelay}ms; animation-fill-mode: both;" onclick="openProject('\${p.id}')">
             <!-- 操作按钮（悬停显示） -->
-            <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex space-x-1" onclick="event.stopPropagation()">
-              <button onclick="showEditProjectModal('\${p.id}')" class="p-1.5 bg-white/95 hover:bg-indigo-100 rounded-md shadow-sm border border-gray-200 transition-colors" title="编辑">
-                <i class="fas fa-edit text-indigo-600 text-xs"></i>
+            <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 flex space-x-1.5 z-10" onclick="event.stopPropagation()">
+              <button onclick="showEditProjectModal('\${p.id}')" class="w-7 h-7 flex items-center justify-center bg-white hover:bg-indigo-50 rounded-lg shadow-md border border-gray-100 transition-all hover:scale-110" title="编辑">
+                <i class="fas fa-pen text-indigo-500 text-xs"></i>
               </button>
-              <button onclick="showDeleteProjectModal('\${p.id}')" class="p-1.5 bg-white/95 hover:bg-red-100 rounded-md shadow-sm border border-gray-200 transition-colors" title="删除">
-                <i class="fas fa-trash-alt text-red-500 text-xs"></i>
+              <button onclick="showDeleteProjectModal('\${p.id}')" class="w-7 h-7 flex items-center justify-center bg-white hover:bg-red-50 rounded-lg shadow-md border border-gray-100 transition-all hover:scale-110" title="删除">
+                <i class="fas fa-trash-alt text-red-400 text-xs"></i>
               </button>
             </div>
-            <div class="flex items-start justify-between mb-2">
-              <div class="w-10 h-10 rounded-lg bg-\${template.color || 'gray'}-100 flex items-center justify-center" style="background: linear-gradient(135deg, rgba(var(--\${template.color || 'gray'}-rgb), 0.15) 0%, rgba(var(--\${template.color || 'gray'}-rgb), 0.05) 100%);">
-                <i class="fas \${template.icon || 'fa-folder'} text-\${template.color || 'gray'}-600"></i>
+            <div class="flex items-start justify-between mb-3">
+              <div class="w-11 h-11 rounded-xl flex items-center justify-center shadow-sm" style="background: \${colors.bg};">
+                <i class="fas \${template.icon || 'fa-folder'} text-base" style="color: \${colors.icon};"></i>
               </div>
               <div class="flex items-center space-x-1.5">
-                \${p.collaborators?.length > 0 ? '<i class="fas fa-users text-gray-400 text-xs"></i>' : ''}
-                <span class="badge \${status.bg} \${status.text}">\${status.label}</span>
+                \${p.collaborators?.length > 0 ? \`<span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-xs text-gray-400 bg-gray-50"><i class="fas fa-users text-xs mr-0.5"></i>\${p.collaborators.length}</span>\` : ''}
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium \${status.bg} \${status.text}">
+                  <span class="w-1.5 h-1.5 rounded-full mr-1.5" style="background: \${status.dot};"></span>
+                  \${status.label}
+                </span>
               </div>
             </div>
-            <h3 class="font-bold text-gray-900 mb-0.5 truncate text-sm">\${p.name}</h3>
-            <p class="text-xs text-gray-500 mb-2">\${template.name || '未知行业'}</p>
-            <div class="flex items-center justify-between text-xs text-gray-400">
-              <span><i class="fas fa-comments mr-1"></i>\${changeCount}次协商</span>
-              <span>\${formatDate(p.updatedAt)}</span>
+            <h3 class="font-bold text-gray-900 mb-0.5 truncate text-sm leading-snug">\${p.name}</h3>
+            <p class="text-xs text-gray-400 mb-3">\${template.name || '未知行业'}</p>
+            <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
+              <span class="flex items-center"><i class="fas fa-comments mr-1 text-indigo-300"></i>\${changeCount}次协商</span>
+              <span class="flex items-center"><i class="far fa-clock mr-1"></i>\${formatDate(p.updatedAt)}</span>
             </div>
-            <div class="mt-2 pt-2 border-t border-gray-100 flex items-center justify-between">
-              <span class="text-xs font-bold text-indigo-600">\${p.params?.investmentAmount || '-'}</span>
-              <span class="text-xs text-gray-400">\${p.params?.revenueShareRatio || '-'}分成</span>
+            <div class="pt-2.5 border-t border-gray-100/80 flex items-center justify-between">
+              <span class="text-sm font-bold" style="color: \${colors.text};">\${p.params?.investmentAmount || '-'}</span>
+              <span class="text-xs text-gray-400 bg-gray-50 px-2 py-0.5 rounded-md">\${p.params?.revenueShareRatio || '-'} 分成</span>
             </div>
           </div>
         \`;
@@ -5963,35 +6344,26 @@ app.get('/', (c) => {
     function showNewProjectModal() { showModal('newProjectModal'); }
     function hideNewProjectModal() { hideModal('newProjectModal'); }
     
-    function renderTemplateGrid() {
-      const grid = document.getElementById('templateGrid');
-      if (!grid) return;
-      grid.innerHTML = templates.map(t => \`
-        <div class="template-card \${selectedTemplateId === t.id ? 'selected' : ''}" 
-             onclick="selectTemplate('\${t.id}')">
-          \${selectedTemplateId === t.id ? '<div class="absolute -top-1.5 -right-1.5 w-5 h-5 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-md"><i class="fas fa-check text-white text-xs"></i></div>' : ''}
-          <div class="flex items-center space-x-2.5">
-            <div class="w-9 h-9 rounded-lg flex items-center justify-center \${selectedTemplateId === t.id ? 'ring-2 ring-indigo-300' : ''}" style="background: linear-gradient(135deg, var(--tw-gradient-from) 0%, var(--tw-gradient-to) 100%); --tw-gradient-from: rgba(99, 102, 241, 0.1); --tw-gradient-to: rgba(168, 85, 247, 0.1);">
-              <i class="fas \${t.icon} text-\${t.color}-600 text-sm"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h4 class="font-semibold text-gray-900 text-sm truncate">\${t.name}</h4>
-              <p class="text-xs text-gray-500 truncate">\${t.description}</p>
-            </div>
-          </div>
-          \${selectedTemplateId === t.id ? '<div class="mt-1.5 text-xs text-indigo-600 text-center font-medium"><i class="fas fa-check-circle mr-1"></i>已选择</div>' : ''}
-        </div>
-      \`).join('');
-    }
+    // renderTemplateGrid 已在下方定义（支持自定义模板），此处省略
     
     function renderTemplateManagerGrid() {
       const grid = document.getElementById('templateManagerGrid');
       if (!grid) return;
-      grid.innerHTML = templates.map(t => \`
+      const tmColorMap = {
+        purple: { bg: '#f3e8ff', icon: '#9333ea' },
+        orange: { bg: '#fff7ed', icon: '#ea580c' },
+        blue: { bg: '#eff6ff', icon: '#2563eb' },
+        pink: { bg: '#fdf2f8', icon: '#db2777' },
+        green: { bg: '#ecfdf5', icon: '#059669' },
+        gray: { bg: '#f9fafb', icon: '#6b7280' },
+      };
+      grid.innerHTML = templates.map(t => {
+        const tc = tmColorMap[t.color] || tmColorMap.gray;
+        return \`
         <div class="p-4 border border-gray-200 rounded-xl hover:border-indigo-300 transition-colors">
           <div class="flex items-center space-x-3 mb-3">
-            <div class="w-10 h-10 rounded-lg bg-\${t.color}-100 flex items-center justify-center">
-              <i class="fas \${t.icon} text-\${t.color}-600"></i>
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: \${tc.bg};">
+              <i class="fas \${t.icon}" style="color: \${tc.icon};"></i>
             </div>
             <div>
               <h4 class="font-medium text-gray-900">\${t.name}</h4>
@@ -6004,7 +6376,8 @@ app.get('/', (c) => {
             <button class="text-xs text-indigo-600 hover:text-indigo-700">查看详情</button>
           </div>
         </div>
-      \`).join('');
+      \`;
+      }).join('');
     }
     
     function selectTemplate(id) {
@@ -6022,8 +6395,8 @@ app.get('/', (c) => {
       const name = document.getElementById('newProjectName').value.trim();
       const note = document.getElementById('newProjectNote').value.trim();
       
-      if (!name) { alert('请输入项目名称'); return; }
-      if (!selectedTemplateId) { alert('请选择行业模板'); return; }
+      if (!name) { showToast('warning', '请输入项目名称', '项目名称是必填项'); return; }
+      if (!selectedTemplateId) { showToast('warning', '请选择行业模板', '请从下方模板列表中选择一个'); return; }
       
       let template;
       
@@ -6056,6 +6429,7 @@ app.get('/', (c) => {
       hideNewProjectModal();
       renderProjects();
       updateStats();
+      showToast('success', '项目创建成功', project.name + ' 已准备就绪');
       openProject(project.id);
     }
     
@@ -6075,8 +6449,7 @@ app.get('/', (c) => {
         currentProject.template = await res.json();
       }
       
-      document.getElementById('pageProjects').classList.remove('active');
-      document.getElementById('pageNegotiation').classList.add('active');
+      showPage('pageNegotiation');
       
       document.getElementById('projectTitle').textContent = project.name;
       document.getElementById('projectIndustry').textContent = currentProject.template.name;
@@ -6099,8 +6472,7 @@ app.get('/', (c) => {
     }
     
     function goToProjects() {
-      document.getElementById('pageNegotiation').classList.remove('active');
-      document.getElementById('pageProjects').classList.add('active');
+      showPage('pageProjects');
       currentProject = null;
       renderProjects();
       updateStats();
@@ -6209,7 +6581,7 @@ app.get('/', (c) => {
       document.getElementById('negotiationInput').focus();
       
       // 提示用户
-      alert(\`已填入测试输入: "\${testMessage}"\\n\\n点击"发送变更"将由 \${agent?.name || agentId} 处理此请求。\`);
+      showToast('info', '测试输入已填入', '点击"发送变更"将由 ' + (agent?.name || agentId) + ' 处理此请求');
     }
     
     // ==================== 多Agent并行处理系统 ====================
@@ -6239,6 +6611,7 @@ app.get('/', (c) => {
       
       const btn = document.getElementById('btnSubmit');
       btn.disabled = true;
+      btn.classList.add('btn-loading');
       activeAgentProcessing = true;
       pendingMessage = message;
       
@@ -6300,7 +6673,8 @@ app.get('/', (c) => {
         setTimeout(() => hideSmartChangePanel(), 2000);
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-paper-plane mr-2"></i>发送变更';
+        btn.classList.remove('btn-loading');
+        btn.innerHTML = '<i class="fas fa-paper-plane mr-1.5"></i>发送变更';
         activeAgentProcessing = false;
       }
     }
@@ -6805,7 +7179,7 @@ app.get('/', (c) => {
       const allConfirmed = [...confirmedPrimary, ...confirmedInferred];
       
       if (allConfirmed.length === 0) {
-        alert('请至少选择一项修改');
+        showToast('warning', '请至少选择一项修改', '勾选您想要应用的变更项');
         return;
       }
       
@@ -6860,7 +7234,7 @@ app.get('/', (c) => {
       updateChangedBadge();
       
       // 显示成功提示
-      showToast(\`成功应用 \${confirmedPrimary.length} 项直接修改\${confirmedInferred.length > 0 ? \`，\${confirmedInferred.length} 项关联修改\` : ''}\`);
+      showToast('success', '修改已应用', \`成功应用 \${confirmedPrimary.length} 项直接修改\${confirmedInferred.length > 0 ? \`，\${confirmedInferred.length} 项关联修改\` : ''}\`);
     }
     
     // 隐藏智能联动面板
@@ -6871,15 +7245,6 @@ app.get('/', (c) => {
       }
       smartChangeResult = null;
       pendingMessage = '';
-    }
-    
-    // Toast提示
-    function showToast(message) {
-      const toast = document.createElement('div');
-      toast.className = 'fixed bottom-8 left-1/2 transform -translate-x-1/2 px-6 py-3 bg-gray-800 text-white rounded-lg shadow-xl z-[900] animate-in';
-      toast.innerHTML = \`<i class="fas fa-check-circle mr-2 text-emerald-400"></i>\${escapeHtml(message)}\`;
-      document.body.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
     }
     
     // 回退到单一解析模式（保留兼容）
@@ -7556,10 +7921,7 @@ app.get('/', (c) => {
       if (!currentProject) return;
       currentProject.updatedAt = new Date().toISOString();
       saveProjects();
-      const btn = event.target.closest('button');
-      const original = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-check mr-1"></i>已保存';
-      setTimeout(() => { btn.innerHTML = original; }, 1500);
+      showToast('success', '保存成功', '项目数据已安全保存');
     }
     
     function exportAs(format) {
@@ -7574,7 +7936,7 @@ app.get('/', (c) => {
         a.click();
         URL.revokeObjectURL(url);
       } else {
-        alert(format.toUpperCase() + '格式导出功能即将上线');
+        showToast('info', format.toUpperCase() + '格式导出即将上线', '目前仅支持JSON格式导出');
       }
     }
     
@@ -7648,23 +8010,41 @@ app.get('/', (c) => {
         try {
           const data = JSON.parse(e.target.result);
           if (data.projects && Array.isArray(data.projects)) {
-            const confirmMsg = '即将导入 ' + data.projects.length + ' 个项目。\\n\\n选择导入模式：\\n- 确定：合并到现有数据\\n- 取消后重新选择覆盖模式';
-            if (confirm(confirmMsg)) {
-              // 合并模式
-              const existingIds = projects.map(p => p.id);
-              const newProjects = data.projects.filter(p => !existingIds.includes(p.id));
-              projects = [...projects, ...newProjects];
-              saveProjects();
-              showToast('成功导入 ' + newProjects.length + ' 个新项目', 'success');
-            } else if (confirm('是否覆盖所有现有数据？（此操作不可恢复）')) {
-              // 覆盖模式
-              projects = data.projects;
-              saveProjects();
-              showToast('数据已完全覆盖', 'success');
-            }
-            renderProjects();
-            updateStats();
-            updateStorageStats();
+            showConfirmDialog({
+              icon: 'info',
+              title: '导入数据',
+              message: '即将导入 ' + data.projects.length + ' 个项目，选择导入模式：',
+              confirmText: '合并导入',
+              cancelText: '覆盖导入',
+              onConfirm: function() {
+                // 合并模式
+                const existingIds = projects.map(p => p.id);
+                const newProjects = data.projects.filter(p => !existingIds.includes(p.id));
+                projects = [...projects, ...newProjects];
+                saveProjects();
+                renderProjects();
+                updateStats();
+                updateStorageStats();
+                showToast('成功导入 ' + newProjects.length + ' 个新项目', 'success');
+              },
+              onCancel: function() {
+                showConfirmDialog({
+                  icon: 'danger',
+                  title: '覆盖确认',
+                  message: '是否覆盖所有现有数据？此操作不可恢复！',
+                  confirmText: '确认覆盖',
+                  cancelText: '取消',
+                  onConfirm: function() {
+                    projects = data.projects;
+                    saveProjects();
+                    renderProjects();
+                    updateStats();
+                    updateStorageStats();
+                    showToast('数据已完全覆盖', 'success');
+                  }
+                });
+              }
+            });
           } else {
             showToast('无效的备份文件格式', 'error');
           }
@@ -7677,44 +8057,37 @@ app.get('/', (c) => {
     }
     
     function clearAllData() {
-      const confirmText = '确定要清除所有数据吗？\\n\\n此操作将删除：\\n- 所有项目 (' + projects.length + ' 个)\\n- 所有版本快照\\n- 所有自定义设置\\n\\n此操作不可恢复！';
-      if (confirm(confirmText)) {
-        if (confirm('最后确认：真的要删除所有数据吗？')) {
-          localStorage.removeItem('rbf_projects');
-          localStorage.removeItem('rbf_custom_templates');
-          projects = [];
-          renderProjects();
-          updateStats();
-          updateStorageStats();
-          showToast('所有数据已清除', 'success');
+      showConfirmDialog({
+        icon: 'danger',
+        title: '清除所有数据',
+        message: '此操作将删除所有项目（' + projects.length + ' 个）、版本快照和自定义设置，且不可恢复！',
+        confirmText: '确认清除',
+        cancelText: '取消',
+        onConfirm: function() {
+          showConfirmDialog({
+            icon: 'danger',
+            title: '最终确认',
+            message: '真的要删除所有数据吗？这是最后一次确认机会。',
+            confirmText: '是，全部删除',
+            cancelText: '不，保留数据',
+            onConfirm: function() {
+              localStorage.removeItem('rbf_projects');
+              localStorage.removeItem('rbf_custom_templates');
+              projects = [];
+              renderProjects();
+              updateStats();
+              updateStorageStats();
+              showToast('所有数据已清除', 'success');
+            }
+          });
         }
-      }
+      });
     }
     
     function showLoginPrompt() {
       showToast('云端同步功能即将上线，敬请期待', 'info');
     }
     
-    // Toast通知
-    function showToast(message, type = 'info') {
-      const colors = {
-        success: 'bg-emerald-500',
-        error: 'bg-red-500',
-        info: 'bg-indigo-500',
-        warning: 'bg-amber-500'
-      };
-      const icons = {
-        success: 'fa-check-circle',
-        error: 'fa-exclamation-circle',
-        info: 'fa-info-circle',
-        warning: 'fa-exclamation-triangle'
-      };
-      const toast = document.createElement('div');
-      toast.className = 'fixed bottom-4 right-4 ' + colors[type] + ' text-white px-6 py-3 rounded-lg shadow-lg flex items-center z-[900] animate-in';
-      toast.innerHTML = '<i class="fas ' + icons[type] + ' mr-2"></i>' + message;
-      document.body.appendChild(toast);
-      setTimeout(() => { toast.remove(); }, 3000);
-    }
     function showCollaboratorModal() { 
       showModal('collaboratorModal');
       renderCollaboratorList();
@@ -7834,7 +8207,7 @@ app.get('/', (c) => {
       renderProjects();
       updateStats();
       hideDeleteProjectModal();
-      showToast('项目已删除', 'success');
+      showToast('success', '项目已删除', '已从列表中移除');
     }
     
     // ==================== 直接编辑合同参数功能 ====================
@@ -8174,25 +8547,33 @@ app.get('/', (c) => {
     
     async function cancelSignProcess() {
       if (!currentSignProcess) return;
-      if (!confirm('确定要取消签署流程吗？已完成的签名将作废。')) return;
-      
-      try {
-        const res = await fetch('/api/sign/' + currentSignProcess.signId + '/cancel', {
-          method: 'POST'
-        });
-        const result = await res.json();
-        
-        if (result.success) {
-          currentProject.signStatus = 'cancelled';
-          saveProjects();
-          showToast('签署流程已取消', 'success');
-          hideSignModal();
-        } else {
-          showToast(result.message || '取消失败', 'error');
+      showConfirmDialog({
+        icon: 'danger',
+        title: '取消签署流程',
+        message: '确定要取消签署流程吗？已完成的签名将作废，此操作不可恢复。',
+        confirmText: '确认取消',
+        cancelText: '返回',
+        confirmClass: 'btn-danger',
+        onConfirm: async function() {
+          try {
+            const res = await fetch('/api/sign/' + currentSignProcess.signId + '/cancel', {
+              method: 'POST'
+            });
+            const result = await res.json();
+            
+            if (result.success) {
+              currentProject.signStatus = 'cancelled';
+              saveProjects();
+              showToast('success', '已取消', '签署流程已取消');
+              hideSignModal();
+            } else {
+              showToast('error', '取消失败', result.message || '请稍后重试');
+            }
+          } catch (e) {
+            showToast('error', '操作失败', '网络错误，请稍后重试');
+          }
         }
-      } catch (e) {
-        showToast('网络错误', 'error');
-      }
+      });
     }
     
     async function sendSignReminder(signId, signerId) {
@@ -9020,23 +9401,39 @@ app.get('/', (c) => {
       const grid = document.getElementById('templateGrid');
       if (!grid) return;
       
+      const templateColorMap = {
+        purple: { bg: '#f3e8ff', icon: '#9333ea' },
+        orange: { bg: '#fff7ed', icon: '#ea580c' },
+        blue: { bg: '#eff6ff', icon: '#2563eb' },
+        pink: { bg: '#fdf2f8', icon: '#db2777' },
+        green: { bg: '#ecfdf5', icon: '#059669' },
+        gray: { bg: '#f9fafb', icon: '#6b7280' },
+        red: { bg: '#fef2f2', icon: '#dc2626' },
+        indigo: { bg: '#eef2ff', icon: '#4f46e5' },
+      };
+      
       // 合并系统模板和自定义模板
       const allTemplates = [...templates, ...customTemplates];
       
-      grid.innerHTML = allTemplates.map(t => \`
-        <div class="template-card p-4 border-2 rounded-xl \${selectedTemplateId === t.id ? 'selected border-indigo-500' : 'border-gray-200'}" 
+      grid.innerHTML = allTemplates.map(t => {
+        const tc = templateColorMap[t.color] || templateColorMap.gray;
+        const isSelected = selectedTemplateId === t.id;
+        return \`
+        <div class="template-card p-3.5 border-2 rounded-xl cursor-pointer transition-all duration-200 \${isSelected ? 'selected border-indigo-500 bg-indigo-50/50 shadow-md' : 'border-gray-200 hover:border-indigo-300 hover:shadow-sm'}" 
              onclick="selectTemplate('\${t.id}')">
           <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-lg bg-\${t.color}-100 flex items-center justify-center">
-              <i class="fas \${t.icon} text-\${t.color}-600"></i>
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 \${isSelected ? 'ring-2 ring-indigo-300 ring-offset-1' : ''}" style="background: \${tc.bg};">
+              <i class="fas \${t.icon}" style="color: \${tc.icon};"></i>
             </div>
-            <div>
-              <h4 class="font-medium text-gray-900">\${t.name}</h4>
+            <div class="flex-1 min-w-0">
+              <h4 class="font-semibold text-gray-900 text-sm truncate">\${t.name}</h4>
               <p class="text-xs text-gray-500 truncate">\${t.isCustom ? '<i class="fas fa-user mr-1"></i>自定义' : t.description}</p>
             </div>
+            \${isSelected ? '<i class="fas fa-check-circle text-indigo-500 text-base flex-shrink-0"></i>' : ''}
           </div>
         </div>
-      \`).join('');
+      \`;
+      }).join('');
     }
     
     // 更新 selectTemplate 以支持自定义模板
@@ -9450,24 +9847,30 @@ app.get('/', (c) => {
       const version = (currentProject.versions || []).find(v => v.id === versionId);
       if (!version) return;
       
-      if (!confirm('确定要回退到版本「' + version.name + '」吗？\\n\\n当前工作内容将被替换为该版本的内容。\\n建议先创建一个快照保存当前状态。')) {
-        return;
-      }
-      
-      // 回退参数和协商记录
-      currentProject.params = JSON.parse(JSON.stringify(version.params));
-      currentProject.negotiations = JSON.parse(JSON.stringify(version.negotiations || []));
-      currentProject.updatedAt = new Date().toISOString();
-      saveProjects();
-      
-      // 重新渲染
-      renderNegotiationHistory();
-      renderModuleCards();
-      renderContractText();
-      updateChangedBadge();
-      renderVersionList();
-      
-      showToast('已回退到版本: ' + version.name, 'success');
+      showConfirmDialog({
+        icon: 'warning',
+        title: '回退到此版本',
+        message: '确定要回退到版本「' + version.name + '」吗？当前工作内容将被替换，建议先创建快照保存当前状态。',
+        confirmText: '确认回退',
+        cancelText: '取消',
+        confirmClass: 'btn-primary',
+        onConfirm: function() {
+          // 回退参数和协商记录
+          currentProject.params = JSON.parse(JSON.stringify(version.params));
+          currentProject.negotiations = JSON.parse(JSON.stringify(version.negotiations || []));
+          currentProject.updatedAt = new Date().toISOString();
+          saveProjects();
+          
+          // 重新渲染
+          renderNegotiationHistory();
+          renderModuleCards();
+          renderContractText();
+          updateChangedBadge();
+          renderVersionList();
+          
+          showToast('success', '版本已回退', '已回退到版本: ' + version.name);
+        }
+      });
     }
     
     function deleteVersion(versionId) {
