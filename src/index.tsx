@@ -5632,8 +5632,321 @@ app.get('/', (c) => {
       authToken = 'guest_token';
       localStorage.setItem('rbf_current_user', JSON.stringify(currentUser));
       localStorage.setItem('rbf_auth_token', authToken);
-      showToast('info', '游客模式', '数据仅保存在本地，注册后可享受完整功能');
+      
+      // 注入 demo 项目数据
+      injectDemoProjects();
+      
+      showToast('info', '游客模式', '已加载演示项目，可自由体验所有功能');
       onLoginSuccess();
+    }
+    
+    function injectDemoProjects() {
+      const now = new Date();
+      const d = (daysAgo) => new Date(now.getTime() - daysAgo * 86400000).toISOString();
+      
+      const demoProjects = [
+        // ===== 1. 演唱会 — 已签署（完整流程案例）=====
+        {
+          id: 'demo_concert_signed',
+          name: '周杰伦2026巡回演唱会·深圳站',
+          note: '嘉禾年华文化联合出品，预计3场共4.5万观众',
+          templateId: 'concert',
+          status: 'signed',
+          params: {
+            investmentAmount: '1800万',
+            fundUsage: '场地租赁、艺人费用、舞美搭建、宣传推广',
+            revenueShareRatio: '68',
+            revenueDefinition: '票房收入+赞助收入+衍生品收入（税前）',
+            sharingStartDate: '首场演出日',
+            sharingEndDate: '末场演出后90天',
+            annualYieldRate: '28',
+            lossClosurePeriod: '3',
+            lossClosureThreshold: '5万',
+            dataReportFrequency: '每自然日',
+            dataTransmissionMethod: '系统自动传输',
+            dgtName: '滴灌通（深圳）投资管理有限公司',
+            mguName: '嘉禾年华文化传媒有限公司',
+            prerequisites: '完成场地审批、艺人合同签署、票务系统对接'
+          },
+          negotiations: [
+            { id: 'n1', input: '投资方提出分成比例70%', understood: '设定初始分成比例', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '70', newValue: '70' }], perspective: 'investor', timestamp: d(30) },
+            { id: 'n2', input: '融资方认为70%过高，希望降至60%', understood: '融资方希望降低分成比例', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '70', newValue: '60' }], perspective: 'borrower', timestamp: d(28) },
+            { id: 'n3', input: '投资方同意让步到68%，但要求增加保底条款', understood: '双方妥协至68%', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '60', newValue: '68' }], perspective: 'investor', timestamp: d(25) },
+            { id: 'n4', input: '融资方接受68%，同意增加衍生品收入纳入分成基数', understood: '最终确认分成条款', changes: [{ paramKey: 'revenueDefinition', paramName: '收入定义', oldValue: '票房收入（税前）', newValue: '票房收入+赞助收入+衍生品收入（税前）' }], perspective: 'borrower', timestamp: d(22) },
+            { id: 'n5', input: '双方确认所有条款，进入签署流程', understood: '条款定稿', changes: [], perspective: 'investor', timestamp: d(15) }
+          ],
+          collaborators: [
+            { id: 'col_1', name: '张伟（投资方）', role: 'investor', status: 'online' },
+            { id: 'col_2', name: '李雪梅（融资方）', role: 'borrower', status: 'online' }
+          ],
+          versions: [
+            { id: 'v1', label: 'V1 初始版本', createdAt: d(30) },
+            { id: 'v2', label: 'V2 调整分成比例', createdAt: d(25) },
+            { id: 'v3', label: 'V3 最终签署版', createdAt: d(15) }
+          ],
+          createdAt: d(35),
+          updatedAt: d(5)
+        },
+        
+        // ===== 2. 餐饮连锁 — 协商中（活跃谈判）=====
+        {
+          id: 'demo_catering_negotiating',
+          name: '霸王茶姬·华南区30店联营',
+          note: '覆盖广州、深圳、东莞核心商圈，目标月均营收150万/店',
+          templateId: 'catering',
+          status: 'negotiating',
+          params: {
+            investmentAmount: '600万',
+            fundUsage: '门店装修、设备采购、首批原料、流动资金',
+            revenueShareRatio: '15',
+            revenueDefinition: '门店全部营业收入（含外卖）',
+            sharingStartDate: '门店开业之日',
+            sharingEndDate: '协议签署后36个月',
+            annualYieldRate: '22',
+            lossClosurePeriod: '6',
+            lossClosureThreshold: '3万',
+            dataReportFrequency: '每自然日',
+            dataTransmissionMethod: '系统自动传输（POS直连）',
+            dgtName: '滴灌通（深圳）投资管理有限公司',
+            mguName: '霸王茶姬华南运营中心',
+            prerequisites: '品牌授权、选址确认、POS系统对接'
+          },
+          negotiations: [
+            { id: 'n1', input: '投资方提出分成比例18%，期限36个月', understood: '初始报价', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '12', newValue: '18' }], perspective: 'investor', timestamp: d(10) },
+            { id: 'n2', input: '融资方希望分成降到12%，原因是新店前期需要更多利润积累', understood: '融资方议价', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '18', newValue: '12' }], perspective: 'borrower', timestamp: d(8) },
+            { id: 'n3', input: '投资方同意降至15%，但要求增加月度保底分成5万元', understood: '投资方让步并加保底', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '12', newValue: '15' }], perspective: 'investor', timestamp: d(5) }
+          ],
+          collaborators: [
+            { id: 'col_3', name: '王建国（投资方）', role: 'investor', status: 'online' },
+            { id: 'col_4', name: '陈小丽（融资方）', role: 'borrower', status: 'away' }
+          ],
+          versions: [
+            { id: 'v1', label: 'V1 初始版本', createdAt: d(10) },
+            { id: 'v2', label: 'V2 分成比例调整', createdAt: d(5) }
+          ],
+          createdAt: d(12),
+          updatedAt: d(2)
+        },
+        
+        // ===== 3. 零售门店 — 已完成（成功案例）=====
+        {
+          id: 'demo_retail_completed',
+          name: '名创优品·杭州城西银泰旗舰店',
+          note: '300㎡旗舰店，位于银泰城B1层主通道，日均客流3万+',
+          templateId: 'retail',
+          status: 'completed',
+          params: {
+            investmentAmount: '350万',
+            fundUsage: '门店装修、首批铺货、租赁押金',
+            revenueShareRatio: '12',
+            revenueDefinition: '门店全部营业收入',
+            sharingStartDate: '2025年6月1日',
+            sharingEndDate: '2027年5月31日',
+            annualYieldRate: '18',
+            lossClosurePeriod: '4',
+            lossClosureThreshold: '2万',
+            dataReportFrequency: '每自然日',
+            dataTransmissionMethod: '系统自动传输',
+            dgtName: '滴灌通（深圳）投资管理有限公司',
+            mguName: '名创优品（杭州）零售有限公司',
+            prerequisites: '物业合同签署、装修方案审批'
+          },
+          negotiations: [
+            { id: 'n1', input: '投资方初始报价15%分成', understood: '初始报价', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '15', newValue: '15' }], perspective: 'investor', timestamp: d(90) },
+            { id: 'n2', input: '融资方希望12%，提供过去6个月经营数据佐证', understood: '以数据支撑议价', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '15', newValue: '12' }], perspective: 'borrower', timestamp: d(85) },
+            { id: 'n3', input: '投资方同意12%，条件是增加KPI对赌条款', understood: '附条件同意', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '15', newValue: '12' }], perspective: 'investor', timestamp: d(80) },
+            { id: 'n4', input: '双方就所有条款达成一致', understood: '最终确认', changes: [], perspective: 'borrower', timestamp: d(75) }
+          ],
+          collaborators: [
+            { id: 'col_5', name: '刘芳（投资方）', role: 'investor', status: 'offline' }
+          ],
+          versions: [
+            { id: 'v1', label: 'V1 初始版本', createdAt: d(90) },
+            { id: 'v2', label: 'V2 最终版本', createdAt: d(75) }
+          ],
+          createdAt: d(95),
+          updatedAt: d(60)
+        },
+        
+        // ===== 4. 医美/健康 — 协商中（早期阶段）=====
+        {
+          id: 'demo_healthcare_early',
+          name: '瑞丽医美·上海陆家嘴旗舰店',
+          note: '轻医美+皮肤管理，面积500㎡，锁定高净值客群',
+          templateId: 'healthcare',
+          status: 'negotiating',
+          params: {
+            investmentAmount: '800万',
+            fundUsage: '医疗设备采购、装修、品牌推广启动资金',
+            revenueShareRatio: '20',
+            revenueDefinition: '全部营业收入（含线上预约）',
+            sharingStartDate: '开业之日',
+            sharingEndDate: '协议签署后48个月',
+            annualYieldRate: '25',
+            lossClosurePeriod: '6',
+            lossClosureThreshold: '8万',
+            dataReportFrequency: '每周',
+            dataTransmissionMethod: 'API自动同步',
+            dgtName: '滴灌通（深圳）投资管理有限公司',
+            mguName: '瑞丽医美管理（上海）有限公司',
+            prerequisites: '医疗机构许可证、设备采购清单审批'
+          },
+          negotiations: [
+            { id: 'n1', input: '投资方报价分成22%，期限48个月', understood: '初始报价', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '22', newValue: '22' }], perspective: 'investor', timestamp: d(3) },
+            { id: 'n2', input: '融资方提出降至20%，理由是医疗设备成本高、回本周期长', understood: '融资方首轮还价', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '22', newValue: '20' }], perspective: 'borrower', timestamp: d(1) }
+          ],
+          collaborators: [],
+          versions: [
+            { id: 'v1', label: 'V1 初始版本', createdAt: d(3) }
+          ],
+          createdAt: d(5),
+          updatedAt: d(1)
+        },
+        
+        // ===== 5. 教育培训 — 草稿（刚创建）=====
+        {
+          id: 'demo_education_draft',
+          name: '新东方·成都春熙路学习中心',
+          note: '1200㎡旗舰校区，聚焦K12+成人英语+留学咨询',
+          templateId: 'education',
+          status: 'draft',
+          params: {
+            investmentAmount: '500万',
+            fundUsage: '校区装修、教学设备、师资培训、市场推广',
+            revenueShareRatio: '10',
+            revenueDefinition: '全部课程收入（含线上课程）',
+            sharingStartDate: '待定',
+            sharingEndDate: '待定',
+            annualYieldRate: '16',
+            lossClosurePeriod: '5',
+            lossClosureThreshold: '3万',
+            dataReportFrequency: '每月',
+            dataTransmissionMethod: '手动上报+系统校验',
+            dgtName: '滴灌通（深圳）投资管理有限公司',
+            mguName: '新东方教育科技集团成都分公司',
+            prerequisites: '办学许可证、消防验收、教师资质审核'
+          },
+          negotiations: [],
+          collaborators: [],
+          versions: [],
+          createdAt: d(1),
+          updatedAt: d(1)
+        },
+        
+        // ===== 6. 餐饮连锁 — 已签署（另一个行业案例）=====
+        {
+          id: 'demo_catering_signed',
+          name: '海底捞·北京三里屯新店',
+          note: '800㎡双层商铺，预计日均翻台率4.5次',
+          templateId: 'catering',
+          status: 'signed',
+          params: {
+            investmentAmount: '1200万',
+            fundUsage: '门店装修、厨房设备、智能点餐系统、员工培训',
+            revenueShareRatio: '14',
+            revenueDefinition: '堂食+外卖全部营业收入（税前）',
+            sharingStartDate: '2025年9月1日',
+            sharingEndDate: '2028年8月31日',
+            annualYieldRate: '20',
+            lossClosurePeriod: '5',
+            lossClosureThreshold: '10万',
+            dataReportFrequency: '每自然日',
+            dataTransmissionMethod: '系统自动传输（ERP直连）',
+            dgtName: '滴灌通（深圳）投资管理有限公司',
+            mguName: '海底捞国际控股北京运营中心'
+          },
+          negotiations: [
+            { id: 'n1', input: '投资方初始报价16%', understood: '初始报价', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '16', newValue: '16' }], perspective: 'investor', timestamp: d(60) },
+            { id: 'n2', input: '海底捞方提出13%，基于品牌溢价和稳定客流', understood: '品牌方议价', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '16', newValue: '13' }], perspective: 'borrower', timestamp: d(55) },
+            { id: 'n3', input: '投资方同意14%，增加投资额至1200万覆盖智能化改造', understood: '最终协商', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '13', newValue: '14' }, { paramKey: 'investmentAmount', paramName: '投资金额', oldValue: '1000万', newValue: '1200万' }], perspective: 'investor', timestamp: d(50) }
+          ],
+          collaborators: [
+            { id: 'col_6', name: '赵强（投资方）', role: 'investor', status: 'offline' },
+            { id: 'col_7', name: '孙婷婷（融资方）', role: 'borrower', status: 'offline' },
+            { id: 'col_8', name: '周律师（法务）', role: 'observer', status: 'offline' }
+          ],
+          versions: [
+            { id: 'v1', label: 'V1 初始版本', createdAt: d(60) },
+            { id: 'v2', label: 'V2 终版（已签署）', createdAt: d(45) }
+          ],
+          createdAt: d(65),
+          updatedAt: d(40)
+        },
+        
+        // ===== 7. 演唱会 — 协商中（大型项目）=====
+        {
+          id: 'demo_concert_negotiating',
+          name: 'BLACKPINK回归演唱会·上海站',
+          note: '虹口足球场，预计2场共8万观众，联合YG Entertainment',
+          templateId: 'concert',
+          status: 'negotiating',
+          params: {
+            investmentAmount: '5000万',
+            fundUsage: '场地租赁、艺人费用、舞美制作、安保、宣传推广',
+            revenueShareRatio: '75',
+            revenueDefinition: '票房+赞助+直播版权+衍生品（税前全口径）',
+            sharingStartDate: '首场演出日',
+            sharingEndDate: '末场演出后120天',
+            annualYieldRate: '35',
+            lossClosurePeriod: '2',
+            lossClosureThreshold: '20万',
+            dataReportFrequency: '每自然日',
+            dataTransmissionMethod: '系统自动传输',
+            dgtName: '滴灌通（深圳）投资管理有限公司',
+            mguName: 'YG Entertainment China Co., Ltd.'
+          },
+          negotiations: [
+            { id: 'n1', input: '投资方报价80%分成，5000万投资', understood: '大型项目初始报价', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '80', newValue: '80' }], perspective: 'investor', timestamp: d(7) },
+            { id: 'n2', input: '融资方提出70%分成，理由是直播版权收益不确定性高', understood: '融资方还价', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '80', newValue: '70' }], perspective: 'borrower', timestamp: d(5) },
+            { id: 'n3', input: '投资方妥协至75%，但要求将直播版权纳入分成基数', understood: '中间方案', changes: [{ paramKey: 'revenueShareRatio', paramName: '分成比例', oldValue: '70', newValue: '75' }, { paramKey: 'revenueDefinition', paramName: '收入定义', oldValue: '票房+赞助+衍生品', newValue: '票房+赞助+直播版权+衍生品（税前全口径）' }], perspective: 'investor', timestamp: d(3) }
+          ],
+          collaborators: [
+            { id: 'col_9', name: 'Michael Chen（投资方）', role: 'investor', status: 'online' },
+            { id: 'col_10', name: 'Park Soo-jin（YG）', role: 'borrower', status: 'away' }
+          ],
+          versions: [
+            { id: 'v1', label: 'V1 初始版本', createdAt: d(7) },
+            { id: 'v2', label: 'V2 分成方案调整', createdAt: d(3) }
+          ],
+          createdAt: d(10),
+          updatedAt: d(1)
+        },
+        
+        // ===== 8. 零售门店 — 草稿 =====
+        {
+          id: 'demo_retail_draft',
+          name: 'KKV·广州天河正佳旗舰店',
+          note: '潮玩集合店，600㎡，Z世代客群聚集地',
+          templateId: 'retail',
+          status: 'draft',
+          params: {
+            investmentAmount: '450万',
+            fundUsage: '门店装修（含IP主题区）、首批选品、智能货架系统',
+            revenueShareRatio: '11',
+            revenueDefinition: '全部营业收入',
+            sharingStartDate: '待定',
+            sharingEndDate: '待定',
+            annualYieldRate: '17',
+            dgtName: '滴灌通（深圳）投资管理有限公司',
+            mguName: 'KKV品牌运营（广州）有限公司'
+          },
+          negotiations: [],
+          collaborators: [],
+          versions: [],
+          createdAt: d(2),
+          updatedAt: d(2)
+        }
+      ];
+      
+      // 注入 demo 数据（不覆盖已有项目）
+      const existingIds = projects.map(p => p.id);
+      const newDemos = demoProjects.filter(p => !existingIds.includes(p.id));
+      if (newDemos.length > 0) {
+        projects = [...newDemos, ...projects];
+        saveProjects();
+      }
+      renderProjects();
+      updateStats();
     }
     
     function handleSSOLogin() {
