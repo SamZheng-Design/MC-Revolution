@@ -7313,7 +7313,13 @@ app.get('/', (c) => {
       }
       
       // 法律顾问转化信息（V3新增）
-      if (result.legalTransform?.enabled) {
+      // 只有真正产出有价值内容才显示（有完善建议或有真实风险分析）
+      const legalHasRealContent = result.legalTransform?.enabled && (
+        (result.legalTransform.clauseRecommendations?.length > 0) ||
+        (result.legalTransform.riskWarnings?.length > 0 && !result.legalTransform.riskWarnings.some(w => w.includes('无法解析'))) ||
+        (result.legalTransform.legalSummary && !result.legalTransform.legalSummary.includes('未能生成') && !result.legalTransform.legalSummary.includes('不可用'))
+      );
+      if (legalHasRealContent) {
         html += \`
           <div class="mb-6 p-4 bg-teal-50 rounded-xl border border-teal-200">
             <div class="flex items-start space-x-3">

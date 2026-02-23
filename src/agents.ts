@@ -263,13 +263,18 @@ function extractJsonFromContent(content: string): any | null {
     if (repaired) return repaired
   }
   
-  // Step 2: 花括号配对
+  // Step 2: 字符串感知的花括号配对（跳过引号内的花括号）
   const firstBrace = content.indexOf('{')
   if (firstBrace >= 0) {
-    let depth = 0, endIdx = -1
+    let depth = 0, endIdx = -1, inString = false, escapeNext = false
     for (let i = firstBrace; i < content.length; i++) {
-      if (content[i] === '{') depth++
-      else if (content[i] === '}') { depth--; if (depth === 0) { endIdx = i; break } }
+      const ch = content[i]
+      if (escapeNext) { escapeNext = false; continue }
+      if (ch === '\\') { escapeNext = true; continue }
+      if (ch === '"') { inString = !inString; continue }
+      if (inString) continue
+      if (ch === '{') depth++
+      else if (ch === '}') { depth--; if (depth === 0) { endIdx = i; break } }
     }
     if (endIdx > firstBrace) {
       const jsonStr = content.substring(firstBrace, endIdx + 1)
@@ -300,9 +305,19 @@ function tryParseJson(str: string): any | null {
       const cleaned = str
         .replace(/,(\s*[}\]])/g, '$1')       // 移除尾部逗号
         .replace(/[\u0000-\u001F]+/g, ' ')   // 移除控制字符
+        .replace(/\n/g, '\\n')               // 转义换行
       return JSON.parse(cleaned)
     } catch (e2) {
-      return null
+      // 再次尝试：修复常见LLM输出问题
+      try {
+        const aggressive = str
+          .replace(/,(\s*[}\]])/g, '$1')
+          .replace(/[\u0000-\u001F\u007F-\u009F]+/g, ' ')
+          .replace(/\\(?!["\\/bfnrtu])/g, '\\\\')  // 修复无效转义
+        return JSON.parse(aggressive)
+      } catch (e3) {
+        return null
+      }
     }
   }
 }
