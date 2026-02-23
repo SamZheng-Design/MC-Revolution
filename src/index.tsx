@@ -1160,7 +1160,7 @@ app.post('/api/ai/negotiate-advice', async (c) => {
   const perspectiveName = perspective === 'investor' ? '投资方' : '融资方'
   const oppositeParty = perspective === 'investor' ? '融资方' : '投资方'
   
-  const systemPrompt = `你是一个专业的收入分成融资谈判顾问，具有丰富的投资和法律经验。
+  const systemPrompt = `你是一个专业的收益分成合作谈判顾问，具有丰富的投资和法律经验。
 
 ## 你的任务
 为【${perspectiveName}】提供专业的谈判策略建议，帮助其在协商中获得最佳结果。
@@ -1174,7 +1174,7 @@ ${JSON.stringify(currentParams, null, 2)}
 ${negotiationHistory?.length > 0 ? negotiationHistory.map((n: any, i: number) => `第${i+1}轮 [${n.perspective === 'investor' ? '投资方' : '融资方'}]: ${n.input}
   变更: ${n.changes?.map((c: any) => c.paramName + ': ' + c.oldValue + '→' + c.newValue).join(', ') || '无'}`).join('\n') : '暂无协商记录'}
 
-## 市场参考数据（收入分成融资行业）：
+## 市场参考数据（收益分成合作行业）：
 - 餐饮行业：投资金额200-800万，分成比例10-18%，期限24-48个月
 - 零售行业：投资金额100-500万，分成比例8-15%，期限36-60个月
 - 演唱会/娱乐：投资金额1000-5000万，分成比例60-80%，期限按项目
@@ -1257,7 +1257,7 @@ app.post('/api/ai/risk-assessment', async (c) => {
   
   const { apiKey, baseUrl } = getAIConfig(c)
   
-  const systemPrompt = `你是收入分成融资风险评估专家。请对当前合同条款进行全面风险评估。
+  const systemPrompt = `你是收益分成合作风险评估专家。请对当前合同条款进行全面风险评估。
 
 ## 行业：${templateName || '未知'}
 ## 当前合同参数：${JSON.stringify(currentParams, null, 2)}
@@ -1331,7 +1331,7 @@ app.post('/api/ai/market-benchmark', async (c) => {
   
   const { apiKey, baseUrl } = getAIConfig(c)
   
-  const systemPrompt = `你是收入分成融资市场分析专家。请对当前条款与市场标准进行对标分析。
+  const systemPrompt = `你是收益分成合作市场分析专家。请对当前条款与市场标准进行对标分析。
 
 ## 行业：${industry || templateName || '未知'}
 ## 当前合同参数：${JSON.stringify(currentParams, null, 2)}
@@ -1870,7 +1870,7 @@ app.post('/api/parse-change', async (c) => {
     return c.json({ error: 'Template not found' }, 404)
   }
 
-  const systemPrompt = `你是一个专业的收入分成融资协商助手。用户会用自然语言描述项目条款的变动，你需要：
+  const systemPrompt = `你是一个专业的收益分成合作协商助手。用户会用自然语言描述项目条款的变动，你需要：
 
 1. 理解用户描述的变动内容
 2. 识别这个变动对应合同的哪个模块和参数
@@ -1953,12 +1953,12 @@ ${template.modules.flatMap(m => m.clauses.map(c => `- ${c.key}: ${c.name} (当�
 // ==================== AI智能助手API ====================
 // 对程序功能有完整了解的AI助手，接入大模型支持自由聊天
 
-const AI_ASSISTANT_SYSTEM_PROMPT = `你是"收入分成融资协商平台"的AI智能助手，名叫"小融"。你对这个平台非常了解，可以帮助用户解答使用问题，也可以进行友好的自由对话。
+const AI_ASSISTANT_SYSTEM_PROMPT = `你是"合约通 Contract Connect"的AI智能助手，名叫"小通"。你对这个平台非常了解，可以帮助用户解答使用问题，也可以进行友好的自由对话。
 
 ## 关于这个平台
 
 ### 平台简介
-这是一个专业的收入分成融资（Revenue-Based Financing, RBF）合同协商平台，帮助投资方和融资方在线协商合同条款、实时协作、版本管理和电子签署。
+这是一个专业的收益分成合作协议协商平台（基于 Revenue-Based Financing 模式），帮助合作各方在线协商合同条款、项目协作、版本管理和智能签署。
 
 ### 核心功能模块
 
@@ -2094,7 +2094,7 @@ app.get('/', (c) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>收入分成融资协商平台</title>
+  <title>合约通 Contract Connect</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <!-- DNS预解析加速 -->
   <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
@@ -2108,7 +2108,7 @@ app.get('/', (c) => {
   <!-- Google Fonts - Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700;800;900&display=swap" rel="stylesheet">
   <!-- 现代化UI优化样式 -->
   <link href="/static/style.css" rel="stylesheet">
   <!-- 应用特定样式 - 精简版 -->
@@ -2899,12 +2899,18 @@ app.get('/', (c) => {
 <body class="bg-gray-50 min-h-screen">
   <!-- Loading Screen -->
   <div id="app-loading">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">收入分成融资协商平台</div>
-    <div class="loading-sub" id="loadingStatus">正在初始化...</div>
-    <div style="width: 200px; height: 3px; background: rgba(255,255,255,0.15); border-radius: 99px; margin-top: 16px; overflow: hidden;">
-      <div id="loadingBar" style="height: 100%; width: 0%; background: white; border-radius: 99px; transition: width 0.4s ease;"></div>
+    <!-- Contract Connect dual-circle logo -->
+    <div style="width:56px; height:72px; position:relative; margin-bottom:8px;">
+      <div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, #2EC4B6 0%, #3DD8CA 100%); position:absolute; top:0; left:4px; box-shadow: 0 4px 20px rgba(46,196,182,0.4); animation: pulse 2s ease-in-out infinite;"></div>
+      <div style="width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, #28A696 0%, #2EC4B6 100%); position:absolute; bottom:0; left:4px; box-shadow: 0 4px 20px rgba(40,166,150,0.35); opacity:0.85; animation: pulse 2s ease-in-out infinite 0.3s;"></div>
     </div>
+    <div class="loading-text" style="font-family:'Montserrat',sans-serif; font-weight:900; letter-spacing:0.05em;">CONTRACT CONNECT</div>
+    <div class="loading-sub" style="font-size:14px; letter-spacing:0.15em; margin-top:4px;">合约通</div>
+    <div class="loading-sub" id="loadingStatus" style="margin-top:12px;">正在初始化...</div>
+    <div style="width: 200px; height: 3px; background: rgba(255,255,255,0.15); border-radius: 99px; margin-top: 16px; overflow: hidden;">
+      <div id="loadingBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #2EC4B6, #3DD8CA); border-radius: 99px; transition: width 0.4s ease;"></div>
+    </div>
+    <div style="margin-top:24px; font-size:9px; letter-spacing:0.2em; color:rgba(255,255,255,0.4); font-family:'Montserrat',sans-serif;">POWERED BY MICRO CONNECT GROUP</div>
   </div>
 
   <!-- ==================== 产品引导教程弹窗 ==================== -->
@@ -2943,8 +2949,8 @@ app.get('/', (c) => {
         <!-- 步骤0: 欢迎 -->
         <div id="step0" class="onboarding-step active">
           <div class="text-center">
-            <h2 class="text-2xl font-bold text-gray-900 mb-3 fade-in-up">欢迎使用收入分成融资协商平台</h2>
-            <p class="text-gray-500 mb-8 fade-in-up delay-100">一站式完成合同协商、多方协作和电子签署</p>
+            <h2 class="text-2xl font-bold text-gray-900 mb-3 fade-in-up">欢迎使用合约通</h2>
+            <p class="text-gray-500 mb-8 fade-in-up delay-100">一站式完成合同协商、项目协作和智能签署</p>
             
             <div class="grid grid-cols-3 gap-4 mb-8">
               <div class="p-4 bg-indigo-50 rounded-2xl fade-in-up delay-100">
@@ -3094,18 +3100,22 @@ app.get('/', (c) => {
   <div id="pageAuth" class="page active flex-col min-h-screen cyber-bg particles-bg">
     <div class="flex-1 flex items-center justify-center p-4 relative z-10">
       <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden animate-scale-in" style="box-shadow: 0 24px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08);">
-        <!-- Logo区域 -->
+        <!-- Logo区域 - Contract Connect -->
         <div class="p-8 text-center" style="border-bottom: 1px solid rgba(0,0,0,0.06);">
-          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-float" style="background: linear-gradient(135deg, #5856d6 0%, #af52de 100%); box-shadow: 0 8px 24px rgba(88,86,214,0.35);">
-            <i class="fas fa-handshake text-white text-2xl"></i>
+          <!-- 双圆叠合 Logo -->
+          <div class="mx-auto mb-5 animate-float" style="width:52px; height:68px; position:relative;">
+            <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, #2EC4B6 0%, #3DD8CA 100%); position:absolute; top:0; left:4px; box-shadow: 0 4px 16px rgba(46,196,182,0.35);"></div>
+            <div style="width:44px; height:44px; border-radius:50%; background:linear-gradient(135deg, #28A696 0%, #2EC4B6 100%); position:absolute; bottom:0; left:4px; box-shadow: 0 4px 16px rgba(40,166,150,0.3); opacity:0.85;"></div>
           </div>
-          <h1 class="text-2xl font-bold text-gradient" style="letter-spacing:-0.03em;">收入分成融资协商平台</h1>
-          <p class="text-sm mt-1" style="color:#86868b;">Revenue-Based Financing Negotiation</p>
+          <h1 style="font-family:'Montserrat',sans-serif; font-weight:900; font-size:22px; letter-spacing:0.04em; color:#1a1a1a; line-height:1.15; margin-bottom:6px;">CONTRACT<br>CONNECT</h1>
+          <div style="width:120px; height:2.5px; background:#2EC4B6; margin:8px auto 10px; border-radius:2px;"></div>
+          <p style="font-family:'Montserrat',sans-serif; font-size:9px; letter-spacing:0.2em; color:#666; font-weight:500;">POWERED BY MICRO CONNECT GROUP</p>
+          <p class="text-lg font-bold mt-3" style="color:#1a1a1a;">合约通</p>
         </div>
         
         <!-- 登录/注册切换 -->
         <div class="flex" style="border-bottom: 1px solid rgba(0,0,0,0.06);">
-          <button onclick="switchAuthTab('login')" id="tabLogin" class="flex-1 py-3 text-center font-semibold" style="color:#5856d6; border-bottom: 2px solid #5856d6;">登录</button>
+          <button onclick="switchAuthTab('login')" id="tabLogin" class="flex-1 py-3 text-center font-semibold" style="color:#2EC4B6; border-bottom: 2px solid #2EC4B6;">登录</button>
           <button onclick="switchAuthTab('register')" id="tabRegister" class="flex-1 py-3 text-center font-semibold" style="color:#86868b;">注册</button>
         </div>
         
@@ -3490,12 +3500,14 @@ app.get('/', (c) => {
     <nav class="px-5 py-3">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center space-x-3">
-          <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #5856d6 0%, #af52de 100%); box-shadow: 0 4px 12px rgba(88,86,214,0.25);">
-            <i class="fas fa-handshake text-white text-sm"></i>
+          <!-- Nav Logo: 双圆叠合 mini -->
+          <div style="width:32px; height:36px; position:relative; flex-shrink:0;">
+            <div style="width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg, #2EC4B6, #3DD8CA); position:absolute; top:0; left:3px;"></div>
+            <div style="width:26px; height:26px; border-radius:50%; background:linear-gradient(135deg, #28A696, #2EC4B6); position:absolute; bottom:0; left:3px; opacity:0.85;"></div>
           </div>
           <div>
-            <h1 class="text-base font-bold tracking-tight nav-brand">RBF融资协商平台</h1>
-            <p class="text-xs -mt-0.5" style="color:#86868b;">Revenue-Based Financing</p>
+            <h1 class="text-base font-bold tracking-tight nav-brand" style="color:#1a1a1a;">合约通</h1>
+            <p class="text-xs -mt-0.5" style="color:#86868b; font-family:'Montserrat',sans-serif; letter-spacing:0.05em; font-weight:600; font-size:9px;">CONTRACT CONNECT</p>
           </div>
         </div>
         <div class="flex items-center space-x-2">
@@ -3651,7 +3663,7 @@ app.get('/', (c) => {
                 <i class="fas fa-handshake"></i>
               </div>
               <h3 class="text-xl font-bold text-gray-800 mb-2" style="letter-spacing:-0.02em;">开始您的第一个融资项目</h3>
-              <p class="text-sm text-gray-500">让收入分成融资谈判变得简单、透明、高效</p>
+              <p class="text-sm text-gray-500">让合同协商与项目协作变得简单、透明、高效</p>
             </div>
             
             <!-- 快速开始引导 - 两列卡片 -->
@@ -3980,7 +3992,7 @@ app.get('/', (c) => {
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-xl font-bold text-gray-900"><i class="fas fa-plus-circle mr-2 text-indigo-600"></i>创建融资项目</h2>
-            <p class="text-sm text-gray-500 mt-1">选择行业模板，开始协商您的收入分成融资合同</p>
+            <p class="text-sm text-gray-500 mt-1">选择行业模板，开始协商您的项目合约</p>
           </div>
           <button onclick="hideNewProjectModal()" class="p-2 hover:bg-white/50 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
@@ -5503,11 +5515,16 @@ app.get('/', (c) => {
     // ==================== 账户功能 ====================
     function switchAuthTab(tab) {
       document.getElementById('tabLogin').className = tab === 'login' 
-        ? 'flex-1 py-3 text-center font-medium text-indigo-600 border-b-2 border-indigo-600' 
+        ? 'flex-1 py-3 text-center font-medium border-b-2' 
         : 'flex-1 py-3 text-center font-medium text-gray-500 hover:text-gray-700';
       document.getElementById('tabRegister').className = tab === 'register' 
-        ? 'flex-1 py-3 text-center font-medium text-indigo-600 border-b-2 border-indigo-600' 
+        ? 'flex-1 py-3 text-center font-medium border-b-2' 
         : 'flex-1 py-3 text-center font-medium text-gray-500 hover:text-gray-700';
+      // 动态设置 teal 品牌色
+      const activeTab = document.getElementById(tab === 'login' ? 'tabLogin' : 'tabRegister');
+      if (activeTab) { activeTab.style.color = '#2EC4B6'; activeTab.style.borderBottomColor = '#2EC4B6'; }
+      const inactiveTab = document.getElementById(tab === 'login' ? 'tabRegister' : 'tabLogin');
+      if (inactiveTab) { inactiveTab.style.color = ''; inactiveTab.style.borderBottomColor = ''; }
       document.getElementById('formLogin').classList.toggle('hidden', tab !== 'login');
       document.getElementById('formRegister').classList.toggle('hidden', tab !== 'register');
     }
@@ -5518,8 +5535,10 @@ app.get('/', (c) => {
         const btn = document.getElementById('regRole' + r.charAt(0).toUpperCase() + r.slice(1));
         if (btn) {
           btn.className = r === role 
-            ? 'py-2 px-3 border-2 border-indigo-500 bg-indigo-50 rounded-lg text-sm text-center'
+            ? 'py-2 px-3 border-2 rounded-lg text-sm text-center'
             : 'py-2 px-3 border-2 border-gray-200 rounded-lg text-sm hover:border-gray-300 text-center';
+          if (r === role) { btn.style.borderColor = '#2EC4B6'; btn.style.backgroundColor = 'rgba(46,196,182,0.08)'; }
+          else { btn.style.borderColor = ''; btn.style.backgroundColor = ''; }
         }
       });
     }
@@ -5605,7 +5624,7 @@ app.get('/', (c) => {
           localStorage.setItem('rbf_current_user', JSON.stringify(currentUser));
           localStorage.setItem('rbf_auth_token', authToken);
           errorEl.className = 'hidden';
-          showToast('success', '注册成功', '欢迎加入RBF融资协商平台！');
+          showToast('success', '注册成功', '欢迎加入合约通！');
           onLoginSuccess();
         } else {
           errorEl.innerHTML = '<i class="fas fa-exclamation-circle mr-1"></i>' + (data.message || '注册失败');
@@ -8226,7 +8245,7 @@ app.get('/', (c) => {
       
       textContainer.innerHTML = \`
         <div class="text-center mb-8 pb-6 border-b-2 border-gray-200">
-          <h1 class="text-2xl font-bold text-gray-900">收入分成融资协议</h1>
+          <h1 class="text-2xl font-bold text-gray-900">收益分成合作协议</h1>
           <p class="text-gray-500 mt-2">\${currentProject.name}</p>
           <p class="text-sm text-gray-400 mt-1">\${template.name} · \${formatDate(currentProject.createdAt)}</p>
         </div>
@@ -10906,7 +10925,7 @@ app.get('/', (c) => {
         
         // 如果是首次打开，显示欢迎消息
         if (aiChatMessages.length === 0) {
-          addAIMessage('assistant', '你好！我是小融 🤖，你的AI助手~\\n\\n我可以帮你了解如何使用这个平台，或者随便聊聊都行。有什么想问的吗？');
+          addAIMessage('assistant', '你好！我是小通 🤖，你的AI助手~\\n\\n我可以帮你了解如何使用这个平台，或者随便聊聊都行。有什么想问的吗？');
         }
       } else {
         chatWindow.classList.add('hidden');
@@ -11024,7 +11043,7 @@ app.get('/', (c) => {
           <i class="fas fa-robot text-white text-lg"></i>
         </div>
         <div>
-          <h3 class="text-white font-bold">小融 AI助手</h3>
+          <h3 class="text-white font-bold">小通 AI助手</h3>
           <p class="text-white/70 text-xs">随时为您解答</p>
         </div>
       </div>

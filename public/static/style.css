@@ -1,6 +1,7 @@
 /* ================================================
-   收入分成融资协商平台 - Premium Design System V15
+   合约通 Contract Connect - Premium Design System V16
    2026年2月 - Apple-Inspired Precision Design
+   Powered by Micro Connect Group
    ================================================ */
 
 /* ========== 1. 设计令牌系统 ========== */
@@ -974,7 +975,7 @@ input::placeholder, textarea::placeholder {
 #app-loading {
   position: fixed;
   inset: 0;
-  background: var(--gradient-aurora);
+  background: linear-gradient(135deg, #0a2e2a 0%, #0f3d36 25%, #0c3530 50%, #164e47 75%, #1a6b5f 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1033,8 +1034,8 @@ body.modal-open {
   position: absolute;
   inset: 0;
   background: 
-    radial-gradient(ellipse at 30% 40%, rgba(99, 102, 241, 0.3) 0%, transparent 50%),
-    radial-gradient(ellipse at 70% 60%, rgba(139, 92, 246, 0.2) 0%, transparent 50%);
+    radial-gradient(ellipse at 30% 40%, rgba(46, 196, 182, 0.25) 0%, transparent 50%),
+    radial-gradient(ellipse at 70% 60%, rgba(40, 166, 150, 0.2) 0%, transparent 50%);
 }
 
 .loading-spinner {
