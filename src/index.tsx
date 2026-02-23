@@ -2197,7 +2197,7 @@ app.get('/', (c) => {
     .text-gray-800 { color: #1f2937; }
     .text-gray-900 { color: #111827; }
     .text-teal-600 { color: #49A89A; }
-    .text-teal-700 { color: #4338ca; }
+    .text-teal-700 { color: #0F766E; }
     .text-emerald-600 { color: #059669; }
     .text-amber-600 { color: #d97706; }
     .text-red-500 { color: #ef4444; }
@@ -2222,7 +2222,7 @@ app.get('/', (c) => {
     .bg-red-500 { background-color: #ef4444; }
     .bg-red-600 { background-color: #dc2626; }
     .bg-cyan-50 { background-color: #faf5ff; }
-    .bg-cyan-100 { background-color: #f3e8ff; }
+    .bg-cyan-100 { background-color: #CFFAFE; }
     .bg-cyan-500 { background-color: #0D9488; }
     .bg-cyan-600 { background-color: #0D9488; }
     .bg-rose-50 { background-color: #fff1f2; }
@@ -2278,7 +2278,7 @@ app.get('/', (c) => {
     .hover\\:bg-gray-50:hover { background-color: #f9fafb; }
     .hover\\:bg-gray-100:hover { background-color: #f3f4f6; }
     .hover\\:bg-teal-50:hover { background-color: #F0FDFA; }
-    .hover\\:bg-teal-700:hover { background-color: #4338ca; }
+    .hover\\:bg-teal-700:hover { background-color: #0F766E; }
     .hover\\:bg-emerald-700:hover { background-color: #047857; }
     .hover\\:bg-red-50:hover { background-color: #fef2f2; }
     .hover\\:bg-red-700:hover { background-color: #b91c1c; }
@@ -2329,14 +2329,14 @@ app.get('/', (c) => {
     .border-gray-50 { border-color: #f9fafb; }
     
     /* Indigo Extended */
-    .text-teal-300 { color: #a5b4fc; }
+    .text-teal-300 { color: #5EEAD4; }
     .text-teal-500 { color: #5DC4B3; }
-    .text-teal-800 { color: #3730a3; }
-    .text-teal-900 { color: #312e81; }
+    .text-teal-800 { color: #115E59; }
+    .text-teal-900 { color: #134E4A; }
     .bg-teal-200 { background-color: #99F6E4; }
-    .bg-teal-700 { background-color: #4338ca; }
+    .bg-teal-700 { background-color: #0F766E; }
     .border-teal-100 { border-color: #CCFBF1; }
-    .border-teal-300 { border-color: #a5b4fc; }
+    .border-teal-300 { border-color: #5EEAD4; }
     .border-teal-600 { border-color: #49A89A; }
     
     /* Emerald Extended */
@@ -2377,22 +2377,16 @@ app.get('/', (c) => {
     
     /* Purple Extended */
     .text-cyan-500 { color: #0D9488; }
-    .text-cyan-700 { color: #7e22ce; }
+    .text-cyan-700 { color: #0E7490; }
     .text-cyan-800 { color: #6b21a8; }
     .text-cyan-900 { color: #581c87; }
-    .bg-cyan-700 { background-color: #7e22ce; }
-    .border-cyan-100 { border-color: #f3e8ff; }
+    .bg-cyan-700 { background-color: #0E7490; }
+    .border-cyan-100 { border-color: #CFFAFE; }
     .border-cyan-600 { border-color: #0D9488; }
     
-    /* Blue Extended */
-    .text-blue-500 { color: #3b82f6; }
-    .text-blue-600 { color: #2563eb; }
-    .text-blue-700 { color: #1d4ed8; }
-    .text-blue-900 { color: #1e3a8a; }
-    .bg-blue-50 { background-color: #eff6ff; }
-    .bg-blue-100 { background-color: #dbeafe; }
-    .bg-blue-500 { background-color: #3b82f6; }
-    .border-blue-200 { border-color: #bfdbfe; }
+    /* Blue Extended - mapped to teal-compatible colors */
+    .text-blue-500 { color: #0891b2; }
+    .border-teal-200 { border-color: #99F6E4; }
     
     /* Rose Extended */
     .text-rose-500 { color: #f43f5e; }
@@ -2660,9 +2654,9 @@ app.get('/', (c) => {
     .via-teal-500 { --tw-gradient-stops: var(--tw-gradient-from), #5DC4B3, var(--tw-gradient-to, transparent); }
     .via-pink-500 { --tw-gradient-stops: var(--tw-gradient-from), #ec4899, var(--tw-gradient-to, transparent); }
     .to-teal-600 { --tw-gradient-to: #49A89A; }
-    .to-teal-700 { --tw-gradient-to: #4338ca; }
+    .to-teal-700 { --tw-gradient-to: #0F766E; }
     .to-cyan-600 { --tw-gradient-to: #0D9488; }
-    .to-cyan-700 { --tw-gradient-to: #7e22ce; }
+    .to-cyan-700 { --tw-gradient-to: #0E7490; }
     .to-pink-500 { --tw-gradient-to: #ec4899; }
     .to-pink-600 { --tw-gradient-to: #db2777; }
     .to-emerald-600 { --tw-gradient-to: #059669; }
@@ -2720,7 +2714,7 @@ app.get('/', (c) => {
     .hover\\:bg-gray-200:hover { background-color: #e5e7eb; }
     .hover\\:bg-teal-100:hover { background-color: #CCFBF1; }
     .hover\\:bg-teal-600:hover { background-color: #49A89A; }
-    .hover\\:bg-teal-800:hover { background-color: #3730a3; }
+    .hover\\:bg-teal-800:hover { background-color: #115E59; }
     .hover\\:bg-emerald-50:hover { background-color: #ecfdf5; }
     .hover\\:bg-emerald-100:hover { background-color: #d1fae5; }
     .hover\\:bg-emerald-600:hover { background-color: #059669; }
@@ -2730,18 +2724,18 @@ app.get('/', (c) => {
     .hover\\:bg-rose-50:hover { background-color: #fff1f2; }
     .hover\\:bg-rose-100:hover { background-color: #ffe4e6; }
     .hover\\:bg-cyan-50:hover { background-color: #faf5ff; }
-    .hover\\:bg-cyan-100:hover { background-color: #f3e8ff; }
+    .hover\\:bg-cyan-100:hover { background-color: #CFFAFE; }
     .hover\\:text-gray-600:hover { color: #4b5563; }
     .hover\\:text-gray-700:hover { color: #374151; }
     .hover\\:text-gray-800:hover { color: #1f2937; }
     .hover\\:text-gray-900:hover { color: #111827; }
-    .hover\\:text-teal-700:hover { color: #4338ca; }
-    .hover\\:text-teal-800:hover { color: #3730a3; }
+    .hover\\:text-teal-700:hover { color: #0F766E; }
+    .hover\\:text-teal-800:hover { color: #115E59; }
     .hover\\:text-emerald-700:hover { color: #047857; }
     .hover\\:text-red-600:hover { color: #dc2626; }
     .hover\\:text-red-700:hover { color: #b91c1c; }
     .hover\\:text-white:hover { color: #fff; }
-    .hover\\:border-teal-300:hover { border-color: #a5b4fc; }
+    .hover\\:border-teal-300:hover { border-color: #5EEAD4; }
     .hover\\:border-teal-500:hover { border-color: #5DC4B3; }
     .hover\\:border-gray-300:hover { border-color: #d1d5db; }
     .hover\\:shadow-md:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
@@ -2986,12 +2980,12 @@ app.get('/', (c) => {
         <div id="step1" class="onboarding-step next">
           <div class="flex items-start space-x-6">
             <div class="flex-shrink-0">
-              <div class="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-blue-200">
+              <div class="w-16 h-16 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-2xl flex items-center justify-center shadow-lg shadow-teal-200">
                 <i class="fas fa-plus-circle text-white text-2xl"></i>
               </div>
             </div>
             <div class="flex-1">
-              <span class="text-xs font-semibold text-blue-600 uppercase tracking-wide">第一步</span>
+              <span class="text-xs font-semibold text-teal-600 uppercase tracking-wide">第一步</span>
               <h3 class="text-xl font-bold text-gray-900 mt-1 mb-3">创建融资项目</h3>
               <p class="text-gray-500 mb-4">点击右上角"新建项目"按钮，选择适合的行业模板（演唱会、餐饮、零售等），系统会自动生成合同框架。</p>
               <div class="flex items-center space-x-4 text-sm">
@@ -3847,7 +3841,7 @@ app.get('/', (c) => {
               <i class="fas fa-history mr-1.5 text-gray-400"></i>协商记录
               <span id="negotiationCount" class="ml-1.5 px-1.5 py-0.5 bg-teal-100 text-teal-700 rounded-full text-xs">0</span>
             </h3>
-            <button onclick="createVersionSnapshot()" class="text-xs text-blue-600 hover:text-blue-700 flex items-center px-2 py-1 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors" title="保存当前合同版本">
+            <button onclick="createVersionSnapshot()" class="text-xs text-teal-600 hover:text-teal-700 flex items-center px-2 py-1 bg-teal-50 rounded-md hover:bg-teal-100 transition-colors" title="保存当前合同版本">
               <i class="fas fa-save mr-1"></i>保存版本
             </button>
           </div>
@@ -3921,8 +3915,8 @@ app.get('/', (c) => {
               </h3>
               <div class="flex items-center justify-center space-x-4 py-4">
                 <div class="text-center">
-                  <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                    <i class="fas fa-keyboard text-blue-600 text-xl"></i>
+                  <div class="w-16 h-16 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <i class="fas fa-keyboard text-teal-600 text-xl"></i>
                   </div>
                   <p class="text-sm font-medium text-gray-700">用户输入</p>
                   <p class="text-xs text-gray-500">自然语言</p>
@@ -4157,7 +4151,7 @@ app.get('/', (c) => {
   <!-- ==================== 弹窗: 协作者管理 ==================== -->
   <div id="collaboratorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
-      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-blue-50">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-cyan-50">
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-users mr-2 text-teal-600"></i>协作管理</h2>
@@ -4349,10 +4343,10 @@ app.get('/', (c) => {
           </div>
           
           <!-- 当前版本（固定显示） -->
-          <div class="mb-3 p-4 bg-blue-50 rounded-xl border-2 border-blue-200">
+          <div class="mb-3 p-4 bg-teal-50 rounded-xl border-2 border-teal-300">
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                <div class="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center">
                   <i class="fas fa-edit text-white"></i>
                 </div>
                 <div>
@@ -4360,7 +4354,7 @@ app.get('/', (c) => {
                   <p class="text-xs text-gray-500"><span id="currentVersionNegCount">0</span>轮协商 · <span id="currentVersionParamCount">0</span>项参数</p>
                 </div>
               </div>
-              <span class="px-3 py-1 bg-blue-500 text-white rounded-lg text-xs font-medium">当前</span>
+              <span class="px-3 py-1 bg-teal-500 text-white rounded-lg text-xs font-medium">当前</span>
             </div>
           </div>
           
@@ -4815,8 +4809,8 @@ app.get('/', (c) => {
             </div>
           </button>
           <button onclick="exportAs('word')" class="w-full flex items-center p-4 border border-gray-200 rounded-xl hover:border-teal-300 hover:bg-teal-50 transition-colors">
-            <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-              <i class="fas fa-file-word text-blue-600"></i>
+            <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center mr-4">
+              <i class="fas fa-file-word text-teal-600"></i>
             </div>
             <div class="text-left">
               <p class="font-medium text-gray-900">Word格式</p>
@@ -6220,7 +6214,7 @@ app.get('/', (c) => {
         draft: 'bg-gray-100 text-gray-600',
         negotiating: 'bg-amber-100 text-amber-700',
         completed: 'bg-emerald-100 text-emerald-700',
-        signed: 'bg-blue-100 text-blue-700'
+        signed: 'bg-teal-100 text-teal-700'
       };
       const statusText = { draft: '草稿', negotiating: '协商中', completed: '已完成', signed: '已签署' };
       const iconColor = role === 'borrower' ? 'amber' : 'teal';
@@ -6379,7 +6373,7 @@ app.get('/', (c) => {
     const stepIcons = ['fa-handshake', 'fa-plus-circle', 'fa-comments', 'fa-user-plus', 'fa-file-signature'];
     const stepColors = [
       'from-teal-500 via-cyan-500 to-pink-500',
-      'from-blue-500 to-cyan-500',
+      'from-teal-500 to-cyan-500',
       'from-emerald-500 to-teal-500',
       'from-amber-500 to-orange-500',
       'from-rose-500 to-pink-500'
@@ -6470,7 +6464,7 @@ app.get('/', (c) => {
       // 更新背景渐变
       const iconArea = document.getElementById('onboardingIconArea');
       if (iconArea && iconArea.parentElement) {
-        const gradientClasses = ['from-teal-500', 'via-cyan-500', 'to-pink-500', 'from-blue-500', 'to-cyan-500', 'from-emerald-500', 'to-teal-500', 'from-amber-500', 'to-orange-500', 'from-rose-500'];
+        const gradientClasses = ['from-teal-500', 'via-cyan-500', 'to-pink-500', 'from-teal-500', 'to-cyan-500', 'from-emerald-500', 'to-teal-500', 'from-amber-500', 'to-orange-500', 'from-rose-500'];
         gradientClasses.forEach(cls => iconArea.parentElement.classList.remove(cls));
         stepColors[currentOnboardingStep].split(' ').forEach(cls => iconArea.parentElement.classList.add(cls));
       }
@@ -6661,14 +6655,14 @@ app.get('/', (c) => {
       
       // 模板颜色映射 - 直接用真实颜色值，避免CSS变量缺失
       const colorMap = {
-        purple: { bg: 'rgba(147,51,234,0.12)', bgHover: 'rgba(147,51,234,0.18)', text: '#3D8F83', icon: '#0D9488' },
+        purple: { bg: 'rgba(13,148,136,0.12)', bgHover: 'rgba(13,148,136,0.18)', text: '#3D8F83', icon: '#0D9488' },
         orange: { bg: 'rgba(249,115,22,0.12)', bgHover: 'rgba(249,115,22,0.18)', text: '#ea580c', icon: '#f97316' },
-        blue: { bg: 'rgba(59,130,246,0.12)', bgHover: 'rgba(59,130,246,0.18)', text: '#2563eb', icon: '#3b82f6' },
+        blue: { bg: 'rgba(50,173,230,0.12)', bgHover: 'rgba(50,173,230,0.18)', text: '#0891b2', icon: '#32ade6' },
         pink: { bg: 'rgba(236,72,153,0.12)', bgHover: 'rgba(236,72,153,0.18)', text: '#db2777', icon: '#ec4899' },
         green: { bg: 'rgba(16,185,129,0.12)', bgHover: 'rgba(16,185,129,0.18)', text: '#059669', icon: '#10b981' },
         gray: { bg: 'rgba(107,114,128,0.12)', bgHover: 'rgba(107,114,128,0.18)', text: '#4b5563', icon: '#6b7280' },
         red: { bg: 'rgba(239,68,68,0.12)', bgHover: 'rgba(239,68,68,0.18)', text: '#dc2626', icon: '#ef4444' },
-        indigo: { bg: 'rgba(99,102,241,0.12)', bgHover: 'rgba(99,102,241,0.18)', text: '#49A89A', icon: '#5DC4B3' },
+        indigo: { bg: 'rgba(93,196,179,0.12)', bgHover: 'rgba(93,196,179,0.18)', text: '#49A89A', icon: '#5DC4B3' },
         teal: { bg: 'rgba(93,196,179,0.12)', bgHover: 'rgba(93,196,179,0.18)', text: '#49A89A', icon: '#5DC4B3' },
       };
       
@@ -6678,7 +6672,7 @@ app.get('/', (c) => {
           draft: { bg: 'bg-gray-100', text: 'text-gray-600', label: '草稿', dot: '#9ca3af' },
           negotiating: { bg: 'bg-amber-50', text: 'text-amber-700', label: '协商中', dot: '#f59e0b' },
           completed: { bg: 'bg-emerald-50', text: 'text-emerald-700', label: '已完成', dot: '#10b981' },
-          signed: { bg: 'bg-blue-50', text: 'text-blue-700', label: '已签署', dot: '#3b82f6' }
+          signed: { bg: 'bg-teal-50', text: 'text-teal-700', label: '已签署', dot: '#0D9488' }
         };
         const status = statusConfig[p.status] || statusConfig.draft;
         const changeCount = p.negotiations?.length || 0;
@@ -6745,9 +6739,9 @@ app.get('/', (c) => {
       const grid = document.getElementById('templateManagerGrid');
       if (!grid) return;
       const tmColorMap = {
-        purple: { bg: '#f3e8ff', icon: '#0D9488' },
+        purple: { bg: '#F0FDFA', icon: '#0D9488' },
         orange: { bg: '#fff7ed', icon: '#ea580c' },
-        blue: { bg: '#eff6ff', icon: '#2563eb' },
+        blue: { bg: '#F0FDFA', icon: '#0891b2' },
         pink: { bg: '#fdf2f8', icon: '#db2777' },
         green: { bg: '#ecfdf5', icon: '#059669' },
         gray: { bg: '#f9fafb', icon: '#6b7280' },
@@ -6856,7 +6850,7 @@ app.get('/', (c) => {
         draft: { bg: 'bg-gray-100', text: 'text-gray-700', label: '草稿' },
         negotiating: { bg: 'bg-amber-100', text: 'text-amber-700', label: '协商中' },
         completed: { bg: 'bg-emerald-100', text: 'text-emerald-700', label: '已完成' },
-        signed: { bg: 'bg-blue-100', text: 'text-blue-700', label: '已签署' }
+        signed: { bg: 'bg-teal-100', text: 'text-teal-700', label: '已签署' }
       };
       const status = statusConfig[project.status] || statusConfig.negotiating;
       document.getElementById('projectStatus').className = \`px-2 py-0.5 rounded text-xs \${status.bg} \${status.text}\`;
@@ -6917,7 +6911,7 @@ app.get('/', (c) => {
         
         const bgColors = {
           'yellow': 'from-yellow-400 to-amber-500',
-          'blue': 'from-blue-400 to-cyan-500',
+          'blue': 'from-teal-400 to-cyan-500',
           'orange': 'from-orange-400 to-red-500',
           'red': 'from-red-400 to-rose-500',
           'purple': 'from-cyan-400 to-teal-500',
@@ -7463,7 +7457,7 @@ app.get('/', (c) => {
           'formula_update': '公式更新',
           'related_term': '关联条款'
         };
-        categoryBadge = \`<span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs">\${categoryLabels[change.category] || change.category}</span>\`;
+        categoryBadge = \`<span class="px-2 py-0.5 bg-teal-100 text-teal-700 rounded text-xs">\${categoryLabels[change.category] || change.category}</span>\`;
       }
       
       // 法律条款显示（V3新增）
@@ -7793,11 +7787,11 @@ app.get('/', (c) => {
       
       const statusConfig = {
         'routing': {
-          icon: '<i class="fas fa-route text-blue-600"></i>',
-          iconBg: 'bg-blue-100',
+          icon: '<i class="fas fa-route text-teal-600"></i>',
+          iconBg: 'bg-teal-100',
           title: '智能路由分析',
           badge: '分析中',
-          badgeBg: 'bg-blue-100 text-blue-700'
+          badgeBg: 'bg-teal-100 text-teal-700'
         },
         'matched': {
           icon: '<i class="fas fa-check-circle text-emerald-600"></i>',
@@ -8126,7 +8120,7 @@ app.get('/', (c) => {
                         <span class="ml-2 px-1.5 py-0.5 bg-amber-100 text-amber-700 rounded text-[10px]">
                           <i class="fas fa-link mr-0.5"></i>联动修改
                         </span>
-                        \${c.category ? \`<span class="ml-1 px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-[10px]">\${categoryLabels[c.category] || c.category}</span>\` : ''}
+                        \${c.category ? \`<span class="ml-1 px-1.5 py-0.5 bg-teal-100 text-teal-700 rounded text-[10px]">\${categoryLabels[c.category] || c.category}</span>\` : ''}
                       \` : ''}
                     </div>
                     <div class="flex items-center text-sm">
@@ -9073,7 +9067,7 @@ app.get('/', (c) => {
         currentProject.status = 'signed';
         saveProjects();
         // 更新顶部状态显示
-        document.getElementById('projectStatus').className = 'px-2 py-0.5 rounded text-xs bg-blue-100 text-blue-700';
+        document.getElementById('projectStatus').className = 'px-2 py-0.5 rounded text-xs bg-teal-100 text-teal-700';
         document.getElementById('projectStatus').textContent = '已签署';
       }
     }
@@ -9806,9 +9800,9 @@ app.get('/', (c) => {
       if (!grid) return;
       
       const templateColorMap = {
-        purple: { bg: '#f3e8ff', icon: '#0D9488' },
+        purple: { bg: '#F0FDFA', icon: '#0D9488' },
         orange: { bg: '#fff7ed', icon: '#ea580c' },
-        blue: { bg: '#eff6ff', icon: '#2563eb' },
+        blue: { bg: '#F0FDFA', icon: '#0891b2' },
         pink: { bg: '#fdf2f8', icon: '#db2777' },
         green: { bg: '#ecfdf5', icon: '#059669' },
         gray: { bg: '#f9fafb', icon: '#6b7280' },
@@ -10332,7 +10326,7 @@ app.get('/', (c) => {
           <div class="flex items-center justify-between text-sm">
             <span class="font-medium text-cyan-600">\${versionA.name}</span>
             <span class="text-gray-400">VS</span>
-            <span class="font-medium text-blue-600">\${versionB.name}</span>
+            <span class="font-medium text-teal-600">\${versionB.name}</span>
           </div>
         </div>
         <div class="p-4">
@@ -10353,7 +10347,7 @@ app.get('/', (c) => {
                     <div class="flex items-center mt-1 text-sm">
                       <span class="text-cyan-600 bg-cyan-100 px-2 py-0.5 rounded">\${d.valA}</span>
                       <i class="fas fa-arrow-right mx-2 text-gray-400"></i>
-                      <span class="text-blue-600 bg-blue-100 px-2 py-0.5 rounded">\${d.valB}</span>
+                      <span class="text-teal-600 bg-teal-100 px-2 py-0.5 rounded">\${d.valB}</span>
                     </div>
                   </div>
                 </div>
@@ -10748,10 +10742,10 @@ app.get('/', (c) => {
                         </div>
                       \` : ''}
                       \${item.recommendations?.length > 0 ? \`
-                        <div class="mt-2 p-2 bg-blue-50 rounded-lg">
-                          <div class="text-xs text-blue-700 font-medium mb-1"><i class="fas fa-lightbulb mr-1"></i>建议措施</div>
+                        <div class="mt-2 p-2 bg-teal-50 rounded-lg">
+                          <div class="text-xs text-teal-700 font-medium mb-1"><i class="fas fa-lightbulb mr-1"></i>建议措施</div>
                           <ul class="space-y-0.5">
-                            \${item.recommendations.map(r => \`<li class="text-xs text-blue-600">• \${r}</li>\`).join('')}
+                            \${item.recommendations.map(r => \`<li class="text-xs text-teal-600">• \${r}</li>\`).join('')}
                           </ul>
                         </div>
                       \` : ''}
@@ -10778,9 +10772,9 @@ app.get('/', (c) => {
             
             <!-- 安全边际 -->
             \${risk.safetyMargin ? \`
-              <div class="p-4 bg-blue-50 rounded-xl border border-blue-200">
-                <h4 class="font-bold text-blue-900 mb-2"><i class="fas fa-balance-scale mr-2"></i>安全边际评估</h4>
-                <p class="text-sm text-blue-700">\${risk.safetyMargin}</p>
+              <div class="p-4 bg-teal-50 rounded-xl border border-teal-200">
+                <h4 class="font-bold text-teal-900 mb-2"><i class="fas fa-balance-scale mr-2"></i>安全边际评估</h4>
+                <p class="text-sm text-teal-700">\${risk.safetyMargin}</p>
               </div>
             \` : ''}
           </div>
@@ -10892,8 +10886,8 @@ app.get('/', (c) => {
                         </div>
                       </div>
                       \${b.recommendation ? \`
-                        <div class="mt-4 p-2 bg-blue-50 rounded-lg">
-                          <p class="text-xs text-blue-700"><i class="fas fa-lightbulb mr-1 text-blue-500"></i>\${b.recommendation}</p>
+                        <div class="mt-4 p-2 bg-teal-50 rounded-lg">
+                          <p class="text-xs text-teal-700"><i class="fas fa-lightbulb mr-1 text-teal-500"></i>\${b.recommendation}</p>
                         </div>
                       \` : ''}
                     </div>
