@@ -2115,7 +2115,7 @@ app.get('/', (c) => {
   <style>
     /* Base Reset & Fallback Styles */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; line-height: 1.5; background: #f3f4f6; color: #1f2937; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', Roboto, sans-serif; line-height: 1.5; background: #f5f5f7; color: #1d1d1f; }
     .hidden { display: none !important; }
     .flex { display: flex; }
     .flex-col { flex-direction: column; }
@@ -2909,7 +2909,7 @@ app.get('/', (c) => {
   <div id="onboardingModal" class="hidden fixed inset-0 bg-black/60 onboarding-modal flex items-center justify-center z-[300]">
     <div class="onboarding-card bg-white rounded-3xl max-w-2xl w-full mx-4 overflow-hidden">
       <!-- 顶部渐变背景 -->
-      <div class="relative h-48 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 overflow-hidden">
+      <div class="relative h-48 overflow-hidden" style="background: linear-gradient(135deg, #5856d6 0%, #af52de 50%, #ff375f 100%);">
         <div class="absolute inset-0 pattern-bg"></div>
         
         <!-- 关闭按钮 -->
@@ -3091,20 +3091,20 @@ app.get('/', (c) => {
   <!-- ==================== 页面0: 登录/注册页 ==================== -->
   <div id="pageAuth" class="page active flex-col min-h-screen cyber-bg particles-bg">
     <div class="flex-1 flex items-center justify-center p-4 relative z-10">
-      <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-scale-in">
+      <div class="bg-white rounded-3xl max-w-md w-full overflow-hidden animate-scale-in" style="box-shadow: 0 24px 80px rgba(0,0,0,0.25), 0 0 0 1px rgba(255,255,255,0.08);">
         <!-- Logo区域 -->
-        <div class="p-8 text-center border-b border-gray-100">
-          <div class="w-16 h-16 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg animate-float">
+        <div class="p-8 text-center" style="border-bottom: 1px solid rgba(0,0,0,0.06);">
+          <div class="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4 animate-float" style="background: linear-gradient(135deg, #5856d6 0%, #af52de 100%); box-shadow: 0 8px 24px rgba(88,86,214,0.35);">
             <i class="fas fa-handshake text-white text-2xl"></i>
           </div>
-          <h1 class="text-2xl font-bold text-gradient">收入分成融资协商平台</h1>
-          <p class="text-gray-500 text-sm mt-1">Revenue-Based Financing Negotiation</p>
+          <h1 class="text-2xl font-bold text-gradient" style="letter-spacing:-0.03em;">收入分成融资协商平台</h1>
+          <p class="text-sm mt-1" style="color:#86868b;">Revenue-Based Financing Negotiation</p>
         </div>
         
         <!-- 登录/注册切换 -->
-        <div class="flex border-b border-gray-100">
-          <button onclick="switchAuthTab('login')" id="tabLogin" class="flex-1 py-3 text-center font-medium text-indigo-600 border-b-2 border-indigo-600">登录</button>
-          <button onclick="switchAuthTab('register')" id="tabRegister" class="flex-1 py-3 text-center font-medium text-gray-500 hover:text-gray-700">注册</button>
+        <div class="flex" style="border-bottom: 1px solid rgba(0,0,0,0.06);">
+          <button onclick="switchAuthTab('login')" id="tabLogin" class="flex-1 py-3 text-center font-semibold" style="color:#5856d6; border-bottom: 2px solid #5856d6;">登录</button>
+          <button onclick="switchAuthTab('register')" id="tabRegister" class="flex-1 py-3 text-center font-semibold" style="color:#86868b;">注册</button>
         </div>
         
         <!-- 登录表单 -->
@@ -3224,7 +3224,7 @@ app.get('/', (c) => {
         </div>
       </div>
     </div>
-    <p class="text-center text-white/60 text-sm pb-4">&copy; 2026 RBF协商平台 · 预留公司系统对接接口</p>
+    <p class="text-center text-sm pb-4" style="color: rgba(255,255,255,0.4);">&copy; 2026 RBF协商平台 · 预留公司系统对接接口</p>
   </div>
   
   <!-- ==================== 页面0.5: 个人主页 ==================== -->
@@ -3233,12 +3233,12 @@ app.get('/', (c) => {
     <nav class="px-6 py-4">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center cursor-pointer" onclick="goToMyProjects()">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer" onclick="goToMyProjects()" style="background: linear-gradient(135deg, #5856d6 0%, #af52de 100%); box-shadow: 0 4px 12px rgba(88,86,214,0.25);">
             <i class="fas fa-handshake text-white"></i>
           </div>
           <div>
             <h1 class="text-xl font-bold nav-brand">个人中心</h1>
-            <p class="text-xs text-gray-500">My Profile</p>
+            <p class="text-xs" style="color:#86868b;">My Profile</p>
           </div>
         </div>
         <div class="flex items-center space-x-3">
@@ -3257,8 +3257,8 @@ app.get('/', (c) => {
       <div class="max-w-7xl mx-auto">
         <!-- 个人信息卡片 -->
         <div class="card rounded-2xl overflow-hidden mb-6 animate-fade-in">
-          <div class="h-32 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 relative">
-            <button onclick="showEditProfileModal()" class="absolute top-4 right-4 px-3 py-1.5 bg-white/20 backdrop-blur-sm text-white rounded-lg hover:bg-white/30 text-sm">
+          <div class="h-32 relative" style="background: linear-gradient(135deg, #5856d6 0%, #af52de 50%, #ff375f 100%);">
+            <button onclick="showEditProfileModal()" class="absolute top-4 right-4 px-3 py-1.5 text-white rounded-lg text-sm" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15);">
               <i class="fas fa-edit mr-1"></i>编辑资料
             </button>
           </div>
@@ -3487,12 +3487,12 @@ app.get('/', (c) => {
     <nav class="px-5 py-3">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center space-x-3">
-          <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-200">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #5856d6 0%, #af52de 100%); box-shadow: 0 4px 12px rgba(88,86,214,0.25);">
             <i class="fas fa-handshake text-white text-sm"></i>
           </div>
           <div>
             <h1 class="text-base font-bold tracking-tight nav-brand">RBF融资协商平台</h1>
-            <p class="text-xs text-gray-500 -mt-0.5">Revenue-Based Financing</p>
+            <p class="text-xs -mt-0.5" style="color:#86868b;">Revenue-Based Financing</p>
           </div>
         </div>
         <div class="flex items-center space-x-2">
@@ -3557,8 +3557,27 @@ app.get('/', (c) => {
     
     <div class="flex-1 p-4">
       <div class="max-w-7xl mx-auto">
+        <!-- 欢迎区域 Hero Banner -->
+        <div class="relative overflow-hidden rounded-2xl mb-5 p-6" style="background: linear-gradient(135deg, #1a1040 0%, #2d1b69 40%, #1e1b4b 100%);">
+          <div class="absolute inset-0" style="background: radial-gradient(ellipse at 70% 30%, rgba(88,86,214,0.3) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(175,82,222,0.2) 0%, transparent 50%); pointer-events:none;"></div>
+          <div class="relative z-10 flex items-center justify-between">
+            <div>
+              <h2 class="text-xl font-bold text-white mb-1" style="letter-spacing: -0.02em;" id="welcomeText">欢迎回来</h2>
+              <p class="text-sm" style="color: rgba(255,255,255,0.6);">管理您的融资协商项目，追踪每一笔交易进展</p>
+            </div>
+            <div class="flex items-center gap-3">
+              <button onclick="showJoinCollabModal()" class="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2" style="background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(8px);">
+                <i class="fas fa-user-plus"></i>加入协作
+              </button>
+              <button onclick="showNewProjectModal()" class="px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2" style="background: white; color: #1a1040; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                <i class="fas fa-plus"></i>新建项目
+              </button>
+            </div>
+          </div>
+        </div>
+        
         <!-- 统计卡片 - 紧凑型 / 移动2列 -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
           <div class="stat-card animate-fade-in">
             <div class="flex items-center justify-between">
               <div>
@@ -3621,60 +3640,66 @@ app.get('/', (c) => {
         
         <div id="projectGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
         
-        <div id="emptyState" class="hidden py-8 animate-fade-in">
-          <div class="max-w-xl mx-auto text-center">
+        <div id="emptyState" class="hidden py-6 animate-fade-in">
+          <div class="max-w-3xl mx-auto">
             <!-- 欢迎标题 -->
-            <div class="empty-state-icon mx-auto animate-float">
-              <i class="fas fa-handshake"></i>
-            </div>
-            <h3 class="text-xl font-bold text-gray-800 mb-2">欢迎使用RBF融资协商平台</h3>
-            <p class="text-sm text-gray-500 mb-6">让收入分成融资谈判变得简单、透明、高效</p>
-            
-            <!-- 快速开始引导 -->
-            <div class="grid grid-cols-2 gap-3 mb-6">
-              <button onclick="showNewProjectModal()" class="empty-action-btn group">
-                <div class="w-10 h-10 icon-container icon-container-md icon-gradient-primary mb-3 group-hover:scale-105 transition-transform">
-                  <i class="fas fa-plus text-white"></i>
-                </div>
-                <h4 class="font-bold text-gray-800 mb-0.5 text-sm">创建新项目</h4>
-                <p class="text-xs text-gray-500">选择行业模板，开始融资协商</p>
-              </button>
-              <button onclick="showJoinCollabModal()" class="empty-action-btn group">
-                <div class="w-10 h-10 icon-container icon-container-md icon-gradient-success mb-3 group-hover:scale-105 transition-transform">
-                  <i class="fas fa-user-plus text-white"></i>
-                </div>
-                <h4 class="font-bold text-gray-800 mb-0.5 text-sm">加入协作</h4>
-                <p class="text-xs text-gray-500">通过邀请码参与项目协商</p>
-              </button>
+            <div class="text-center mb-6">
+              <div class="empty-state-icon mx-auto animate-float">
+                <i class="fas fa-handshake"></i>
+              </div>
+              <h3 class="text-xl font-bold text-gray-800 mb-2" style="letter-spacing:-0.02em;">开始您的第一个融资项目</h3>
+              <p class="text-sm text-gray-500">让收入分成融资谈判变得简单、透明、高效</p>
             </div>
             
-            <!-- 功能亮点 -->
-            <div class="bg-white/80 backdrop-blur rounded-xl p-4 border border-gray-100">
-              <h4 class="text-xs font-semibold text-gray-600 mb-3"><i class="fas fa-star text-amber-500 mr-1"></i>平台特色</h4>
-              <div class="grid grid-cols-4 gap-3 text-xs">
-                <div class="text-center">
-                  <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mx-auto mb-1.5 shadow-sm">
-                    <i class="fas fa-robot text-indigo-500 text-sm"></i>
-                  </div>
-                  <p class="text-gray-600">AI智能解析</p>
+            <!-- 快速开始引导 - 两列卡片 -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+              <button onclick="showNewProjectModal()" class="group text-left p-5 rounded-2xl border transition-all" style="background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.06);" onmouseover="this.style.borderColor='rgba(88,86,214,0.3)';this.style.boxShadow='0 8px 32px rgba(88,86,214,0.08)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(0,0,0,0.06)';this.style.boxShadow='none';this.style.transform='none'">
+                <div class="w-12 h-12 icon-container icon-container-lg icon-gradient-primary mb-4 group-hover:scale-105 transition-transform" style="border-radius:16px;">
+                  <i class="fas fa-plus text-white text-lg"></i>
                 </div>
-                <div class="text-center">
-                  <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mx-auto mb-1.5 shadow-sm">
-                    <i class="fas fa-users text-purple-500 text-sm"></i>
-                  </div>
-                  <p class="text-gray-600">多方协作</p>
+                <h4 class="font-bold text-gray-800 mb-1 text-base">创建新项目</h4>
+                <p class="text-sm text-gray-500 leading-relaxed">选择行业模板，AI自动生成合同框架，开始融资协商</p>
+              </button>
+              <button onclick="showJoinCollabModal()" class="group text-left p-5 rounded-2xl border transition-all" style="background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.06);" onmouseover="this.style.borderColor='rgba(52,199,89,0.3)';this.style.boxShadow='0 8px 32px rgba(52,199,89,0.08)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(0,0,0,0.06)';this.style.boxShadow='none';this.style.transform='none'">
+                <div class="w-12 h-12 icon-container icon-container-lg icon-gradient-success mb-4 group-hover:scale-105 transition-transform" style="border-radius:16px;">
+                  <i class="fas fa-user-plus text-white text-lg"></i>
                 </div>
-                <div class="text-center">
-                  <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mx-auto mb-1.5 shadow-sm">
-                    <i class="fas fa-history text-blue-500 text-sm"></i>
+                <h4 class="font-bold text-gray-800 mb-1 text-base">加入协作</h4>
+                <p class="text-sm text-gray-500 leading-relaxed">通过邀请码参与他人的项目协商，实时同步进度</p>
+              </button>
+            </div>
+            
+            <!-- 功能亮点 - 更丰富 -->
+            <div class="rounded-2xl p-5 border" style="background: rgba(255,255,255,0.8); border-color: rgba(0,0,0,0.04);">
+              <h4 class="text-xs font-bold uppercase tracking-wider mb-4" style="color: #86868b;"><i class="fas fa-sparkles mr-1.5" style="color: #5856d6;"></i>平台核心能力</h4>
+              <div class="grid grid-cols-4 gap-4">
+                <div class="text-center group">
+                  <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(88,86,214,0.08) 0%, rgba(175,82,222,0.08) 100%);">
+                    <i class="fas fa-robot text-base" style="color: #5856d6;"></i>
                   </div>
-                  <p class="text-gray-600">版本快照</p>
+                  <p class="font-medium text-xs text-gray-700">AI智能解析</p>
+                  <p class="text-xs text-gray-400 mt-0.5">自然语言驱动</p>
                 </div>
-                <div class="text-center">
-                  <div class="w-8 h-8 bg-white rounded-lg flex items-center justify-center mx-auto mb-1.5 shadow-sm">
-                    <i class="fas fa-signature text-pink-500 text-sm"></i>
+                <div class="text-center group">
+                  <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(175,82,222,0.08) 0%, rgba(255,55,95,0.06) 100%);">
+                    <i class="fas fa-users text-base" style="color: #af52de;"></i>
                   </div>
-                  <p class="text-gray-600">电子签章</p>
+                  <p class="font-medium text-xs text-gray-700">多方协作</p>
+                  <p class="text-xs text-gray-400 mt-0.5">实时同步变更</p>
+                </div>
+                <div class="text-center group">
+                  <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(50,173,230,0.08) 0%, rgba(88,86,214,0.06) 100%);">
+                    <i class="fas fa-history text-base" style="color: #32ade6;"></i>
+                  </div>
+                  <p class="font-medium text-xs text-gray-700">版本快照</p>
+                  <p class="text-xs text-gray-400 mt-0.5">完整变更追踪</p>
+                </div>
+                <div class="text-center group">
+                  <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(255,55,95,0.06) 0%, rgba(255,159,10,0.06) 100%);">
+                    <i class="fas fa-signature text-base" style="color: #ff375f;"></i>
+                  </div>
+                  <p class="font-medium text-xs text-gray-700">电子签章</p>
+                  <p class="text-xs text-gray-400 mt-0.5">法律效力保障</p>
                 </div>
               </div>
             </div>
