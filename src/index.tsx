@@ -2189,8 +2189,8 @@ app.get('/', (c) => {
     .text-gray-700 { color: #374151; }
     .text-gray-800 { color: #1f2937; }
     .text-gray-900 { color: #111827; }
-    .text-indigo-600 { color: #4f46e5; }
-    .text-indigo-700 { color: #4338ca; }
+    .text-teal-600 { color: #49A89A; }
+    .text-teal-700 { color: #4338ca; }
     .text-emerald-600 { color: #059669; }
     .text-amber-600 { color: #d97706; }
     .text-red-500 { color: #ef4444; }
@@ -2199,10 +2199,10 @@ app.get('/', (c) => {
     .bg-gray-50 { background-color: #f9fafb; }
     .bg-gray-100 { background-color: #f3f4f6; }
     .bg-gray-200 { background-color: #e5e7eb; }
-    .bg-indigo-50 { background-color: #eef2ff; }
-    .bg-indigo-100 { background-color: #e0e7ff; }
-    .bg-indigo-500 { background-color: #6366f1; }
-    .bg-indigo-600 { background-color: #4f46e5; }
+    .bg-teal-50 { background-color: #F0FDFA; }
+    .bg-teal-100 { background-color: #CCFBF1; }
+    .bg-teal-500 { background-color: #5DC4B3; }
+    .bg-teal-600 { background-color: #49A89A; }
     .bg-emerald-50 { background-color: #ecfdf5; }
     .bg-emerald-100 { background-color: #d1fae5; }
     .bg-emerald-500 { background-color: #10b981; }
@@ -2214,10 +2214,10 @@ app.get('/', (c) => {
     .bg-red-100 { background-color: #fee2e2; }
     .bg-red-500 { background-color: #ef4444; }
     .bg-red-600 { background-color: #dc2626; }
-    .bg-purple-50 { background-color: #faf5ff; }
-    .bg-purple-100 { background-color: #f3e8ff; }
-    .bg-purple-500 { background-color: #a855f7; }
-    .bg-purple-600 { background-color: #9333ea; }
+    .bg-cyan-50 { background-color: #faf5ff; }
+    .bg-cyan-100 { background-color: #f3e8ff; }
+    .bg-cyan-500 { background-color: #0D9488; }
+    .bg-cyan-600 { background-color: #0D9488; }
     .bg-rose-50 { background-color: #fff1f2; }
     .bg-rose-100 { background-color: #ffe4e6; }
     .bg-rose-600 { background-color: #e11d48; }
@@ -2235,13 +2235,13 @@ app.get('/', (c) => {
     .border-gray-100 { border-color: #f3f4f6; }
     .border-gray-200 { border-color: #e5e7eb; }
     .border-gray-300 { border-color: #d1d5db; }
-    .border-indigo-200 { border-color: #c7d2fe; }
-    .border-indigo-500 { border-color: #6366f1; }
+    .border-teal-200 { border-color: #99F6E4; }
+    .border-teal-500 { border-color: #5DC4B3; }
     .border-emerald-200 { border-color: #a7f3d0; }
     .border-amber-200 { border-color: #fde68a; }
     .border-rose-200 { border-color: #fecdd3; }
     .border-orange-200 { border-color: #fed7aa; }
-    .border-purple-200 { border-color: #e9d5ff; }
+    .border-cyan-200 { border-color: #CCFBF1; }
     .rounded { border-radius: 0.25rem; }
     .rounded-lg { border-radius: 0.5rem; }
     .rounded-xl { border-radius: 0.75rem; }
@@ -2270,19 +2270,19 @@ app.get('/', (c) => {
     .transition-colors { transition: color 0.15s ease, background-color 0.15s ease; }
     .hover\\:bg-gray-50:hover { background-color: #f9fafb; }
     .hover\\:bg-gray-100:hover { background-color: #f3f4f6; }
-    .hover\\:bg-indigo-50:hover { background-color: #eef2ff; }
-    .hover\\:bg-indigo-700:hover { background-color: #4338ca; }
+    .hover\\:bg-teal-50:hover { background-color: #F0FDFA; }
+    .hover\\:bg-teal-700:hover { background-color: #4338ca; }
     .hover\\:bg-emerald-700:hover { background-color: #047857; }
     .hover\\:bg-red-50:hover { background-color: #fef2f2; }
     .hover\\:bg-red-700:hover { background-color: #b91c1c; }
-    .hover\\:text-indigo-600:hover { color: #4f46e5; }
+    .hover\\:text-teal-600:hover { color: #49A89A; }
     .hover\\:text-red-500:hover { color: #ef4444; }
     .group:hover .group-hover\\:opacity-100 { opacity: 1; }
     .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     input, textarea, select { font-family: inherit; font-size: 1rem; }
     input[type="checkbox"], input[type="radio"] { width: auto; padding: 0; border: none; background: transparent; box-shadow: none !important; flex-shrink: 0; }
-    input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5); }
+    input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 2px rgba(93, 196, 179, 0.5); }
     input[type="checkbox"]:focus, input[type="radio"]:focus { box-shadow: none !important; transform: none; }
     button { cursor: pointer; font-family: inherit; }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
@@ -2322,15 +2322,15 @@ app.get('/', (c) => {
     .border-gray-50 { border-color: #f9fafb; }
     
     /* Indigo Extended */
-    .text-indigo-300 { color: #a5b4fc; }
-    .text-indigo-500 { color: #6366f1; }
-    .text-indigo-800 { color: #3730a3; }
-    .text-indigo-900 { color: #312e81; }
-    .bg-indigo-200 { background-color: #c7d2fe; }
-    .bg-indigo-700 { background-color: #4338ca; }
-    .border-indigo-100 { border-color: #e0e7ff; }
-    .border-indigo-300 { border-color: #a5b4fc; }
-    .border-indigo-600 { border-color: #4f46e5; }
+    .text-teal-300 { color: #a5b4fc; }
+    .text-teal-500 { color: #5DC4B3; }
+    .text-teal-800 { color: #3730a3; }
+    .text-teal-900 { color: #312e81; }
+    .bg-teal-200 { background-color: #99F6E4; }
+    .bg-teal-700 { background-color: #4338ca; }
+    .border-teal-100 { border-color: #CCFBF1; }
+    .border-teal-300 { border-color: #a5b4fc; }
+    .border-teal-600 { border-color: #49A89A; }
     
     /* Emerald Extended */
     .text-emerald-400 { color: #34d399; }
@@ -2369,13 +2369,13 @@ app.get('/', (c) => {
     .border-red-200 { border-color: #fecaca; }
     
     /* Purple Extended */
-    .text-purple-500 { color: #a855f7; }
-    .text-purple-700 { color: #7e22ce; }
-    .text-purple-800 { color: #6b21a8; }
-    .text-purple-900 { color: #581c87; }
-    .bg-purple-700 { background-color: #7e22ce; }
-    .border-purple-100 { border-color: #f3e8ff; }
-    .border-purple-600 { border-color: #9333ea; }
+    .text-cyan-500 { color: #0D9488; }
+    .text-cyan-700 { color: #7e22ce; }
+    .text-cyan-800 { color: #6b21a8; }
+    .text-cyan-900 { color: #581c87; }
+    .bg-cyan-700 { background-color: #7e22ce; }
+    .border-cyan-100 { border-color: #f3e8ff; }
+    .border-cyan-600 { border-color: #0D9488; }
     
     /* Blue Extended */
     .text-blue-500 { color: #3b82f6; }
@@ -2413,14 +2413,14 @@ app.get('/', (c) => {
     .bg-teal-700 { background-color: #0f766e; }
     
     /* Violet Extended */
-    .text-violet-600 { color: #7c3aed; }
+    .text-violet-600 { color: #3D8F83; }
     .text-violet-700 { color: #6d28d9; }
     .text-violet-800 { color: #5b21b6; }
-    .bg-violet-50 { background-color: #f5f3ff; }
-    .bg-violet-100 { background-color: #ede9fe; }
-    .border-violet-100 { border-color: #ede9fe; }
-    .border-violet-200 { border-color: #ddd6fe; }
-    .border-violet-400 { border-color: #a78bfa; }
+    .bg-violet-50 { background-color: #F0FDFA; }
+    .bg-violet-100 { background-color: #F0FDFA; }
+    .border-violet-100 { border-color: #F0FDFA; }
+    .border-violet-200 { border-color: #CCFBF1; }
+    .border-violet-400 { border-color: #7DD4C7; }
     
     /* Cyan Extended */
     .bg-cyan-500 { background-color: #06b6d4; }
@@ -2642,20 +2642,20 @@ app.get('/', (c) => {
     .bg-gradient-to-tr { background-image: linear-gradient(to top right, var(--tw-gradient-stops)); }
     .bg-gradient-to-bl { background-image: linear-gradient(to bottom left, var(--tw-gradient-stops)); }
     .bg-gradient-to-tl { background-image: linear-gradient(to top left, var(--tw-gradient-stops)); }
-    .from-indigo-500 { --tw-gradient-from: #6366f1; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
-    .from-indigo-600 { --tw-gradient-from: #4f46e5; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
-    .from-purple-500 { --tw-gradient-from: #a855f7; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
-    .from-purple-600 { --tw-gradient-from: #9333ea; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
+    .from-teal-500 { --tw-gradient-from: #5DC4B3; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
+    .from-teal-600 { --tw-gradient-from: #49A89A; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
+    .from-cyan-500 { --tw-gradient-from: #0D9488; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
+    .from-cyan-600 { --tw-gradient-from: #0D9488; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
     .from-emerald-500 { --tw-gradient-from: #10b981; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
     .from-amber-500 { --tw-gradient-from: #f59e0b; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
     .from-rose-500 { --tw-gradient-from: #f43f5e; --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, transparent); }
-    .via-purple-500 { --tw-gradient-stops: var(--tw-gradient-from), #a855f7, var(--tw-gradient-to, transparent); }
-    .via-indigo-500 { --tw-gradient-stops: var(--tw-gradient-from), #6366f1, var(--tw-gradient-to, transparent); }
+    .via-cyan-500 { --tw-gradient-stops: var(--tw-gradient-from), #0D9488, var(--tw-gradient-to, transparent); }
+    .via-teal-500 { --tw-gradient-stops: var(--tw-gradient-from), #5DC4B3, var(--tw-gradient-to, transparent); }
     .via-pink-500 { --tw-gradient-stops: var(--tw-gradient-from), #ec4899, var(--tw-gradient-to, transparent); }
-    .to-indigo-600 { --tw-gradient-to: #4f46e5; }
-    .to-indigo-700 { --tw-gradient-to: #4338ca; }
-    .to-purple-600 { --tw-gradient-to: #9333ea; }
-    .to-purple-700 { --tw-gradient-to: #7e22ce; }
+    .to-teal-600 { --tw-gradient-to: #49A89A; }
+    .to-teal-700 { --tw-gradient-to: #4338ca; }
+    .to-cyan-600 { --tw-gradient-to: #0D9488; }
+    .to-cyan-700 { --tw-gradient-to: #7e22ce; }
     .to-pink-500 { --tw-gradient-to: #ec4899; }
     .to-pink-600 { --tw-gradient-to: #db2777; }
     .to-emerald-600 { --tw-gradient-to: #059669; }
@@ -2678,9 +2678,9 @@ app.get('/', (c) => {
     .shadow-2xl { box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
     .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
     .shadow-none { box-shadow: none; }
-    .ring-1 { box-shadow: 0 0 0 1px var(--tw-ring-color, rgba(99, 102, 241, 0.5)); }
-    .ring-2 { box-shadow: 0 0 0 2px var(--tw-ring-color, rgba(99, 102, 241, 0.5)); }
-    .ring-indigo-500 { --tw-ring-color: #6366f1; }
+    .ring-1 { box-shadow: 0 0 0 1px var(--tw-ring-color, rgba(93, 196, 179, 0.5)); }
+    .ring-2 { box-shadow: 0 0 0 2px var(--tw-ring-color, rgba(93, 196, 179, 0.5)); }
+    .ring-teal-500 { --tw-ring-color: #5DC4B3; }
     .ring-offset-2 { --tw-ring-offset-width: 2px; }
     .backdrop-blur-sm { backdrop-filter: blur(4px); }
     .backdrop-blur { backdrop-filter: blur(8px); }
@@ -2705,15 +2705,15 @@ app.get('/', (c) => {
     .outline-none { outline: 2px solid transparent; outline-offset: 2px; }
     .outline { outline-style: solid; }
     .focus\\:outline-none:focus { outline: 2px solid transparent; outline-offset: 2px; }
-    .focus\\:ring-2:focus { box-shadow: 0 0 0 2px var(--tw-ring-color, rgba(99, 102, 241, 0.5)); }
-    .focus\\:ring-indigo-500:focus { --tw-ring-color: #6366f1; }
-    .focus\\:border-indigo-500:focus { border-color: #6366f1; }
+    .focus\\:ring-2:focus { box-shadow: 0 0 0 2px var(--tw-ring-color, rgba(93, 196, 179, 0.5)); }
+    .focus\\:ring-teal-500:focus { --tw-ring-color: #5DC4B3; }
+    .focus\\:border-teal-500:focus { border-color: #5DC4B3; }
     
     /* Additional hover states */
     .hover\\:bg-gray-200:hover { background-color: #e5e7eb; }
-    .hover\\:bg-indigo-100:hover { background-color: #e0e7ff; }
-    .hover\\:bg-indigo-600:hover { background-color: #4f46e5; }
-    .hover\\:bg-indigo-800:hover { background-color: #3730a3; }
+    .hover\\:bg-teal-100:hover { background-color: #CCFBF1; }
+    .hover\\:bg-teal-600:hover { background-color: #49A89A; }
+    .hover\\:bg-teal-800:hover { background-color: #3730a3; }
     .hover\\:bg-emerald-50:hover { background-color: #ecfdf5; }
     .hover\\:bg-emerald-100:hover { background-color: #d1fae5; }
     .hover\\:bg-emerald-600:hover { background-color: #059669; }
@@ -2722,20 +2722,20 @@ app.get('/', (c) => {
     .hover\\:bg-amber-100:hover { background-color: #fef3c7; }
     .hover\\:bg-rose-50:hover { background-color: #fff1f2; }
     .hover\\:bg-rose-100:hover { background-color: #ffe4e6; }
-    .hover\\:bg-purple-50:hover { background-color: #faf5ff; }
-    .hover\\:bg-purple-100:hover { background-color: #f3e8ff; }
+    .hover\\:bg-cyan-50:hover { background-color: #faf5ff; }
+    .hover\\:bg-cyan-100:hover { background-color: #f3e8ff; }
     .hover\\:text-gray-600:hover { color: #4b5563; }
     .hover\\:text-gray-700:hover { color: #374151; }
     .hover\\:text-gray-800:hover { color: #1f2937; }
     .hover\\:text-gray-900:hover { color: #111827; }
-    .hover\\:text-indigo-700:hover { color: #4338ca; }
-    .hover\\:text-indigo-800:hover { color: #3730a3; }
+    .hover\\:text-teal-700:hover { color: #4338ca; }
+    .hover\\:text-teal-800:hover { color: #3730a3; }
     .hover\\:text-emerald-700:hover { color: #047857; }
     .hover\\:text-red-600:hover { color: #dc2626; }
     .hover\\:text-red-700:hover { color: #b91c1c; }
     .hover\\:text-white:hover { color: #fff; }
-    .hover\\:border-indigo-300:hover { border-color: #a5b4fc; }
-    .hover\\:border-indigo-500:hover { border-color: #6366f1; }
+    .hover\\:border-teal-300:hover { border-color: #a5b4fc; }
+    .hover\\:border-teal-500:hover { border-color: #5DC4B3; }
     .hover\\:border-gray-300:hover { border-color: #d1d5db; }
     .hover\\:shadow-md:hover { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
     .hover\\:shadow-lg:hover { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
@@ -2809,8 +2809,8 @@ app.get('/', (c) => {
     .group:hover .group-hover\\:block { display: block; }
     .group:hover .group-hover\\:flex { display: flex; }
     .group:hover .group-hover\\:bg-gray-50 { background-color: #f9fafb; }
-    .group:hover .group-hover\\:bg-indigo-50 { background-color: #eef2ff; }
-    .group:hover .group-hover\\:text-indigo-600 { color: #4f46e5; }
+    .group:hover .group-hover\\:bg-teal-50 { background-color: #F0FDFA; }
+    .group:hover .group-hover\\:text-teal-600 { color: #49A89A; }
     .group:hover .group-hover\\:scale-105 { transform: scale(1.05); }
     .group:hover .group-hover\\:translate-x-1 { transform: translateX(0.25rem); }
     
@@ -2917,7 +2917,7 @@ app.get('/', (c) => {
   <div id="onboardingModal" class="hidden fixed inset-0 bg-black/60 onboarding-modal flex items-center justify-center z-[300]">
     <div class="onboarding-card bg-white rounded-3xl max-w-2xl w-full mx-4 overflow-hidden">
       <!-- 顶部渐变背景 -->
-      <div class="relative h-48 overflow-hidden" style="background: linear-gradient(135deg, #5856d6 0%, #af52de 50%, #ff375f 100%);">
+      <div class="relative h-48 overflow-hidden" style="background: linear-gradient(135deg, #5DC4B3 0%, #49A89A 50%, #ff375f 100%);">
         <div class="absolute inset-0 pattern-bg"></div>
         
         <!-- 关闭按钮 -->
@@ -2953,15 +2953,15 @@ app.get('/', (c) => {
             <p class="text-gray-500 mb-8 fade-in-up delay-100">一站式完成合同协商、项目协作和智能签署</p>
             
             <div class="grid grid-cols-3 gap-4 mb-8">
-              <div class="p-4 bg-indigo-50 rounded-2xl fade-in-up delay-100">
-                <div class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center mx-auto mb-3 feature-icon">
-                  <i class="fas fa-file-contract text-indigo-600 text-xl"></i>
+              <div class="p-4 bg-teal-50 rounded-2xl fade-in-up delay-100">
+                <div class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center mx-auto mb-3 feature-icon">
+                  <i class="fas fa-file-contract text-teal-600 text-xl"></i>
                 </div>
                 <p class="text-sm font-medium text-gray-700">智能合同</p>
               </div>
-              <div class="p-4 bg-purple-50 rounded-2xl fade-in-up delay-200">
-                <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-3 feature-icon">
-                  <i class="fas fa-users text-purple-600 text-xl"></i>
+              <div class="p-4 bg-cyan-50 rounded-2xl fade-in-up delay-200">
+                <div class="w-12 h-12 bg-cyan-100 rounded-xl flex items-center justify-center mx-auto mb-3 feature-icon">
+                  <i class="fas fa-users text-cyan-600 text-xl"></i>
                 </div>
                 <p class="text-sm font-medium text-gray-700">多方协作</p>
               </div>
@@ -3015,7 +3015,7 @@ app.get('/', (c) => {
               <p class="text-gray-500 mb-4">用日常语言描述您想要的变更，例如"把投资金额改为600万"或"分成比例降低到12%"，AI会自动解析并更新合同。</p>
               <div class="bg-gray-50 rounded-xl p-3 border border-gray-100">
                 <div class="flex items-center text-sm text-gray-600">
-                  <i class="fas fa-magic text-purple-500 mr-2"></i>
+                  <i class="fas fa-magic text-cyan-500 mr-2"></i>
                   <span class="italic">"提前终止的返还比例提高5个百分点"</span>
                 </div>
               </div>
@@ -3036,7 +3036,7 @@ app.get('/', (c) => {
               <h3 class="text-xl font-bold text-gray-900 mt-1 mb-3">邀请对方协作</h3>
               <p class="text-gray-500 mb-4">生成邀请链接发送给对方，支持投资方和融资方双视角，实时同步协商进度，所有变更自动记录。</p>
               <div class="flex items-center space-x-3">
-                <div class="px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded-lg text-sm font-medium">
+                <div class="px-3 py-1.5 bg-teal-100 text-teal-700 rounded-lg text-sm font-medium">
                   <i class="fas fa-landmark mr-1"></i>投资方
                 </div>
                 <i class="fas fa-exchange-alt text-gray-300"></i>
@@ -3088,7 +3088,7 @@ app.get('/', (c) => {
           <button id="btnPrevStep" onclick="prevStep()" class="hidden px-4 py-2 border border-gray-200 text-gray-600 rounded-xl hover:bg-gray-50 transition-all">
             <i class="fas fa-arrow-left mr-2"></i>上一步
           </button>
-          <button id="btnNextStep" onclick="nextStep()" class="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 shadow-lg shadow-indigo-200 transition-all font-medium">
+          <button id="btnNextStep" onclick="nextStep()" class="px-6 py-2.5 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl hover:from-teal-700 hover:to-cyan-700 shadow-lg shadow-teal-200 transition-all font-medium">
             开始探索<i class="fas fa-arrow-right ml-2"></i>
           </button>
         </div>
@@ -3126,14 +3126,14 @@ app.get('/', (c) => {
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">用户名 / 邮箱</label>
               <input type="text" id="loginUsername" placeholder="请输入用户名或邮箱" autocomplete="username"
-                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500"
                 onkeydown="if(event.key==='Enter')document.getElementById('loginPassword').focus()">
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">密码</label>
               <div class="password-wrapper">
                 <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password"
-                  class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
                 <button type="button" onclick="togglePasswordVisibility('loginPassword', this)" class="password-toggle" tabindex="-1">
                   <i class="fas fa-eye"></i>
                 </button>
@@ -3144,7 +3144,7 @@ app.get('/', (c) => {
                 <input type="checkbox" id="rememberMe" class="mr-2 rounded" style="width:16px;height:16px;flex-shrink:0;">
                 <span>记住我</span>
               </label>
-              <a href="#" class="text-indigo-600 hover:text-indigo-700">忘记密码？</a>
+              <a href="#" class="text-teal-600 hover:text-teal-700">忘记密码？</a>
             </div>
             <button type="submit" class="w-full py-3 btn-primary rounded-xl font-medium shadow-lg">
               <i class="fas fa-sign-in-alt mr-2"></i>登录
@@ -3173,29 +3173,29 @@ app.get('/', (c) => {
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">用户名 <span class="text-red-500">*</span></label>
                 <input type="text" id="regUsername" placeholder="用于登录" 
-                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">姓名</label>
                 <input type="text" id="regDisplayName" placeholder="显示名称" 
-                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
               </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">邮箱 <span class="text-red-500">*</span></label>
               <input type="email" id="regEmail" placeholder="your@email.com" 
-                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
               <input type="tel" id="regPhone" placeholder="13800138000" 
-                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
             </div>
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">密码 <span class="text-red-500">*</span></label>
               <div class="password-wrapper">
                 <input type="password" id="regPassword" placeholder="至少6位" autocomplete="new-password"
-                  class="w-full px-4 py-2.5 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+                  class="w-full px-4 py-2.5 pr-12 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm"
                   onkeydown="if(event.key==='Enter')handleRegister()">
                 <button type="button" onclick="togglePasswordVisibility('regPassword', this)" class="password-toggle" tabindex="-1">
                   <i class="fas fa-eye"></i>
@@ -3205,14 +3205,14 @@ app.get('/', (c) => {
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">默认角色</label>
               <div class="grid grid-cols-3 gap-2">
-                <button type="button" onclick="selectRegRole('investor')" id="regRoleInvestor" class="py-2 px-3 border-2 border-gray-200 rounded-lg text-sm hover:border-indigo-300 text-center">
-                  <i class="fas fa-landmark text-indigo-500 block mb-1"></i>投资方
+                <button type="button" onclick="selectRegRole('investor')" id="regRoleInvestor" class="py-2 px-3 border-2 border-gray-200 rounded-lg text-sm hover:border-teal-300 text-center">
+                  <i class="fas fa-landmark text-teal-500 block mb-1"></i>投资方
                 </button>
                 <button type="button" onclick="selectRegRole('borrower')" id="regRoleBorrower" class="py-2 px-3 border-2 border-gray-200 rounded-lg text-sm hover:border-amber-300 text-center">
                   <i class="fas fa-store text-amber-500 block mb-1"></i>融资方
                 </button>
-                <button type="button" onclick="selectRegRole('both')" id="regRoleBoth" class="py-2 px-3 border-2 border-indigo-500 bg-indigo-50 rounded-lg text-sm text-center">
-                  <i class="fas fa-exchange-alt text-purple-500 block mb-1"></i>两者皆可
+                <button type="button" onclick="selectRegRole('both')" id="regRoleBoth" class="py-2 px-3 border-2 border-teal-500 bg-teal-50 rounded-lg text-sm text-center">
+                  <i class="fas fa-exchange-alt text-cyan-500 block mb-1"></i>两者皆可
                 </button>
               </div>
             </div>
@@ -3220,15 +3220,15 @@ app.get('/', (c) => {
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">公司</label>
                 <input type="text" id="regCompany" placeholder="所属公司" 
-                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">职位</label>
                 <input type="text" id="regTitle" placeholder="您的职位" 
-                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm">
+                  class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
               </div>
             </div>
-            <button type="submit" class="w-full py-3 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-lg">
+            <button type="submit" class="w-full py-3 bg-teal-600 text-white rounded-xl font-medium hover:bg-teal-700 transition-colors shadow-lg">
               <i class="fas fa-user-plus mr-2"></i>注册
             </button>
           </div>
@@ -3246,7 +3246,7 @@ app.get('/', (c) => {
     <nav class="px-6 py-4">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer" onclick="goToMyProjects()" style="background: linear-gradient(135deg, #5856d6 0%, #af52de 100%); box-shadow: 0 4px 12px rgba(88,86,214,0.25);">
+          <div class="w-10 h-10 rounded-xl flex items-center justify-center cursor-pointer" onclick="goToMyProjects()" style="background: linear-gradient(135deg, #5DC4B3 0%, #49A89A 100%); box-shadow: 0 4px 12px rgba(93,196,179,0.25);">
             <i class="fas fa-handshake text-white"></i>
           </div>
           <div>
@@ -3255,7 +3255,7 @@ app.get('/', (c) => {
           </div>
         </div>
         <div class="flex items-center space-x-3">
-          <button onclick="goToMyProjects()" class="px-4 py-2 text-indigo-600 hover:bg-indigo-50 rounded-lg flex items-center">
+          <button onclick="goToMyProjects()" class="px-4 py-2 text-teal-600 hover:bg-teal-50 rounded-lg flex items-center">
             <i class="fas fa-folder-open mr-2"></i>我的项目
           </button>
           <button onclick="handleLogout()" class="px-4 py-2 text-gray-500 hover:text-red-500 hover:bg-red-50 rounded-lg flex items-center">
@@ -3270,14 +3270,14 @@ app.get('/', (c) => {
       <div class="max-w-7xl mx-auto">
         <!-- 个人信息卡片 -->
         <div class="card rounded-2xl overflow-hidden mb-6 animate-fade-in">
-          <div class="h-32 relative" style="background: linear-gradient(135deg, #5856d6 0%, #af52de 50%, #ff375f 100%);">
+          <div class="h-32 relative" style="background: linear-gradient(135deg, #5DC4B3 0%, #49A89A 50%, #ff375f 100%);">
             <button onclick="showEditProfileModal()" class="absolute top-4 right-4 px-3 py-1.5 text-white rounded-lg text-sm" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.15);">
               <i class="fas fa-edit mr-1"></i>编辑资料
             </button>
           </div>
           <div class="px-6 pb-6 relative">
             <div class="flex items-end space-x-4 -mt-12">
-              <div id="profileAvatar" class="w-24 h-24 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-2xl flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg">
+              <div id="profileAvatar" class="w-24 h-24 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-2xl flex items-center justify-center text-white text-3xl font-bold border-4 border-white shadow-lg">
                 U
               </div>
               <div class="pb-2">
@@ -3317,7 +3317,7 @@ app.get('/', (c) => {
               <p class="text-xs opacity-70">我发起的项目</p>
             </div>
           </button>
-          <button onclick="switchProfileRole('investor')" id="profileRoleInvestor" class="flex-1 py-4 bg-white rounded-xl border-2 border-gray-200 text-gray-600 font-medium flex items-center justify-center hover:border-indigo-300">
+          <button onclick="switchProfileRole('investor')" id="profileRoleInvestor" class="flex-1 py-4 bg-white rounded-xl border-2 border-gray-200 text-gray-600 font-medium flex items-center justify-center hover:border-teal-300">
             <i class="fas fa-landmark mr-2 text-xl"></i>
             <div class="text-left">
               <p class="font-bold">作为投资方</p>
@@ -3336,7 +3336,7 @@ app.get('/', (c) => {
                 我发起的项目
                 <span id="borrowerProjectCount" class="ml-2 px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs">0</span>
               </h3>
-              <button onclick="goToMyProjects()" class="text-sm text-indigo-600 hover:text-indigo-700">
+              <button onclick="goToMyProjects()" class="text-sm text-teal-600 hover:text-teal-700">
                 查看全部 <i class="fas fa-arrow-right ml-1"></i>
               </button>
             </div>
@@ -3390,11 +3390,11 @@ app.get('/', (c) => {
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <h3 class="font-bold text-gray-800 flex items-center">
-                <i class="fas fa-folder text-indigo-500 mr-2"></i>
+                <i class="fas fa-folder text-teal-500 mr-2"></i>
                 我参与的项目
-                <span id="investorProjectCount" class="ml-2 px-2 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs">0</span>
+                <span id="investorProjectCount" class="ml-2 px-2 py-0.5 bg-teal-100 text-teal-700 rounded-full text-xs">0</span>
               </h3>
-              <button onclick="showJoinCollabModal()" class="text-sm text-indigo-600 hover:text-indigo-700">
+              <button onclick="showJoinCollabModal()" class="text-sm text-teal-600 hover:text-teal-700">
                 <i class="fas fa-user-plus mr-1"></i>加入新项目
               </button>
             </div>
@@ -3402,7 +3402,7 @@ app.get('/', (c) => {
               <div class="p-8 text-center text-gray-400">
                 <i class="fas fa-inbox text-4xl mb-3 opacity-50"></i>
                 <p>暂无参与的项目</p>
-                <button onclick="showJoinCollabModal()" class="mt-3 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm hover:bg-indigo-600">
+                <button onclick="showJoinCollabModal()" class="mt-3 px-4 py-2 bg-teal-500 text-white rounded-lg text-sm hover:bg-teal-600">
                   <i class="fas fa-link mr-1"></i>通过邀请码加入
                 </button>
               </div>
@@ -3413,7 +3413,7 @@ app.get('/', (c) => {
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100">
               <h3 class="font-bold text-gray-800 flex items-center">
-                <i class="fas fa-comments text-indigo-500 mr-2"></i>
+                <i class="fas fa-comments text-teal-500 mr-2"></i>
                 项目讨论
                 <span id="investorDiscussionCount" class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">0</span>
               </h3>
@@ -3429,7 +3429,7 @@ app.get('/', (c) => {
           <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100">
               <h3 class="font-bold text-gray-800 flex items-center">
-                <i class="fas fa-file-contract text-indigo-500 mr-2"></i>
+                <i class="fas fa-file-contract text-teal-500 mr-2"></i>
                 相关合同
                 <span id="investorContractCount" class="ml-2 px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs">0</span>
               </h3>
@@ -3450,7 +3450,7 @@ app.get('/', (c) => {
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 max-h-[85vh] overflow-hidden animate-in flex flex-col">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-user-edit mr-2 text-indigo-600"></i>编辑个人资料</h2>
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-user-edit mr-2 text-teal-600"></i>编辑个人资料</h2>
           <button onclick="hideEditProfileModal()" class="p-2 hover:bg-gray-100 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
           </button>
@@ -3459,29 +3459,29 @@ app.get('/', (c) => {
       <div class="p-6 space-y-4 overflow-y-auto flex-1">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">显示名称</label>
-          <input type="text" id="editDisplayName" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <input type="text" id="editDisplayName" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">手机号</label>
-          <input type="tel" id="editPhone" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <input type="tel" id="editPhone" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">公司</label>
-            <input type="text" id="editCompany" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="text" id="editCompany" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">职位</label>
-            <input type="text" id="editTitle" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <input type="text" id="editTitle" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
           </div>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">个人简介</label>
-          <textarea id="editBio" rows="2" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+          <textarea id="editBio" rows="2" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"></textarea>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">默认角色</label>
-          <select id="editDefaultRole" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <select id="editDefaultRole" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
             <option value="both">两者皆可</option>
             <option value="investor">投资方</option>
             <option value="borrower">融资方</option>
@@ -3490,7 +3490,7 @@ app.get('/', (c) => {
       </div>
       <div class="p-6 border-t border-gray-100 flex justify-end space-x-3 flex-shrink-0">
         <button onclick="hideEditProfileModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
-        <button onclick="saveProfile()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">保存</button>
+        <button onclick="saveProfile()" class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">保存</button>
       </div>
     </div>
   </div>
@@ -3536,7 +3536,7 @@ app.get('/', (c) => {
           <!-- 用户头像/登录入口 -->
           <div class="border-l border-gray-200 pl-2 ml-1 relative">
             <button onclick="toggleUserDropdown(event)" id="navUserBtn" class="flex items-center space-x-1.5 px-2 py-1.5 hover:bg-gray-100 rounded-lg">
-              <div id="navUserAvatar" class="w-7 h-7 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
+              <div id="navUserAvatar" class="w-7 h-7 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
                 U
               </div>
               <span id="navUserName" class="text-xs font-medium text-gray-700 max-w-[60px] truncate">用户</span>
@@ -3545,7 +3545,7 @@ app.get('/', (c) => {
             <div id="userDropdown" class="user-dropdown">
               <div class="user-dropdown-header">
                 <div class="flex items-center space-x-3">
-                  <div id="dropdownAvatar" class="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-xl flex items-center justify-center text-white font-bold">U</div>
+                  <div id="dropdownAvatar" class="w-10 h-10 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-xl flex items-center justify-center text-white font-bold">U</div>
                   <div>
                     <div id="dropdownName" class="font-semibold text-gray-900 text-sm">用户</div>
                     <div id="dropdownRole" class="text-xs text-gray-500">游客模式</div>
@@ -3574,7 +3574,7 @@ app.get('/', (c) => {
       <div class="max-w-7xl mx-auto">
         <!-- 欢迎区域 Hero Banner -->
         <div class="relative overflow-hidden rounded-2xl mb-5 p-6" style="background: linear-gradient(135deg, #1a1040 0%, #2d1b69 40%, #1e1b4b 100%);">
-          <div class="absolute inset-0" style="background: radial-gradient(ellipse at 70% 30%, rgba(88,86,214,0.3) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(175,82,222,0.2) 0%, transparent 50%); pointer-events:none;"></div>
+          <div class="absolute inset-0" style="background: radial-gradient(ellipse at 70% 30%, rgba(93,196,179,0.3) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(175,82,222,0.2) 0%, transparent 50%); pointer-events:none;"></div>
           <div class="relative z-10 flex items-center justify-between">
             <div>
               <h2 class="text-xl font-bold text-white mb-1" style="letter-spacing: -0.02em;" id="welcomeText">欢迎回来</h2>
@@ -3632,7 +3632,7 @@ app.get('/', (c) => {
                 <p class="stat-label">总融资额</p>
                 <p class="stat-value" id="statAmount">¥0</p>
               </div>
-              <div class="icon-container icon-container-sm" style="background: linear-gradient(135deg, #a855f7 0%, #7c3aed 100%); box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);">
+              <div class="icon-container icon-container-sm" style="background: linear-gradient(135deg, #0D9488 0%, #3D8F83 100%); box-shadow: 0 4px 12px rgba(73, 168, 154, 0.3);">
                 <i class="fas fa-yen-sign text-white text-sm"></i>
               </div>
             </div>
@@ -3668,7 +3668,7 @@ app.get('/', (c) => {
             
             <!-- 快速开始引导 - 两列卡片 -->
             <div class="grid grid-cols-2 gap-4 mb-6">
-              <button onclick="showNewProjectModal()" class="group text-left p-5 rounded-2xl border transition-all" style="background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.06);" onmouseover="this.style.borderColor='rgba(88,86,214,0.3)';this.style.boxShadow='0 8px 32px rgba(88,86,214,0.08)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(0,0,0,0.06)';this.style.boxShadow='none';this.style.transform='none'">
+              <button onclick="showNewProjectModal()" class="group text-left p-5 rounded-2xl border transition-all" style="background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.06);" onmouseover="this.style.borderColor='rgba(93,196,179,0.3)';this.style.boxShadow='0 8px 32px rgba(93,196,179,0.08)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(0,0,0,0.06)';this.style.boxShadow='none';this.style.transform='none'">
                 <div class="w-12 h-12 icon-container icon-container-lg icon-gradient-primary mb-4 group-hover:scale-105 transition-transform" style="border-radius:16px;">
                   <i class="fas fa-plus text-white text-lg"></i>
                 </div>
@@ -3686,24 +3686,24 @@ app.get('/', (c) => {
             
             <!-- 功能亮点 - 更丰富 -->
             <div class="rounded-2xl p-5 border" style="background: rgba(255,255,255,0.8); border-color: rgba(0,0,0,0.04);">
-              <h4 class="text-xs font-bold uppercase tracking-wider mb-4" style="color: #86868b;"><i class="fas fa-sparkles mr-1.5" style="color: #5856d6;"></i>平台核心能力</h4>
+              <h4 class="text-xs font-bold uppercase tracking-wider mb-4" style="color: #86868b;"><i class="fas fa-sparkles mr-1.5" style="color: #5DC4B3;"></i>平台核心能力</h4>
               <div class="grid grid-cols-4 gap-4">
                 <div class="text-center group">
-                  <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(88,86,214,0.08) 0%, rgba(175,82,222,0.08) 100%);">
-                    <i class="fas fa-robot text-base" style="color: #5856d6;"></i>
+                  <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(93,196,179,0.08) 0%, rgba(175,82,222,0.08) 100%);">
+                    <i class="fas fa-robot text-base" style="color: #5DC4B3;"></i>
                   </div>
                   <p class="font-medium text-xs text-gray-700">AI智能解析</p>
                   <p class="text-xs text-gray-400 mt-0.5">自然语言驱动</p>
                 </div>
                 <div class="text-center group">
                   <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(175,82,222,0.08) 0%, rgba(255,55,95,0.06) 100%);">
-                    <i class="fas fa-users text-base" style="color: #af52de;"></i>
+                    <i class="fas fa-users text-base" style="color: #49A89A;"></i>
                   </div>
                   <p class="font-medium text-xs text-gray-700">多方协作</p>
                   <p class="text-xs text-gray-400 mt-0.5">实时同步变更</p>
                 </div>
                 <div class="text-center group">
-                  <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(50,173,230,0.08) 0%, rgba(88,86,214,0.06) 100%);">
+                  <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(50,173,230,0.08) 0%, rgba(93,196,179,0.06) 100%);">
                     <i class="fas fa-history text-base" style="color: #32ade6;"></i>
                   </div>
                   <p class="font-medium text-xs text-gray-700">版本快照</p>
@@ -3722,7 +3722,7 @@ app.get('/', (c) => {
             <!-- 帮助提示 -->
             <p class="mt-4 text-xs text-gray-400">
               <i class="fas fa-question-circle mr-1"></i>
-              首次使用？<button onclick="showOnboarding()" class="text-indigo-500 hover:text-indigo-600 underline font-medium">查看新手引导</button>
+              首次使用？<button onclick="showOnboarding()" class="text-teal-500 hover:text-teal-600 underline font-medium">查看新手引导</button>
             </p>
           </div>
         </div>
@@ -3735,7 +3735,7 @@ app.get('/', (c) => {
     <nav class="px-4 py-2.5 flex-shrink-0">
       <div class="flex items-center justify-between">
         <div class="flex items-center space-x-3">
-          <button onclick="goToProjects()" class="back-btn flex items-center px-2.5 py-1.5 text-gray-600 hover:text-indigo-600 rounded-lg text-sm">
+          <button onclick="goToProjects()" class="back-btn flex items-center px-2.5 py-1.5 text-gray-600 hover:text-teal-600 rounded-lg text-sm">
             <i class="fas fa-arrow-left mr-1.5"></i>
             <span class="font-medium">返回</span>
           </button>
@@ -3757,7 +3757,7 @@ app.get('/', (c) => {
             <i class="fas fa-history"></i>
           </button>
           <!-- AI助手 -->
-          <button onclick="showAIAdvisorModal()" class="tooltip p-1.5 hover:bg-indigo-100 rounded-lg text-indigo-600 text-sm" data-tip="AI谈判助手">
+          <button onclick="showAIAdvisorModal()" class="tooltip p-1.5 hover:bg-teal-100 rounded-lg text-teal-600 text-sm" data-tip="AI谈判助手">
             <i class="fas fa-robot"></i>
           </button>
           <!-- 视角切换 -->
@@ -3789,19 +3789,19 @@ app.get('/', (c) => {
         <div class="p-3 border-b border-gray-100 bg-gradient-to-b from-slate-50 to-white">
           <div class="flex items-center justify-between mb-2">
             <label class="text-xs font-semibold text-gray-700 flex items-center">
-              <i class="fas fa-comment-dots mr-1.5 text-indigo-500"></i>描述条款变动
+              <i class="fas fa-comment-dots mr-1.5 text-teal-500"></i>描述条款变动
             </label>
-            <button onclick="showAIAdvisorPanel()" id="btnAIAdvisor" class="text-xs bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-2.5 py-1 rounded-full hover:from-indigo-600 hover:to-purple-600 flex items-center shadow-md pulse-glow">
+            <button onclick="showAIAdvisorPanel()" id="btnAIAdvisor" class="text-xs bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-2.5 py-1 rounded-full hover:from-teal-600 hover:to-cyan-600 flex items-center shadow-md pulse-glow">
               <i class="fas fa-robot mr-1"></i>AI助手
             </button>
           </div>
           <textarea id="negotiationInput" rows="2" 
             placeholder="用自然语言描述变动...&#10;例如：投资金额改成600万，分成比例降到12%&#10;提示：Ctrl+Enter 快速发送"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-sm"></textarea>
+            class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none text-sm"></textarea>
           
           <!-- 快捷输入提示 - 更紧凑 -->
-          <div class="mt-2 p-2 bg-indigo-50/70 rounded-lg border border-indigo-100">
-            <p class="text-xs text-indigo-600 mb-1.5 font-medium"><i class="fas fa-bolt mr-1"></i>快捷输入</p>
+          <div class="mt-2 p-2 bg-teal-50/70 rounded-lg border border-teal-100">
+            <p class="text-xs text-teal-600 mb-1.5 font-medium"><i class="fas fa-bolt mr-1"></i>快捷输入</p>
             <div class="flex gap-1.5 flex-wrap">
               <button onclick="quickInput('投资金额调整为')" class="quick-input-btn">
                 <i class="fas fa-yen-sign"></i>金额
@@ -3838,7 +3838,7 @@ app.get('/', (c) => {
           <div class="flex items-center justify-between mb-2">
             <h3 class="text-xs font-semibold text-gray-600 flex items-center">
               <i class="fas fa-history mr-1.5 text-gray-400"></i>协商记录
-              <span id="negotiationCount" class="ml-1.5 px-1.5 py-0.5 bg-indigo-100 text-indigo-700 rounded-full text-xs">0</span>
+              <span id="negotiationCount" class="ml-1.5 px-1.5 py-0.5 bg-teal-100 text-teal-700 rounded-full text-xs">0</span>
             </h3>
             <button onclick="createVersionSnapshot()" class="text-xs text-blue-600 hover:text-blue-700 flex items-center px-2 py-1 bg-blue-50 rounded-md hover:bg-blue-100 transition-colors" title="保存当前合同版本">
               <i class="fas fa-save mr-1"></i>保存版本
@@ -3863,7 +3863,7 @@ app.get('/', (c) => {
             </span>
           </div>
           <div class="flex bg-gray-100 rounded-lg p-0.5">
-            <button onclick="switchContractView('card')" id="btnCardView" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-white shadow text-indigo-600">
+            <button onclick="switchContractView('card')" id="btnCardView" class="px-2.5 py-1 rounded-md text-xs font-semibold bg-white shadow text-teal-600">
               <i class="fas fa-th-large mr-1"></i>卡片
             </button>
             <button onclick="switchContractView('full')" id="btnFullView" class="px-2.5 py-1 rounded-md text-xs font-semibold text-gray-600">
@@ -3892,11 +3892,11 @@ app.get('/', (c) => {
         </div>
         
         <!-- Agent专家面板 -->
-        <div id="agentsView" class="hidden flex-1 overflow-y-auto p-6 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+        <div id="agentsView" class="hidden flex-1 overflow-y-auto p-6 bg-gradient-to-br from-teal-50 via-cyan-50 to-pink-50">
           <div class="max-w-4xl mx-auto">
             <!-- 顶部介绍 -->
             <div class="text-center mb-8">
-              <div class="w-20 h-20 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+              <div class="w-20 h-20 bg-gradient-to-br from-teal-500 via-cyan-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <i class="fas fa-users-cog text-white text-3xl"></i>
               </div>
               <h2 class="text-2xl font-bold text-gray-900 mb-2">多Agent并行工作流</h2>
@@ -3909,7 +3909,7 @@ app.get('/', (c) => {
             <!-- 工作流程图 -->
             <div class="bg-white rounded-2xl p-6 shadow-lg mb-8">
               <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
-                <i class="fas fa-project-diagram mr-2 text-indigo-600"></i>
+                <i class="fas fa-project-diagram mr-2 text-teal-600"></i>
                 工作流程
               </h3>
               <div class="flex items-center justify-center space-x-4 py-4">
@@ -3922,8 +3922,8 @@ app.get('/', (c) => {
                 </div>
                 <i class="fas fa-arrow-right text-gray-300 text-2xl"></i>
                 <div class="text-center">
-                  <div class="w-16 h-16 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-2">
-                    <i class="fas fa-route text-purple-600 text-xl"></i>
+                  <div class="w-16 h-16 bg-cyan-100 rounded-xl flex items-center justify-center mx-auto mb-2">
+                    <i class="fas fa-route text-cyan-600 text-xl"></i>
                   </div>
                   <p class="text-sm font-medium text-gray-700">智能路由</p>
                   <p class="text-xs text-gray-500">关键词+LLM</p>
@@ -3961,16 +3961,16 @@ app.get('/', (c) => {
             </div>
             
             <!-- 底部说明 -->
-            <div class="mt-8 p-4 bg-white/60 rounded-xl border border-indigo-100">
+            <div class="mt-8 p-4 bg-white/60 rounded-xl border border-teal-100">
               <div class="flex items-start space-x-4">
-                <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <i class="fas fa-lightbulb text-indigo-600"></i>
+                <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <i class="fas fa-lightbulb text-teal-600"></i>
                 </div>
                 <div>
                   <h4 class="font-medium text-gray-800 mb-1">使用提示</h4>
                   <p class="text-sm text-gray-600">
                     您可以在输入框中使用自然语言描述多个条款的变动，例如：
-                    <span class="inline-block mt-1 px-2 py-1 bg-indigo-100 text-indigo-700 rounded text-xs">
+                    <span class="inline-block mt-1 px-2 py-1 bg-teal-100 text-teal-700 rounded text-xs">
                       "投资金额改成800万，违约金提高到25%，数据上报改为每周"
                     </span>
                     系统会自动识别并分配给相应的专家Agent处理。
@@ -3988,10 +3988,10 @@ app.get('/', (c) => {
   <!-- ==================== 弹窗: 新建项目 ==================== -->
   <div id="newProjectModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
-      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-cyan-50">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-xl font-bold text-gray-900"><i class="fas fa-plus-circle mr-2 text-indigo-600"></i>创建融资项目</h2>
+            <h2 class="text-xl font-bold text-gray-900"><i class="fas fa-plus-circle mr-2 text-teal-600"></i>创建融资项目</h2>
             <p class="text-sm text-gray-500 mt-1">选择行业模板，开始协商您的项目合约</p>
           </div>
           <button onclick="hideNewProjectModal()" class="p-2 hover:bg-white/50 rounded-lg">
@@ -4003,11 +4003,11 @@ app.get('/', (c) => {
         <!-- 步骤1: 项目名称 -->
         <div class="mb-6">
           <div class="flex items-center mb-3">
-            <span class="w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-2">1</span>
+            <span class="w-6 h-6 bg-teal-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-2">1</span>
             <label class="text-sm font-medium text-gray-700">为项目命名</label>
           </div>
           <input type="text" id="newProjectName" placeholder="例如：XX品牌杭州旗舰店融资、2024春季巡演" 
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
           <p class="text-xs text-gray-400 mt-1"><i class="fas fa-lightbulb mr-1 text-amber-500"></i>建议使用品牌+项目类型命名，便于后续管理</p>
         </div>
         
@@ -4015,7 +4015,7 @@ app.get('/', (c) => {
         <div class="mb-6">
           <div class="flex items-center justify-between mb-3">
             <div class="flex items-center">
-              <span class="w-6 h-6 bg-indigo-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-2">2</span>
+              <span class="w-6 h-6 bg-teal-600 text-white rounded-full flex items-center justify-center text-xs font-bold mr-2">2</span>
               <label class="text-sm font-medium text-gray-700">选择行业模板</label>
             </div>
             <span id="selectedTemplateHint" class="text-xs text-gray-400">请选择一个模板</span>
@@ -4031,14 +4031,14 @@ app.get('/', (c) => {
             <label class="text-sm font-medium text-gray-500">备注（可选）</label>
           </div>
           <textarea id="newProjectNote" rows="2" placeholder="项目背景、特殊要求等..."
-            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none text-sm"></textarea>
+            class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none text-sm"></textarea>
         </div>
       </div>
       <div class="p-6 border-t border-gray-100 flex justify-between items-center">
         <p class="text-xs text-gray-400"><i class="fas fa-shield-alt mr-1 text-emerald-500"></i>数据安全存储在本地浏览器</p>
         <div class="flex space-x-3">
           <button onclick="hideNewProjectModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
-          <button onclick="createProject()" class="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-medium shadow-lg hover:shadow-xl transition-all">
+          <button onclick="createProject()" class="px-6 py-2.5 bg-teal-600 text-white rounded-lg hover:bg-teal-700 font-medium shadow-lg hover:shadow-xl transition-all">
             <i class="fas fa-rocket mr-2"></i>开始协商
           </button>
         </div>
@@ -4051,7 +4051,7 @@ app.get('/', (c) => {
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-database mr-2 text-indigo-600"></i>数据管理</h2>
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-database mr-2 text-teal-600"></i>数据管理</h2>
           <button onclick="hideCloudSyncModal()" class="p-2 hover:bg-gray-100 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
           </button>
@@ -4059,18 +4059,18 @@ app.get('/', (c) => {
       </div>
       <div class="p-6 overflow-y-auto max-h-[65vh]">
         <!-- 存储状态 -->
-        <div class="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl">
+        <div class="mb-6 p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl">
           <div class="flex items-center justify-between mb-3">
-            <h4 class="font-medium text-gray-800"><i class="fas fa-hdd mr-2 text-indigo-600"></i>本地存储状态</h4>
+            <h4 class="font-medium text-gray-800"><i class="fas fa-hdd mr-2 text-teal-600"></i>本地存储状态</h4>
             <span id="storageStatusBadge" class="px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full text-xs">正常</span>
           </div>
           <div class="grid grid-cols-3 gap-3 text-center">
             <div class="bg-white rounded-lg p-3">
-              <p class="text-2xl font-bold text-indigo-600" id="storageProjectCount">0</p>
+              <p class="text-2xl font-bold text-teal-600" id="storageProjectCount">0</p>
               <p class="text-xs text-gray-500">项目数</p>
             </div>
             <div class="bg-white rounded-lg p-3">
-              <p class="text-2xl font-bold text-purple-600" id="storageVersionCount">0</p>
+              <p class="text-2xl font-bold text-cyan-600" id="storageVersionCount">0</p>
               <p class="text-xs text-gray-500">版本快照</p>
             </div>
             <div class="bg-white rounded-lg p-3">
@@ -4084,7 +4084,7 @@ app.get('/', (c) => {
               <span id="storagePercent">0%</span>
             </div>
             <div class="w-full bg-gray-200 rounded-full h-2">
-              <div id="storageBar" class="bg-indigo-600 h-2 rounded-full transition-all" style="width: 0%"></div>
+              <div id="storageBar" class="bg-teal-600 h-2 rounded-full transition-all" style="width: 0%"></div>
             </div>
           </div>
         </div>
@@ -4093,9 +4093,9 @@ app.get('/', (c) => {
         <div class="mb-6">
           <h4 class="text-sm font-medium text-gray-700 mb-3"><i class="fas fa-cog mr-2"></i>数据操作</h4>
           <div class="grid grid-cols-2 gap-3">
-            <button onclick="exportAllData()" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+            <button onclick="exportAllData()" class="flex items-center justify-center p-4 border-2 border-dashed border-gray-200 rounded-xl hover:border-teal-300 hover:bg-teal-50 transition-colors">
               <div class="text-center">
-                <i class="fas fa-download text-indigo-600 text-xl mb-2"></i>
+                <i class="fas fa-download text-teal-600 text-xl mb-2"></i>
                 <p class="text-sm font-medium text-gray-700">导出全部数据</p>
                 <p class="text-xs text-gray-400">备份到JSON文件</p>
               </div>
@@ -4150,10 +4150,10 @@ app.get('/', (c) => {
   <!-- ==================== 弹窗: 协作者管理 ==================== -->
   <div id="collaboratorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
-      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-blue-50">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-blue-50">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-users mr-2 text-indigo-600"></i>协作管理</h2>
+            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-users mr-2 text-teal-600"></i>协作管理</h2>
             <p class="text-xs text-gray-500 mt-1">邀请投资方或融资方参与合同协商</p>
           </div>
           <button onclick="hideCollaboratorModal()" class="p-2 hover:bg-white/50 rounded-lg">
@@ -4164,13 +4164,13 @@ app.get('/', (c) => {
       <div class="p-6 overflow-y-auto max-h-[65vh]">
         <!-- 邀请协作者 -->
         <div class="mb-6">
-          <h4 class="text-sm font-medium text-gray-700 mb-3"><i class="fas fa-user-plus mr-2 text-indigo-500"></i>邀请协作者</h4>
+          <h4 class="text-sm font-medium text-gray-700 mb-3"><i class="fas fa-user-plus mr-2 text-teal-500"></i>邀请协作者</h4>
           <div class="space-y-3">
             <div class="grid grid-cols-3 gap-2">
-              <button onclick="selectInviteRole('investor')" id="roleInvestor" class="invite-role-btn p-3 border-2 border-indigo-500 bg-indigo-50 rounded-xl text-center">
-                <i class="fas fa-landmark text-indigo-600 text-lg mb-1"></i>
-                <p class="text-xs font-medium text-indigo-700">投资方</p>
-                <p class="text-xs text-indigo-500">可提议修改</p>
+              <button onclick="selectInviteRole('investor')" id="roleInvestor" class="invite-role-btn p-3 border-2 border-teal-500 bg-teal-50 rounded-xl text-center">
+                <i class="fas fa-landmark text-teal-600 text-lg mb-1"></i>
+                <p class="text-xs font-medium text-teal-700">投资方</p>
+                <p class="text-xs text-teal-500">可提议修改</p>
               </button>
               <button onclick="selectInviteRole('borrower')" id="roleBorrower" class="invite-role-btn p-3 border-2 border-gray-200 rounded-xl text-center hover:border-amber-300 hover:bg-amber-50">
                 <i class="fas fa-store text-amber-600 text-lg mb-1"></i>
@@ -4190,7 +4190,7 @@ app.get('/', (c) => {
                 <option value="168">7天有效</option>
                 <option value="720">30天有效</option>
               </select>
-              <button onclick="generateInviteLink()" id="btnGenerateInvite" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm flex items-center">
+              <button onclick="generateInviteLink()" id="btnGenerateInvite" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 text-sm flex items-center">
                 <i class="fas fa-link mr-2"></i>生成邀请链接
               </button>
             </div>
@@ -4225,10 +4225,10 @@ app.get('/', (c) => {
           </div>
           <div id="collaboratorList" class="space-y-2">
             <!-- 所有者（固定） -->
-            <div class="flex items-center justify-between p-3 bg-indigo-50 rounded-xl border border-indigo-100">
+            <div class="flex items-center justify-between p-3 bg-teal-50 rounded-xl border border-teal-100">
               <div class="flex items-center space-x-3">
                 <div class="relative">
-                  <div class="w-10 h-10 bg-indigo-500 rounded-full flex items-center justify-center">
+                  <div class="w-10 h-10 bg-teal-500 rounded-full flex items-center justify-center">
                     <i class="fas fa-crown text-white text-sm"></i>
                   </div>
                   <span class="absolute -bottom-1 -right-1 w-4 h-4 bg-emerald-400 rounded-full border-2 border-white"></span>
@@ -4238,7 +4238,7 @@ app.get('/', (c) => {
                   <p class="text-xs text-gray-500">创建于 <span id="ownerCreateDate">-</span></p>
                 </div>
               </div>
-              <span class="px-2 py-1 bg-indigo-500 text-white rounded-lg text-xs">所有者</span>
+              <span class="px-2 py-1 bg-teal-500 text-white rounded-lg text-xs">所有者</span>
             </div>
             <!-- 动态协作者列表 -->
             <div id="dynamicCollaboratorList"></div>
@@ -4250,7 +4250,7 @@ app.get('/', (c) => {
           <h5 class="text-xs font-medium text-gray-600 mb-2"><i class="fas fa-info-circle mr-1"></i>角色权限说明</h5>
           <div class="grid grid-cols-3 gap-2 text-xs">
             <div class="text-center">
-              <p class="font-medium text-indigo-600">投资方</p>
+              <p class="font-medium text-teal-600">投资方</p>
               <p class="text-gray-500">查看、评论、提议修改</p>
             </div>
             <div class="text-center">
@@ -4309,10 +4309,10 @@ app.get('/', (c) => {
   <!-- ==================== 弹窗: 版本历史 ==================== -->
   <div id="versionModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
-      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-purple-50 to-indigo-50">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-cyan-50 to-teal-50">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-code-branch mr-2 text-purple-600"></i>版本管理</h2>
+            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-code-branch mr-2 text-cyan-600"></i>版本管理</h2>
             <p class="text-xs text-gray-500 mt-1">创建快照、对比版本、回退历史状态</p>
           </div>
           <button onclick="hideVersionModal()" class="p-2 hover:bg-white/50 rounded-lg">
@@ -4322,16 +4322,16 @@ app.get('/', (c) => {
       </div>
       <div class="p-6 overflow-y-auto max-h-[60vh]">
         <!-- 创建快照 -->
-        <div class="mb-6 p-4 bg-purple-50 rounded-xl border border-purple-100">
-          <h4 class="text-sm font-medium text-purple-800 mb-3"><i class="fas fa-camera mr-2"></i>创建版本快照</h4>
+        <div class="mb-6 p-4 bg-cyan-50 rounded-xl border border-cyan-100">
+          <h4 class="text-sm font-medium text-cyan-800 mb-3"><i class="fas fa-camera mr-2"></i>创建版本快照</h4>
           <div class="flex space-x-2">
             <input type="text" id="versionNameInput" placeholder="版本名称（如：初稿、第一轮协商完成）" 
-              class="flex-1 px-4 py-2 border border-purple-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500">
-            <button onclick="createVersionSnapshot()" class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 text-sm whitespace-nowrap">
+              class="flex-1 px-4 py-2 border border-cyan-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-cyan-500">
+            <button onclick="createVersionSnapshot()" class="px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 text-sm whitespace-nowrap">
               <i class="fas fa-save mr-1"></i>保存快照
             </button>
           </div>
-          <p class="text-xs text-purple-600 mt-2"><i class="fas fa-info-circle mr-1"></i>快照将保存当前所有参数和协商记录</p>
+          <p class="text-xs text-cyan-600 mt-2"><i class="fas fa-info-circle mr-1"></i>快照将保存当前所有参数和协商记录</p>
         </div>
         
         <!-- 版本列表 -->
@@ -4370,7 +4370,7 @@ app.get('/', (c) => {
       
       <!-- 底部操作栏 -->
       <div class="p-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between">
-        <button onclick="showVersionCompareModal()" id="btnVersionCompare" class="text-sm text-gray-500 hover:text-indigo-600 flex items-center disabled:opacity-50" disabled>
+        <button onclick="showVersionCompareModal()" id="btnVersionCompare" class="text-sm text-gray-500 hover:text-teal-600 flex items-center disabled:opacity-50" disabled>
           <i class="fas fa-code-compare mr-2"></i>版本对比
         </button>
         <div class="text-xs text-gray-400">
@@ -4385,7 +4385,7 @@ app.get('/', (c) => {
     <div class="bg-white rounded-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-code-compare mr-2 text-indigo-600"></i>版本对比</h2>
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-code-compare mr-2 text-teal-600"></i>版本对比</h2>
           <button onclick="hideVersionCompareModal()" class="p-2 hover:bg-gray-100 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
           </button>
@@ -4427,7 +4427,7 @@ app.get('/', (c) => {
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-info-circle mr-2 text-indigo-600"></i>版本详情</h2>
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-info-circle mr-2 text-teal-600"></i>版本详情</h2>
           <button onclick="hideVersionDetailModal()" class="p-2 hover:bg-gray-100 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
           </button>
@@ -4442,7 +4442,7 @@ app.get('/', (c) => {
   <!-- ==================== 弹窗: AI谈判助手 ==================== -->
   <div id="aiAdvisorModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
-      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-500 to-purple-600">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-teal-500 to-cyan-600">
         <div class="flex items-center justify-between">
           <div class="flex items-center">
             <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
@@ -4462,7 +4462,7 @@ app.get('/', (c) => {
       <!-- 功能标签页 -->
       <div class="border-b border-gray-200 bg-gray-50">
         <div class="flex">
-          <button onclick="switchAITab('advice')" id="tabAIAdvice" class="ai-tab flex-1 px-4 py-3 text-sm font-medium text-indigo-600 border-b-2 border-indigo-600 bg-white">
+          <button onclick="switchAITab('advice')" id="tabAIAdvice" class="ai-tab flex-1 px-4 py-3 text-sm font-medium text-teal-600 border-b-2 border-teal-600 bg-white">
             <i class="fas fa-lightbulb mr-2"></i>谈判建议
           </button>
           <button onclick="switchAITab('risk')" id="tabAIRisk" class="ai-tab flex-1 px-4 py-3 text-sm font-medium text-gray-500 hover:text-gray-700">
@@ -4478,26 +4478,26 @@ app.get('/', (c) => {
         <!-- 初始状态：谈判建议 -->
         <div id="aiAdvicePanel">
           <div class="text-center py-6">
-            <div class="w-20 h-20 bg-gradient-to-br from-indigo-100 to-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <i class="fas fa-brain text-indigo-600 text-3xl"></i>
+            <div class="w-20 h-20 bg-gradient-to-br from-teal-100 to-cyan-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-brain text-teal-600 text-3xl"></i>
             </div>
             <h3 class="font-bold text-gray-900 mb-2">智能谈判顾问</h3>
             <p class="text-sm text-gray-500 mb-6">基于历史数据和市场行情，为您量身定制谈判策略</p>
             
             <div class="grid grid-cols-2 gap-3 mb-6 text-left">
-              <div class="p-3 bg-indigo-50 rounded-xl">
-                <div class="flex items-center text-indigo-700 mb-1">
+              <div class="p-3 bg-teal-50 rounded-xl">
+                <div class="flex items-center text-teal-700 mb-1">
                   <i class="fas fa-bullseye mr-2"></i>
                   <span class="text-sm font-medium">最优报价</span>
                 </div>
-                <p class="text-xs text-indigo-600">基于对方立场给出建议值</p>
+                <p class="text-xs text-teal-600">基于对方立场给出建议值</p>
               </div>
-              <div class="p-3 bg-purple-50 rounded-xl">
-                <div class="flex items-center text-purple-700 mb-1">
+              <div class="p-3 bg-cyan-50 rounded-xl">
+                <div class="flex items-center text-cyan-700 mb-1">
                   <i class="fas fa-chess mr-2"></i>
                   <span class="text-sm font-medium">策略指导</span>
                 </div>
-                <p class="text-xs text-purple-600">专业话术和谈判技巧</p>
+                <p class="text-xs text-cyan-600">专业话术和谈判技巧</p>
               </div>
               <div class="p-3 bg-amber-50 rounded-xl">
                 <div class="flex items-center text-amber-700 mb-1">
@@ -4515,7 +4515,7 @@ app.get('/', (c) => {
               </div>
             </div>
             
-            <button onclick="getAIAdvice()" id="btnGetAdvice" class="px-8 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-xl hover:from-indigo-700 hover:to-purple-700 font-medium shadow-lg shadow-indigo-200">
+            <button onclick="getAIAdvice()" id="btnGetAdvice" class="px-8 py-3 bg-gradient-to-r from-teal-600 to-cyan-600 text-white rounded-xl hover:from-teal-700 hover:to-cyan-700 font-medium shadow-lg shadow-teal-200">
               <i class="fas fa-magic mr-2"></i>获取AI建议
             </button>
           </div>
@@ -4600,8 +4600,8 @@ app.get('/', (c) => {
           <!-- 签署流程步骤指示 -->
           <div class="flex items-center justify-center mb-6 px-4">
             <div class="flex items-center">
-              <div class="sign-progress-step active w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-indigo-100 text-indigo-600">1</div>
-              <span class="ml-2 text-sm font-medium text-indigo-600">填写信息</span>
+              <div class="sign-progress-step active w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold bg-teal-100 text-teal-600">1</div>
+              <span class="ml-2 text-sm font-medium text-teal-600">填写信息</span>
             </div>
             <div class="w-12 h-0.5 bg-gray-200 mx-3"></div>
             <div class="flex items-center">
@@ -4622,25 +4622,25 @@ app.get('/', (c) => {
           
           <!-- 签署人表单 -->
           <div class="space-y-4">
-            <div class="p-4 border-2 border-indigo-200 rounded-xl bg-indigo-50/50">
+            <div class="p-4 border-2 border-teal-200 rounded-xl bg-teal-50/50">
               <div class="flex items-center mb-3">
-                <div class="w-8 h-8 bg-indigo-500 rounded-full flex items-center justify-center mr-3">
+                <div class="w-8 h-8 bg-teal-500 rounded-full flex items-center justify-center mr-3">
                   <i class="fas fa-landmark text-white text-sm"></i>
                 </div>
-                <h4 class="font-medium text-indigo-900">投资方签署人</h4>
+                <h4 class="font-medium text-teal-900">投资方签署人</h4>
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div>
                   <label class="block text-xs text-gray-500 mb-1">姓名 <span class="text-red-500">*</span></label>
-                  <input type="text" id="signerInvestorName" placeholder="签署人姓名" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <input type="text" id="signerInvestorName" placeholder="签署人姓名" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                 </div>
                 <div>
                   <label class="block text-xs text-gray-500 mb-1">手机号</label>
-                  <input type="tel" id="signerInvestorPhone" placeholder="接收签署通知" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <input type="tel" id="signerInvestorPhone" placeholder="接收签署通知" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                 </div>
                 <div class="col-span-2">
                   <label class="block text-xs text-gray-500 mb-1">邮箱</label>
-                  <input type="email" id="signerInvestorEmail" placeholder="接收签署文件" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <input type="email" id="signerInvestorEmail" placeholder="接收签署文件" class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
                 </div>
               </div>
             </div>
@@ -4725,17 +4725,17 @@ app.get('/', (c) => {
         </div>
         
         <!-- 验证码输入 -->
-        <div class="mt-4 p-4 bg-indigo-50 rounded-xl">
-          <label class="block text-sm font-medium text-indigo-700 mb-2">
+        <div class="mt-4 p-4 bg-teal-50 rounded-xl">
+          <label class="block text-sm font-medium text-teal-700 mb-2">
             <i class="fas fa-shield-alt mr-1"></i>签署验证码
           </label>
           <div class="flex space-x-3">
-            <input type="text" id="signVerifyCode" placeholder="请输入验证码" maxlength="6" class="flex-1 px-4 py-2 border border-indigo-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-            <button onclick="sendSignVerifyCode()" id="btnSendVerifyCode" class="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 text-sm whitespace-nowrap">
+            <input type="text" id="signVerifyCode" placeholder="请输入验证码" maxlength="6" class="flex-1 px-4 py-2 border border-teal-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500">
+            <button onclick="sendSignVerifyCode()" id="btnSendVerifyCode" class="px-4 py-2 bg-teal-100 text-teal-700 rounded-lg hover:bg-teal-200 text-sm whitespace-nowrap">
               发送验证码
             </button>
           </div>
-          <p class="text-xs text-indigo-500 mt-2"><i class="fas fa-info-circle mr-1"></i>演示模式：验证码为 123456</p>
+          <p class="text-xs text-teal-500 mt-2"><i class="fas fa-info-circle mr-1"></i>演示模式：验证码为 123456</p>
         </div>
       </div>
       <div class="p-4 border-t border-gray-100 flex justify-end space-x-3 flex-shrink-0">
@@ -4773,7 +4773,7 @@ app.get('/', (c) => {
         </div>
         
         <div class="flex space-x-3">
-          <button onclick="downloadSignedContract()" class="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+          <button onclick="downloadSignedContract()" class="flex-1 px-4 py-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
             <i class="fas fa-download mr-2"></i>下载合同
           </button>
           <button onclick="hideSignCompleteModal()" class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
@@ -4789,7 +4789,7 @@ app.get('/', (c) => {
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-download mr-2 text-indigo-600"></i>导出合同</h2>
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-download mr-2 text-teal-600"></i>导出合同</h2>
           <button onclick="hideExportModal()" class="p-2 hover:bg-gray-100 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
           </button>
@@ -4798,7 +4798,7 @@ app.get('/', (c) => {
       <div class="p-6">
         <p class="text-sm text-gray-500 mb-4">选择导出格式</p>
         <div class="space-y-3">
-          <button onclick="exportAs('pdf')" class="w-full flex items-center p-4 border border-gray-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+          <button onclick="exportAs('pdf')" class="w-full flex items-center p-4 border border-gray-200 rounded-xl hover:border-teal-300 hover:bg-teal-50 transition-colors">
             <div class="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center mr-4">
               <i class="fas fa-file-pdf text-red-600"></i>
             </div>
@@ -4807,7 +4807,7 @@ app.get('/', (c) => {
               <p class="text-xs text-gray-500">适合打印和存档</p>
             </div>
           </button>
-          <button onclick="exportAs('word')" class="w-full flex items-center p-4 border border-gray-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+          <button onclick="exportAs('word')" class="w-full flex items-center p-4 border border-gray-200 rounded-xl hover:border-teal-300 hover:bg-teal-50 transition-colors">
             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
               <i class="fas fa-file-word text-blue-600"></i>
             </div>
@@ -4816,7 +4816,7 @@ app.get('/', (c) => {
               <p class="text-xs text-gray-500">适合继续编辑</p>
             </div>
           </button>
-          <button onclick="exportAs('json')" class="w-full flex items-center p-4 border border-gray-200 rounded-xl hover:border-indigo-300 hover:bg-indigo-50 transition-colors">
+          <button onclick="exportAs('json')" class="w-full flex items-center p-4 border border-gray-200 rounded-xl hover:border-teal-300 hover:bg-teal-50 transition-colors">
             <div class="w-10 h-10 bg-amber-100 rounded-lg flex items-center justify-center mr-4">
               <i class="fas fa-file-code text-amber-600"></i>
             </div>
@@ -4833,10 +4833,10 @@ app.get('/', (c) => {
   <!-- ==================== 弹窗: 模板管理 ==================== -->
   <div id="templateManagerModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-3xl w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
-      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-indigo-50 to-purple-50">
+      <div class="p-6 border-b border-gray-100 bg-gradient-to-r from-teal-50 to-cyan-50">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-layer-group mr-2 text-indigo-600"></i>模板管理</h2>
+            <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-layer-group mr-2 text-teal-600"></i>模板管理</h2>
             <p class="text-xs text-gray-500 mt-1">管理系统模板和自定义行业模板</p>
           </div>
           <button onclick="hideTemplateManagerModal()" class="p-2 hover:bg-white/50 rounded-lg">
@@ -4848,14 +4848,14 @@ app.get('/', (c) => {
         <!-- 标签切换和操作 -->
         <div class="flex items-center justify-between mb-4">
           <div class="flex space-x-2 bg-gray-100 rounded-lg p-1">
-            <button onclick="switchTemplateTab('system')" id="tabSystemTemplate" class="px-4 py-2 bg-white text-indigo-700 rounded-lg text-sm font-medium shadow-sm">
+            <button onclick="switchTemplateTab('system')" id="tabSystemTemplate" class="px-4 py-2 bg-white text-teal-700 rounded-lg text-sm font-medium shadow-sm">
               <i class="fas fa-building mr-1"></i>系统模板
             </button>
             <button onclick="switchTemplateTab('custom')" id="tabCustomTemplate" class="px-4 py-2 text-gray-600 rounded-lg text-sm font-medium hover:bg-white/50">
               <i class="fas fa-user mr-1"></i>我的模板 <span id="customTemplateCount" class="ml-1 px-1.5 py-0.5 bg-gray-200 text-gray-600 rounded-full text-xs">0</span>
             </button>
           </div>
-          <button onclick="showCreateTemplateModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 flex items-center">
+          <button onclick="showCreateTemplateModal()" class="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700 flex items-center">
             <i class="fas fa-plus mr-2"></i>创建模板
           </button>
         </div>
@@ -4876,7 +4876,7 @@ app.get('/', (c) => {
             </div>
             <h4 class="font-medium text-gray-700 mb-2">暂无自定义模板</h4>
             <p class="text-sm text-gray-500 mb-4">基于系统模板创建专属行业模板</p>
-            <button onclick="showCreateTemplateModal()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700">
+            <button onclick="showCreateTemplateModal()" class="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm hover:bg-teal-700">
               <i class="fas fa-plus mr-2"></i>创建第一个模板
             </button>
           </div>
@@ -4900,7 +4900,7 @@ app.get('/', (c) => {
     <div class="bg-white rounded-2xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
-          <h2 id="createTemplateTitle" class="text-lg font-bold text-gray-900"><i class="fas fa-plus-circle mr-2 text-indigo-600"></i>创建自定义模板</h2>
+          <h2 id="createTemplateTitle" class="text-lg font-bold text-gray-900"><i class="fas fa-plus-circle mr-2 text-teal-600"></i>创建自定义模板</h2>
           <button onclick="hideCreateTemplateModal()" class="p-2 hover:bg-gray-100 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
           </button>
@@ -4911,14 +4911,14 @@ app.get('/', (c) => {
         <div id="templateCreateMethod" class="mb-6">
           <label class="block text-sm font-medium text-gray-700 mb-3">选择创建方式</label>
           <div class="grid grid-cols-2 gap-3">
-            <button onclick="selectCreateMethod('clone')" id="methodClone" class="create-method-btn p-4 border-2 border-indigo-500 bg-indigo-50 rounded-xl text-left">
+            <button onclick="selectCreateMethod('clone')" id="methodClone" class="create-method-btn p-4 border-2 border-teal-500 bg-teal-50 rounded-xl text-left">
               <div class="flex items-center mb-2">
-                <div class="w-10 h-10 bg-indigo-500 rounded-lg flex items-center justify-center mr-3">
+                <div class="w-10 h-10 bg-teal-500 rounded-lg flex items-center justify-center mr-3">
                   <i class="fas fa-copy text-white"></i>
                 </div>
                 <div>
-                  <h4 class="font-medium text-indigo-900">复制系统模板</h4>
-                  <p class="text-xs text-indigo-600">基于现有模板修改</p>
+                  <h4 class="font-medium text-teal-900">复制系统模板</h4>
+                  <p class="text-xs text-teal-600">基于现有模板修改</p>
                 </div>
               </div>
             </button>
@@ -4949,13 +4949,13 @@ app.get('/', (c) => {
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">模板名称 <span class="text-red-500">*</span></label>
             <input type="text" id="newTemplateName" placeholder="例如：杭州餐饮连锁专用模板" 
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
           </div>
           
           <div class="grid grid-cols-2 gap-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">行业分类</label>
-              <select id="newTemplateIndustry" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              <select id="newTemplateIndustry" class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
                 <option value="餐饮">餐饮</option>
                 <option value="零售">零售</option>
                 <option value="医疗">医疗</option>
@@ -4967,11 +4967,11 @@ app.get('/', (c) => {
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-2">图标颜色</label>
               <div class="flex space-x-2">
-                <button onclick="selectTemplateColor('indigo')" class="color-btn w-10 h-10 bg-indigo-500 rounded-lg border-2 border-indigo-600"></button>
+                <button onclick="selectTemplateColor('indigo')" class="color-btn w-10 h-10 bg-teal-500 rounded-lg border-2 border-teal-600"></button>
                 <button onclick="selectTemplateColor('amber')" class="color-btn w-10 h-10 bg-amber-500 rounded-lg border-2 border-transparent hover:border-amber-600"></button>
                 <button onclick="selectTemplateColor('emerald')" class="color-btn w-10 h-10 bg-emerald-500 rounded-lg border-2 border-transparent hover:border-emerald-600"></button>
                 <button onclick="selectTemplateColor('rose')" class="color-btn w-10 h-10 bg-rose-500 rounded-lg border-2 border-transparent hover:border-rose-600"></button>
-                <button onclick="selectTemplateColor('purple')" class="color-btn w-10 h-10 bg-purple-500 rounded-lg border-2 border-transparent hover:border-purple-600"></button>
+                <button onclick="selectTemplateColor('purple')" class="color-btn w-10 h-10 bg-cyan-500 rounded-lg border-2 border-transparent hover:border-cyan-600"></button>
                 <button onclick="selectTemplateColor('cyan')" class="color-btn w-10 h-10 bg-cyan-500 rounded-lg border-2 border-transparent hover:border-cyan-600"></button>
               </div>
             </div>
@@ -4980,7 +4980,7 @@ app.get('/', (c) => {
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">模板描述</label>
             <textarea id="newTemplateDesc" rows="2" placeholder="简要描述此模板的适用场景..."
-              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none"></textarea>
+              class="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none"></textarea>
           </div>
           
           <!-- 默认参数编辑 -->
@@ -4994,7 +4994,7 @@ app.get('/', (c) => {
       </div>
       <div class="p-4 border-t border-gray-100 flex justify-end space-x-3">
         <button onclick="hideCreateTemplateModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
-        <button id="btnSaveTemplate" onclick="saveCustomTemplate()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        <button id="btnSaveTemplate" onclick="saveCustomTemplate()" class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
           <i class="fas fa-save mr-2"></i>保存模板
         </button>
       </div>
@@ -5006,7 +5006,7 @@ app.get('/', (c) => {
     <div class="bg-white rounded-2xl max-w-lg w-full mx-4 max-h-[80vh] overflow-hidden animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-info-circle mr-2 text-indigo-600"></i>模板详情</h2>
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-info-circle mr-2 text-teal-600"></i>模板详情</h2>
           <button onclick="hideTemplateDetailModal()" class="p-2 hover:bg-gray-100 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
           </button>
@@ -5023,7 +5023,7 @@ app.get('/', (c) => {
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
       <div class="p-6 border-b border-gray-100">
         <div class="flex items-center justify-between">
-          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-edit mr-2 text-indigo-600"></i>编辑项目</h2>
+          <h2 class="text-lg font-bold text-gray-900"><i class="fas fa-edit mr-2 text-teal-600"></i>编辑项目</h2>
           <button onclick="hideEditProjectModal()" class="p-2 hover:bg-gray-100 rounded-lg">
             <i class="fas fa-times text-gray-500"></i>
           </button>
@@ -5033,15 +5033,15 @@ app.get('/', (c) => {
         <input type="hidden" id="editProjectId">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">项目名称 <span class="text-red-500">*</span></label>
-          <input type="text" id="editProjectName" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="输入项目名称">
+          <input type="text" id="editProjectName" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500" placeholder="输入项目名称">
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">备注</label>
-          <textarea id="editProjectNote" rows="3" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 resize-none" placeholder="项目备注..."></textarea>
+          <textarea id="editProjectNote" rows="3" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none" placeholder="项目备注..."></textarea>
         </div>
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">项目状态</label>
-          <select id="editProjectStatus" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          <select id="editProjectStatus" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500">
             <option value="negotiating">协商中</option>
             <option value="completed">已完成</option>
             <option value="signed">已签署</option>
@@ -5051,7 +5051,7 @@ app.get('/', (c) => {
       </div>
       <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
         <button onclick="hideEditProjectModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
-        <button onclick="saveEditProject()" class="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+        <button onclick="saveEditProject()" class="px-6 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
           <i class="fas fa-save mr-2"></i>保存
         </button>
       </div>
@@ -5117,7 +5117,7 @@ app.get('/', (c) => {
           <label class="block text-sm font-medium text-gray-700 mb-1">新值 <span class="text-red-500">*</span></label>
           <input type="text" id="editParamNewValue" class="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500" placeholder="输入新值">
         </div>
-        <div id="editParamNote" class="p-3 bg-indigo-50 rounded-xl border border-indigo-100 text-sm text-indigo-700">
+        <div id="editParamNote" class="p-3 bg-teal-50 rounded-xl border border-teal-100 text-sm text-teal-700">
           <!-- 参数说明 -->
         </div>
       </div>
@@ -5166,27 +5166,27 @@ app.get('/', (c) => {
   <!-- ==================== 弹窗: 删除版本快照确认 ==================== -->
   <div id="deleteVersionModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
     <div class="bg-white rounded-2xl max-w-md w-full mx-4 animate-in">
-      <div class="p-6 border-b border-gray-100 bg-purple-50">
+      <div class="p-6 border-b border-gray-100 bg-cyan-50">
         <div class="flex items-center">
-          <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
-            <i class="fas fa-history text-purple-600 text-xl"></i>
+          <div class="w-12 h-12 bg-cyan-100 rounded-full flex items-center justify-center mr-4">
+            <i class="fas fa-history text-cyan-600 text-xl"></i>
           </div>
           <div>
-            <h2 class="text-lg font-bold text-purple-900">删除版本快照</h2>
-            <p class="text-sm text-purple-600">此操作不可恢复</p>
+            <h2 class="text-lg font-bold text-cyan-900">删除版本快照</h2>
+            <p class="text-sm text-cyan-600">此操作不可恢复</p>
           </div>
         </div>
       </div>
       <div class="p-6">
         <input type="hidden" id="deleteVersionId">
         <p class="text-gray-700 mb-4">确定要删除版本 "<span id="deleteVersionName" class="font-bold text-gray-900"></span>" 吗？</p>
-        <div class="p-3 bg-purple-50 rounded-lg border border-purple-200">
-          <p class="text-sm text-purple-700"><i class="fas fa-info-circle mr-2"></i>删除后将无法恢复到此版本的合同状态</p>
+        <div class="p-3 bg-cyan-50 rounded-lg border border-cyan-200">
+          <p class="text-sm text-cyan-700"><i class="fas fa-info-circle mr-2"></i>删除后将无法恢复到此版本的合同状态</p>
         </div>
       </div>
       <div class="p-6 border-t border-gray-100 flex justify-end space-x-3">
         <button onclick="hideDeleteVersionModal()" class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">取消</button>
-        <button onclick="confirmDeleteVersion()" class="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+        <button onclick="confirmDeleteVersion()" class="px-6 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700">
           <i class="fas fa-trash-alt mr-2"></i>确认删除
         </button>
       </div>
@@ -5211,8 +5211,8 @@ app.get('/', (c) => {
         <input type="hidden" id="deleteCollaboratorId">
         <div id="deleteCollaboratorPreview" class="p-4 bg-gray-50 rounded-xl border border-gray-200 mb-4">
           <div class="flex items-center space-x-3">
-            <div id="deleteCollaboratorAvatar" class="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-              <i class="fas fa-user text-indigo-600"></i>
+            <div id="deleteCollaboratorAvatar" class="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
+              <i class="fas fa-user text-teal-600"></i>
             </div>
             <div>
               <p id="deleteCollaboratorName" class="font-medium text-gray-900">协作者名称</p>
@@ -5251,8 +5251,8 @@ app.get('/', (c) => {
         <input type="hidden" id="deleteTemplateId">
         <div id="deleteTemplatePreview" class="p-4 bg-gray-50 rounded-xl border border-gray-200 mb-4">
           <div class="flex items-center space-x-3">
-            <div id="deleteTemplateIcon" class="w-12 h-12 bg-indigo-100 rounded-xl flex items-center justify-center">
-              <i class="fas fa-file-contract text-indigo-600"></i>
+            <div id="deleteTemplateIcon" class="w-12 h-12 bg-teal-100 rounded-xl flex items-center justify-center">
+              <i class="fas fa-file-contract text-teal-600"></i>
             </div>
             <div>
               <p id="deleteTemplateName" class="font-medium text-gray-900">模板名称</p>
@@ -6126,8 +6126,8 @@ app.get('/', (c) => {
         ? 'flex-1 py-4 bg-white rounded-xl border-2 border-amber-500 text-amber-700 font-medium flex items-center justify-center shadow-sm'
         : 'flex-1 py-4 bg-white rounded-xl border-2 border-gray-200 text-gray-600 font-medium flex items-center justify-center hover:border-amber-300';
       document.getElementById('profileRoleInvestor').className = role === 'investor'
-        ? 'flex-1 py-4 bg-white rounded-xl border-2 border-indigo-500 text-indigo-700 font-medium flex items-center justify-center shadow-sm'
-        : 'flex-1 py-4 bg-white rounded-xl border-2 border-gray-200 text-gray-600 font-medium flex items-center justify-center hover:border-indigo-300';
+        ? 'flex-1 py-4 bg-white rounded-xl border-2 border-teal-500 text-teal-700 font-medium flex items-center justify-center shadow-sm'
+        : 'flex-1 py-4 bg-white rounded-xl border-2 border-gray-200 text-gray-600 font-medium flex items-center justify-center hover:border-teal-300';
       document.getElementById('borrowerView').classList.toggle('hidden', role !== 'borrower');
       document.getElementById('investorView').classList.toggle('hidden', role !== 'investor');
       renderProfileProjects();
@@ -6182,7 +6182,7 @@ app.get('/', (c) => {
       
       const investorListEl = document.getElementById('investorProjectList');
       if (participatedProjects.length === 0) {
-        investorListEl.innerHTML = '<div class="p-8 text-center text-gray-400"><i class="fas fa-inbox text-4xl mb-3 opacity-50"></i><p>暂无参与的项目</p><button onclick="showJoinCollabModal()" class="mt-3 px-4 py-2 bg-indigo-500 text-white rounded-lg text-sm hover:bg-indigo-600"><i class="fas fa-link mr-1"></i>通过邀请码加入</button></div>';
+        investorListEl.innerHTML = '<div class="p-8 text-center text-gray-400"><i class="fas fa-inbox text-4xl mb-3 opacity-50"></i><p>暂无参与的项目</p><button onclick="showJoinCollabModal()" class="mt-3 px-4 py-2 bg-teal-500 text-white rounded-lg text-sm hover:bg-teal-600"><i class="fas fa-link mr-1"></i>通过邀请码加入</button></div>';
       } else {
         investorListEl.innerHTML = participatedProjects.slice(0, 5).map(p => renderProfileProjectItem(p, 'investor')).join('');
       }
@@ -6216,7 +6216,7 @@ app.get('/', (c) => {
         signed: 'bg-blue-100 text-blue-700'
       };
       const statusText = { draft: '草稿', negotiating: '协商中', completed: '已完成', signed: '已签署' };
-      const iconColor = role === 'borrower' ? 'amber' : 'indigo';
+      const iconColor = role === 'borrower' ? 'amber' : 'teal';
       
       return \`
         <div class="p-4 hover:bg-gray-50 cursor-pointer transition-colors" onclick="openProjectFromProfile('\${project.id}')">
@@ -6371,7 +6371,7 @@ app.get('/', (c) => {
     const totalSteps = 5;
     const stepIcons = ['fa-handshake', 'fa-plus-circle', 'fa-comments', 'fa-user-plus', 'fa-file-signature'];
     const stepColors = [
-      'from-indigo-500 via-purple-500 to-pink-500',
+      'from-teal-500 via-cyan-500 to-pink-500',
       'from-blue-500 to-cyan-500',
       'from-emerald-500 to-teal-500',
       'from-amber-500 to-orange-500',
@@ -6463,7 +6463,7 @@ app.get('/', (c) => {
       // 更新背景渐变
       const iconArea = document.getElementById('onboardingIconArea');
       if (iconArea && iconArea.parentElement) {
-        const gradientClasses = ['from-indigo-500', 'via-purple-500', 'to-pink-500', 'from-blue-500', 'to-cyan-500', 'from-emerald-500', 'to-teal-500', 'from-amber-500', 'to-orange-500', 'from-rose-500'];
+        const gradientClasses = ['from-teal-500', 'via-cyan-500', 'to-pink-500', 'from-blue-500', 'to-cyan-500', 'from-emerald-500', 'to-teal-500', 'from-amber-500', 'to-orange-500', 'from-rose-500'];
         gradientClasses.forEach(cls => iconArea.parentElement.classList.remove(cls));
         stepColors[currentOnboardingStep].split(' ').forEach(cls => iconArea.parentElement.classList.add(cls));
       }
@@ -6654,14 +6654,15 @@ app.get('/', (c) => {
       
       // 模板颜色映射 - 直接用真实颜色值，避免CSS变量缺失
       const colorMap = {
-        purple: { bg: 'rgba(147,51,234,0.12)', bgHover: 'rgba(147,51,234,0.18)', text: '#7c3aed', icon: '#9333ea' },
+        purple: { bg: 'rgba(147,51,234,0.12)', bgHover: 'rgba(147,51,234,0.18)', text: '#3D8F83', icon: '#0D9488' },
         orange: { bg: 'rgba(249,115,22,0.12)', bgHover: 'rgba(249,115,22,0.18)', text: '#ea580c', icon: '#f97316' },
         blue: { bg: 'rgba(59,130,246,0.12)', bgHover: 'rgba(59,130,246,0.18)', text: '#2563eb', icon: '#3b82f6' },
         pink: { bg: 'rgba(236,72,153,0.12)', bgHover: 'rgba(236,72,153,0.18)', text: '#db2777', icon: '#ec4899' },
         green: { bg: 'rgba(16,185,129,0.12)', bgHover: 'rgba(16,185,129,0.18)', text: '#059669', icon: '#10b981' },
         gray: { bg: 'rgba(107,114,128,0.12)', bgHover: 'rgba(107,114,128,0.18)', text: '#4b5563', icon: '#6b7280' },
         red: { bg: 'rgba(239,68,68,0.12)', bgHover: 'rgba(239,68,68,0.18)', text: '#dc2626', icon: '#ef4444' },
-        indigo: { bg: 'rgba(99,102,241,0.12)', bgHover: 'rgba(99,102,241,0.18)', text: '#4f46e5', icon: '#6366f1' },
+        indigo: { bg: 'rgba(99,102,241,0.12)', bgHover: 'rgba(99,102,241,0.18)', text: '#49A89A', icon: '#5DC4B3' },
+        teal: { bg: 'rgba(93,196,179,0.12)', bgHover: 'rgba(93,196,179,0.18)', text: '#49A89A', icon: '#5DC4B3' },
       };
       
       grid.innerHTML = filtered.map((p, idx) => {
@@ -6681,8 +6682,8 @@ app.get('/', (c) => {
           <div class="project-card cursor-pointer relative group animate-slide-up" style="animation-delay: \${animDelay}ms; animation-fill-mode: both;" onclick="openProject('\${p.id}')">
             <!-- 操作按钮（悬停显示） -->
             <div class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-200 flex space-x-1.5 z-10" onclick="event.stopPropagation()">
-              <button onclick="showEditProjectModal('\${p.id}')" class="w-7 h-7 flex items-center justify-center bg-white hover:bg-indigo-50 rounded-lg shadow-md border border-gray-100 transition-all hover:scale-110" title="编辑">
-                <i class="fas fa-pen text-indigo-500 text-xs"></i>
+              <button onclick="showEditProjectModal('\${p.id}')" class="w-7 h-7 flex items-center justify-center bg-white hover:bg-teal-50 rounded-lg shadow-md border border-gray-100 transition-all hover:scale-110" title="编辑">
+                <i class="fas fa-pen text-teal-500 text-xs"></i>
               </button>
               <button onclick="showDeleteProjectModal('\${p.id}')" class="w-7 h-7 flex items-center justify-center bg-white hover:bg-red-50 rounded-lg shadow-md border border-gray-100 transition-all hover:scale-110" title="删除">
                 <i class="fas fa-trash-alt text-red-400 text-xs"></i>
@@ -6703,7 +6704,7 @@ app.get('/', (c) => {
             <h3 class="font-bold text-gray-900 mb-0.5 truncate text-sm leading-snug">\${p.name}</h3>
             <p class="text-xs text-gray-400 mb-3">\${template.name || '未知行业'}</p>
             <div class="flex items-center justify-between text-xs text-gray-400 mb-2">
-              <span class="flex items-center"><i class="fas fa-comments mr-1 text-indigo-300"></i>\${changeCount}次协商</span>
+              <span class="flex items-center"><i class="fas fa-comments mr-1 text-teal-300"></i>\${changeCount}次协商</span>
               <span class="flex items-center"><i class="far fa-clock mr-1"></i>\${formatDate(p.updatedAt)}</span>
             </div>
             <div class="pt-2.5 border-t border-gray-100/80 flex items-center justify-between">
@@ -6737,17 +6738,19 @@ app.get('/', (c) => {
       const grid = document.getElementById('templateManagerGrid');
       if (!grid) return;
       const tmColorMap = {
-        purple: { bg: '#f3e8ff', icon: '#9333ea' },
+        purple: { bg: '#f3e8ff', icon: '#0D9488' },
         orange: { bg: '#fff7ed', icon: '#ea580c' },
         blue: { bg: '#eff6ff', icon: '#2563eb' },
         pink: { bg: '#fdf2f8', icon: '#db2777' },
         green: { bg: '#ecfdf5', icon: '#059669' },
         gray: { bg: '#f9fafb', icon: '#6b7280' },
+        teal: { bg: '#F0FDFA', icon: '#49A89A' },
+        indigo: { bg: '#F0FDFA', icon: '#49A89A' },
       };
       grid.innerHTML = templates.map(t => {
         const tc = tmColorMap[t.color] || tmColorMap.gray;
         return \`
-        <div class="p-4 border border-gray-200 rounded-xl hover:border-indigo-300 transition-colors">
+        <div class="p-4 border border-gray-200 rounded-xl hover:border-teal-300 transition-colors">
           <div class="flex items-center space-x-3 mb-3">
             <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: \${tc.bg};">
               <i class="fas \${t.icon}" style="color: \${tc.icon};"></i>
@@ -6760,7 +6763,7 @@ app.get('/', (c) => {
           <p class="text-sm text-gray-500 mb-3">\${t.description}</p>
           <div class="flex items-center justify-between">
             <span class="text-xs text-gray-400"><i class="fas fa-file-alt mr-1"></i>标准条款</span>
-            <button class="text-xs text-indigo-600 hover:text-indigo-700">查看详情</button>
+            <button class="text-xs text-teal-600 hover:text-teal-700">查看详情</button>
           </div>
         </div>
       \`;
@@ -6881,13 +6884,13 @@ app.get('/', (c) => {
       document.getElementById('fullView').classList.toggle('hidden', view !== 'full');
       document.getElementById('agentsView').classList.toggle('hidden', view !== 'agents');
       document.getElementById('btnCardView').className = view === 'card'
-        ? 'px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow text-indigo-600'
+        ? 'px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow text-teal-600'
         : 'px-3 py-1.5 rounded-md text-sm font-medium text-gray-600';
       document.getElementById('btnFullView').className = view === 'full'
-        ? 'px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow text-indigo-600'
+        ? 'px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow text-teal-600'
         : 'px-3 py-1.5 rounded-md text-sm font-medium text-gray-600';
       document.getElementById('btnAgentsView').className = view === 'agents'
-        ? 'px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow text-indigo-600'
+        ? 'px-3 py-1.5 rounded-md text-sm font-medium bg-white shadow text-teal-600'
         : 'px-3 py-1.5 rounded-md text-sm font-medium text-gray-600';
       
       // 渲染Agent卡片
@@ -6910,9 +6913,9 @@ app.get('/', (c) => {
           'blue': 'from-blue-400 to-cyan-500',
           'orange': 'from-orange-400 to-red-500',
           'red': 'from-red-400 to-rose-500',
-          'purple': 'from-purple-400 to-fuchsia-500',
+          'purple': 'from-cyan-400 to-teal-500',
           'green': 'from-green-400 to-emerald-500',
-          'indigo': 'from-indigo-400 to-violet-500',
+          'indigo': 'from-teal-400 to-emerald-500',
           'teal': 'from-teal-400 to-cyan-500',
           'gray': 'from-gray-400 to-slate-500'
         };
@@ -6930,7 +6933,7 @@ app.get('/', (c) => {
                   \${agent.expertise.slice(0, 6).map(kw => \`
                     <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">\${kw}</span>
                   \`).join('')}
-                  \${agent.expertise.length > 6 ? \`<span class="px-2 py-0.5 bg-indigo-50 text-indigo-600 rounded text-xs">+\${agent.expertise.length - 6}更多</span>\` : ''}
+                  \${agent.expertise.length > 6 ? \`<span class="px-2 py-0.5 bg-teal-50 text-teal-600 rounded text-xs">+\${agent.expertise.length - 6}更多</span>\` : ''}
                 </div>
               </div>
             </div>
@@ -6938,7 +6941,7 @@ app.get('/', (c) => {
               <span class="text-xs text-gray-400">
                 <i class="fas fa-layer-group mr-1"></i>负责模块: \${agent.moduleIds.join(', ')}
               </span>
-              <button onclick="testAgentRoute('\${agent.id}')" class="text-xs text-indigo-600 hover:text-indigo-700 flex items-center">
+              <button onclick="testAgentRoute('\${agent.id}')" class="text-xs text-teal-600 hover:text-teal-700 flex items-center">
                 <i class="fas fa-vial mr-1"></i>测试路由
               </button>
             </div>
@@ -7130,17 +7133,17 @@ app.get('/', (c) => {
       // 在结果区域顶部插入法律审核进度条
       const indicator = document.createElement('div');
       indicator.id = 'phase2Indicator';
-      indicator.className = 'mb-4 p-3 bg-indigo-50 rounded-xl border border-indigo-200 animate-pulse';
+      indicator.className = 'mb-4 p-3 bg-teal-50 rounded-xl border border-teal-200 animate-pulse';
       indicator.innerHTML = \`
         <div class="flex items-center space-x-3">
-          <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-            <i class="fas fa-spinner fa-spin text-indigo-600 text-sm"></i>
+          <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center">
+            <i class="fas fa-spinner fa-spin text-teal-600 text-sm"></i>
           </div>
           <div class="flex-1">
-            <p class="text-sm font-medium text-indigo-800">
+            <p class="text-sm font-medium text-teal-800">
               <i class="fas fa-gavel mr-1"></i>法律顾问审核中 + 深度联动分析中...
             </p>
-            <p class="text-xs text-indigo-500 mt-0.5">完成后将自动追加法律条款和更多关联修改建议</p>
+            <p class="text-xs text-teal-500 mt-0.5">完成后将自动追加法律条款和更多关联修改建议</p>
           </div>
         </div>
       \`;
@@ -7159,7 +7162,7 @@ app.get('/', (c) => {
       
       panel.innerHTML = \`
         <div class="bg-white rounded-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl">
-          <div class="p-6 bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600">
+          <div class="p-6 bg-gradient-to-r from-violet-600 via-cyan-600 to-fuchsia-600">
             <div class="flex items-center justify-between">
               <div class="flex items-center">
                 <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
@@ -7239,8 +7242,8 @@ app.get('/', (c) => {
           desc: message
         },
         'phase2': {
-          icon: '<i class="fas fa-spinner fa-spin text-indigo-600"></i>',
-          bg: 'bg-indigo-100',
+          icon: '<i class="fas fa-spinner fa-spin text-teal-600"></i>',
+          bg: 'bg-teal-100',
           title: '深度分析中...',
           desc: message
         },
@@ -7305,20 +7308,20 @@ app.get('/', (c) => {
       // 法律顾问转化信息（V3新增）
       if (result.legalTransform?.enabled) {
         html += \`
-          <div class="mb-6 p-4 bg-indigo-50 rounded-xl border border-indigo-200">
+          <div class="mb-6 p-4 bg-teal-50 rounded-xl border border-teal-200">
             <div class="flex items-start space-x-3">
-              <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <i class="fas fa-balance-scale text-indigo-600"></i>
+              <div class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <i class="fas fa-balance-scale text-teal-600"></i>
               </div>
               <div class="flex-1">
-                <p class="text-sm font-medium text-indigo-800 mb-1">
+                <p class="text-sm font-medium text-teal-800 mb-1">
                   <i class="fas fa-gavel mr-1"></i>法律顾问审核
                 </p>
                 \${result.legalTransform.legalSummary ? \`<p class="text-gray-700 mb-2">\${escapeHtml(result.legalTransform.legalSummary)}</p>\` : ''}
                 \${result.legalTransform.clauseRecommendations?.length > 0 ? \`
                   <div class="mt-2 p-2 bg-white/50 rounded-lg">
-                    <p class="text-xs font-medium text-indigo-700 mb-1"><i class="fas fa-lightbulb mr-1"></i>条款完善建议：</p>
-                    <ul class="text-xs text-indigo-600 space-y-1">
+                    <p class="text-xs font-medium text-teal-700 mb-1"><i class="fas fa-lightbulb mr-1"></i>条款完善建议：</p>
+                    <ul class="text-xs text-teal-600 space-y-1">
                       \${result.legalTransform.clauseRecommendations.map(r => \`<li class="flex items-start"><i class="fas fa-check-circle mr-1 mt-0.5"></i>\${escapeHtml(r)}</li>\`).join('')}
                     </ul>
                   </div>
@@ -7410,7 +7413,7 @@ app.get('/', (c) => {
             <button onclick="hideSmartChangePanel()" class="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg transition">
               取消
             </button>
-            <button onclick="confirmSmartChanges()" class="px-6 py-2 bg-gradient-to-r from-violet-600 to-purple-600 text-white rounded-lg hover:from-violet-700 hover:to-purple-700 transition shadow-lg">
+            <button onclick="confirmSmartChanges()" class="px-6 py-2 bg-gradient-to-r from-violet-600 to-cyan-600 text-white rounded-lg hover:from-violet-700 hover:to-cyan-700 transition shadow-lg">
               <i class="fas fa-check mr-2"></i>确认修改
             </button>
           </div>
@@ -7454,24 +7457,24 @@ app.get('/', (c) => {
       let legalClauseHtml = '';
       if (change.legalClauseText) {
         legalClauseHtml = \`
-          <div class="mt-3 p-3 bg-indigo-50 rounded-lg border border-indigo-100">
+          <div class="mt-3 p-3 bg-teal-50 rounded-lg border border-teal-100">
             <div class="flex items-center mb-2">
-              <i class="fas fa-gavel text-indigo-600 mr-2 text-sm"></i>
-              <span class="text-xs font-semibold text-indigo-700">法律条款语言</span>
-              \${change.legalReview?.reviewed ? \`<span class="ml-auto px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded text-xs"><i class="fas fa-check-circle mr-1"></i>已审核</span>\` : ''}
+              <i class="fas fa-gavel text-teal-600 mr-2 text-sm"></i>
+              <span class="text-xs font-semibold text-teal-700">法律条款语言</span>
+              \${change.legalReview?.reviewed ? \`<span class="ml-auto px-2 py-0.5 bg-teal-100 text-teal-600 rounded text-xs"><i class="fas fa-check-circle mr-1"></i>已审核</span>\` : ''}
             </div>
-            <p class="text-sm text-indigo-900 leading-relaxed">\${escapeHtml(change.legalClauseText)}</p>
+            <p class="text-sm text-teal-900 leading-relaxed">\${escapeHtml(change.legalClauseText)}</p>
             \${change.legalNotes?.length > 0 ? \`
-              <div class="mt-2 pt-2 border-t border-indigo-100">
-                <p class="text-xs text-indigo-600 font-medium mb-1"><i class="fas fa-sticky-note mr-1"></i>法律注意事项：</p>
-                <ul class="text-xs text-indigo-500 space-y-0.5">
+              <div class="mt-2 pt-2 border-t border-teal-100">
+                <p class="text-xs text-teal-600 font-medium mb-1"><i class="fas fa-sticky-note mr-1"></i>法律注意事项：</p>
+                <ul class="text-xs text-teal-500 space-y-0.5">
                   \${change.legalNotes.map(n => \`<li class="flex items-start"><span class="mr-1">•</span>\${escapeHtml(n)}</li>\`).join('')}
                 </ul>
               </div>
             \` : ''}
             \${change.legalReview?.legalScore ? \`
               <div class="mt-2 flex items-center justify-between text-xs">
-                <span class="text-indigo-500">法律规范性评分</span>
+                <span class="text-teal-500">法律规范性评分</span>
                 <span class="font-semibold \${change.legalReview.legalScore >= 80 ? 'text-emerald-600' : change.legalReview.legalScore >= 60 ? 'text-amber-600' : 'text-red-600'}">\${change.legalReview.legalScore}/100</span>
               </div>
             \` : ''}
@@ -7505,7 +7508,7 @@ app.get('/', (c) => {
                 <span class="font-semibold text-gray-800">\${escapeHtml(change.paramName || change.key)}</span>
                 \${confidenceBadge}
                 \${categoryBadge}
-                \${change.legalReview?.reviewed ? '<span class="px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded text-xs"><i class="fas fa-balance-scale mr-1"></i>法律审核</span>' : ''}
+                \${change.legalReview?.reviewed ? '<span class="px-2 py-0.5 bg-teal-100 text-teal-600 rounded text-xs"><i class="fas fa-balance-scale mr-1"></i>法律审核</span>' : ''}
               </div>
               <div class="flex items-center text-sm mb-2">
                 <span class="text-gray-500 line-through mr-2">\${escapeHtml(change.oldValue || '-')}</span>
@@ -7691,7 +7694,7 @@ app.get('/', (c) => {
         panel.className = 'fixed inset-0 bg-black/60 flex items-center justify-center z-[200]';
         panel.innerHTML = \`
           <div class="bg-white rounded-2xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden shadow-2xl">
-            <div class="p-6 bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600">
+            <div class="p-6 bg-gradient-to-r from-teal-600 via-cyan-600 to-pink-600">
               <div class="flex items-center justify-between">
                 <div class="flex items-center">
                   <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mr-4">
@@ -7711,8 +7714,8 @@ app.get('/', (c) => {
             <!-- 用户输入展示 -->
             <div class="px-6 py-4 border-b border-gray-100 bg-gray-50">
               <div class="flex items-start space-x-3">
-                <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <i class="fas fa-user text-indigo-600 text-sm"></i>
+                <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <i class="fas fa-user text-teal-600 text-sm"></i>
                 </div>
                 <div class="flex-1">
                   <p class="text-xs text-gray-500 mb-1">您的输入</p>
@@ -7724,14 +7727,14 @@ app.get('/', (c) => {
             <!-- 处理状态 -->
             <div class="px-6 py-4 border-b border-gray-100">
               <div class="flex items-center space-x-3">
-                <div id="agentStatusIcon" class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center">
-                  <i class="fas fa-spinner fa-spin text-indigo-600"></i>
+                <div id="agentStatusIcon" class="w-10 h-10 bg-teal-100 rounded-full flex items-center justify-center">
+                  <i class="fas fa-spinner fa-spin text-teal-600"></i>
                 </div>
                 <div class="flex-1">
                   <p id="agentStatusTitle" class="font-medium text-gray-800">初始化中...</p>
                   <p id="agentStatusDesc" class="text-sm text-gray-500">正在连接AI系统</p>
                 </div>
-                <div id="agentStatusBadge" class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-sm">
+                <div id="agentStatusBadge" class="px-3 py-1 bg-teal-100 text-teal-700 rounded-full text-sm">
                   处理中
                 </div>
               </div>
@@ -7791,11 +7794,11 @@ app.get('/', (c) => {
           badgeBg: 'bg-emerald-100 text-emerald-700'
         },
         'processing': {
-          icon: '<i class="fas fa-cogs fa-spin text-purple-600"></i>',
-          iconBg: 'bg-purple-100',
+          icon: '<i class="fas fa-cogs fa-spin text-cyan-600"></i>',
+          iconBg: 'bg-cyan-100',
           title: '并行处理中',
           badge: '执行中',
-          badgeBg: 'bg-purple-100 text-purple-700'
+          badgeBg: 'bg-cyan-100 text-cyan-700'
         },
         'completed': {
           icon: '<i class="fas fa-check-double text-emerald-600"></i>',
@@ -7849,7 +7852,7 @@ app.get('/', (c) => {
       container.innerHTML = \`
         <div class="mb-4">
           <h4 class="text-sm font-medium text-gray-700 mb-3">
-            <i class="fas fa-users-cog mr-2 text-indigo-600"></i>
+            <i class="fas fa-users-cog mr-2 text-teal-600"></i>
             正在调用 \${agentIds.length} 个专业Agent并行处理
           </h4>
           <div class="grid grid-cols-2 gap-3">
@@ -7879,8 +7882,8 @@ app.get('/', (c) => {
             }).join('')}
           </div>
         </div>
-        <div class="mt-4 p-4 bg-indigo-50 rounded-xl border border-indigo-100">
-          <div class="flex items-center space-x-2 text-sm text-indigo-700">
+        <div class="mt-4 p-4 bg-teal-50 rounded-xl border border-teal-100">
+          <div class="flex items-center space-x-2 text-sm text-teal-700">
             <i class="fas fa-info-circle"></i>
             <span>多Agent并行架构：各专家同时处理，提高效率并确保专业性</span>
           </div>
@@ -7946,11 +7949,11 @@ app.get('/', (c) => {
                 <i class="fas fa-check-circle mr-2"></i>
                 <span class="font-medium">\${result.changes?.length || 0} 项变更</span>
               </div>
-              <div class="flex items-center text-indigo-700">
+              <div class="flex items-center text-teal-700">
                 <i class="fas fa-robot mr-2"></i>
                 <span>\${result.stats?.respondedAgents || 0}/\${result.stats?.totalAgents || 0} Agent响应</span>
               </div>
-              <div class="flex items-center text-purple-700">
+              <div class="flex items-center text-cyan-700">
                 <i class="fas fa-clock mr-2"></i>
                 <span>耗时 \${result.stats?.totalTime || 0}ms</span>
               </div>
@@ -8012,7 +8015,7 @@ app.get('/', (c) => {
       
       container.innerHTML = negotiations.slice().reverse().map((n, i) => {
         const pIcon = n.perspective === 'investor' ? 'fa-landmark' : 'fa-store';
-        const pColor = n.perspective === 'investor' ? 'indigo' : 'amber';
+        const pColor = n.perspective === 'investor' ? 'teal' : 'amber';
         const pText = n.perspective === 'investor' ? '投资方' : '融资方';
         
         // 检查是否有多Agent处理信息
@@ -8046,7 +8049,7 @@ app.get('/', (c) => {
                   \${primaryCount > 0 ? \`<span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-xs">\${primaryCount}直接</span>\` : ''}
                   \${inferredCount > 0 ? \`<span class="px-2 py-0.5 bg-amber-100 text-amber-700 rounded-full text-xs">\${inferredCount}联动</span>\` : ''}
                 \` : (hasAgentDetails ? \`
-                  <span class="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs flex items-center">
+                  <span class="px-2 py-0.5 bg-cyan-100 text-cyan-700 rounded-full text-xs flex items-center">
                     <i class="fas fa-robot mr-1"></i>\${respondedAgents} Agent
                   </span>
                 \` : '')}
@@ -8064,11 +8067,11 @@ app.get('/', (c) => {
             \${hasAgentDetails ? \`
               <!-- 多Agent处理详情展开/收起 -->
               <div class="mb-3">
-                <button onclick="toggleAgentDetails('\${n.id}')" class="text-xs text-indigo-600 hover:text-indigo-700 flex items-center">
+                <button onclick="toggleAgentDetails('\${n.id}')" class="text-xs text-teal-600 hover:text-teal-700 flex items-center">
                   <i class="fas fa-chevron-down mr-1" id="agentDetailsIcon_\${n.id}"></i>
                   查看Agent处理详情 (\${n.processingStats?.totalTime || 0}ms)
                 </button>
-                <div id="agentDetails_\${n.id}" class="hidden mt-2 p-3 bg-white rounded-lg border border-indigo-100">
+                <div id="agentDetails_\${n.id}" class="hidden mt-2 p-3 bg-white rounded-lg border border-teal-100">
                   <div class="grid grid-cols-2 gap-2">
                     \${n.agentDetails.map(agent => {
                       const agentInfo = agentColorMap[agent.agentId] || { bg: 'gray', icon: 'fa-robot', name: agent.agentName };
@@ -8125,8 +8128,8 @@ app.get('/', (c) => {
               }).join('')}
               
               \${n.suggestions?.length > 0 ? \`
-                <div class="bg-indigo-50 rounded-lg p-2 border border-indigo-100">
-                  <p class="text-xs text-indigo-700"><i class="fas fa-lightbulb mr-1"></i>\${n.suggestions[0]}</p>
+                <div class="bg-teal-50 rounded-lg p-2 border border-teal-100">
+                  <p class="text-xs text-teal-700"><i class="fas fa-lightbulb mr-1"></i>\${n.suggestions[0]}</p>
                 </div>
               \` : (n.suggestion ? \`<div class="bg-amber-50 rounded-lg p-2 border border-amber-100"><p class="text-xs text-amber-700"><i class="fas fa-lightbulb mr-1"></i>\${n.suggestion}</p></div>\` : '')}
               
@@ -8172,8 +8175,8 @@ app.get('/', (c) => {
           <div class="module-card bg-white rounded-xl p-5 border-2 \${hasChanges ? 'has-changes border-emerald-300' : 'border-gray-100'}">
             <div class="flex items-start justify-between mb-4">
               <div class="flex items-center">
-                <div class="w-12 h-12 rounded-xl bg-indigo-100 flex items-center justify-center mr-3">
-                  <i class="fas \${module.icon} text-indigo-600 text-xl"></i>
+                <div class="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center mr-3">
+                  <i class="fas \${module.icon} text-teal-600 text-xl"></i>
                 </div>
                 <div>
                   <h3 class="font-bold text-gray-800">\${module.title}</h3>
@@ -8205,9 +8208,9 @@ app.get('/', (c) => {
                   \`;
                 } else {
                   return \`
-                    <div class="flex items-center justify-between py-2 border-b border-gray-50 cursor-pointer hover:bg-indigo-50 rounded-lg px-2 -mx-2 transition-colors" onclick="showEditParamModal('\${clause.key}', '\${clause.name}', '\${currentValue}', '\${escapedNote}')" title="点击编辑">
+                    <div class="flex items-center justify-between py-2 border-b border-gray-50 cursor-pointer hover:bg-teal-50 rounded-lg px-2 -mx-2 transition-colors" onclick="showEditParamModal('\${clause.key}', '\${clause.name}', '\${currentValue}', '\${escapedNote}')" title="点击编辑">
                       <span class="text-gray-600 flex items-center">\${clause.name} <i class="fas fa-pen text-gray-300 text-xs ml-2 opacity-0 group-hover:opacity-100"></i></span>
-                      <span class="font-semibold text-indigo-600 flex items-center">\${currentValue} <i class="fas fa-edit text-indigo-300 text-xs ml-2"></i></span>
+                      <span class="font-semibold text-teal-600 flex items-center">\${currentValue} <i class="fas fa-edit text-teal-300 text-xs ml-2"></i></span>
                     </div>
                   \`;
                 }
@@ -8255,7 +8258,7 @@ app.get('/', (c) => {
             <div id="section-\${section.id}" class="contract-section mb-8 p-5 rounded-xl border \${hasChanges ? 'has-changes border-emerald-200' : 'border-gray-100'}">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-xl font-bold text-gray-800 flex items-center">
-                  <span class="w-10 h-10 rounded-xl \${hasChanges ? 'bg-emerald-500' : 'bg-indigo-500'} text-white flex items-center justify-center text-sm font-bold mr-3">\${section.number}</span>
+                  <span class="w-10 h-10 rounded-xl \${hasChanges ? 'bg-emerald-500' : 'bg-teal-500'} text-white flex items-center justify-center text-sm font-bold mr-3">\${section.number}</span>
                   \${section.title}
                 </h2>
                 \${hasChanges ? '<span class="change-badge">已修改</span>' : ''}
@@ -8494,14 +8497,14 @@ app.get('/', (c) => {
       selectedInviteRole = role;
       // 更新UI
       document.querySelectorAll('.invite-role-btn').forEach(btn => {
-        btn.classList.remove('border-indigo-500', 'bg-indigo-50', 'border-amber-500', 'bg-amber-50', 'border-gray-500', 'bg-gray-100');
+        btn.classList.remove('border-teal-500', 'bg-teal-50', 'border-amber-500', 'bg-amber-50', 'border-gray-500', 'bg-gray-100');
         btn.classList.add('border-gray-200');
       });
       const btnId = 'role' + role.charAt(0).toUpperCase() + role.slice(1);
       const btn = document.getElementById(btnId);
       if (role === 'investor') {
         btn.classList.remove('border-gray-200');
-        btn.classList.add('border-indigo-500', 'bg-indigo-50');
+        btn.classList.add('border-teal-500', 'bg-teal-50');
       } else if (role === 'borrower') {
         btn.classList.remove('border-gray-200');
         btn.classList.add('border-amber-500', 'bg-amber-50');
@@ -8805,7 +8808,7 @@ app.get('/', (c) => {
       const container = document.getElementById('signersStatusList');
       container.innerHTML = signData.signers.map(s => {
         const roleConfig = {
-          investor: { icon: 'fa-landmark', color: 'indigo', label: '投资方' },
+          investor: { icon: 'fa-landmark', color: 'teal', label: '投资方' },
           borrower: { icon: 'fa-store', color: 'amber', label: '融资方' }
         };
         const role = roleConfig[s.role] || roleConfig.investor;
@@ -8833,7 +8836,7 @@ app.get('/', (c) => {
                 <button onclick="openSignaturePad('\${s.id}', '\${s.name}', '\${s.role}')" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 text-sm">
                   <i class="fas fa-pen mr-1"></i>去签署
                 </button>
-                <button onclick="sendSignReminder('\${signData.signId}', '\${s.id}')" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg" title="发送提醒">
+                <button onclick="sendSignReminder('\${signData.signId}', '\${s.id}')" class="p-2 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg" title="发送提醒">
                   <i class="fas fa-bell"></i>
                 </button>
               \`}
@@ -8845,7 +8848,7 @@ app.get('/', (c) => {
       // 更新底部操作按钮
       const leftAction = document.getElementById('signModalLeftAction');
       if (signData.status === 'completed') {
-        leftAction.innerHTML = '<button onclick="downloadSignedContract()" class="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm"><i class="fas fa-download mr-2"></i>下载已签合同</button>';
+        leftAction.innerHTML = '<button onclick="downloadSignedContract()" class="px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700 text-sm"><i class="fas fa-download mr-2"></i>下载已签合同</button>';
         document.getElementById('btnInitiateSign').classList.add('hidden');
       } else {
         leftAction.innerHTML = '<button onclick="cancelSignProcess()" class="text-sm text-red-500 hover:text-red-700"><i class="fas fa-times mr-1"></i>取消签署流程</button>';
@@ -8990,7 +8993,7 @@ app.get('/', (c) => {
       document.getElementById('editSignerEmail').value = email || '';
       
       // 更新弹窗标题图标颜色
-      const iconColors = { investor: 'indigo', borrower: 'amber' };
+      const iconColors = { investor: 'teal', borrower: 'amber' };
       const iconTypes = { investor: 'fa-landmark', borrower: 'fa-store' };
       const color = iconColors[signerType] || 'teal';
       const icon = iconTypes[signerType] || 'fa-user-edit';
@@ -9298,7 +9301,7 @@ app.get('/', (c) => {
     let customTemplates = JSON.parse(localStorage.getItem('rbf_custom_templates') || '[]');
     let templateCreateMethod = 'clone';
     let selectedSourceTemplate = null;
-    let selectedTemplateColor = 'indigo';
+    let selectedTemplateColor = 'teal';
     let editingTemplateId = null;
     
     async function loadCustomTemplates() {
@@ -9319,13 +9322,13 @@ app.get('/', (c) => {
       const customList = document.getElementById('customTemplateList');
       
       if (tab === 'system') {
-        systemTab.className = 'px-4 py-2 bg-white text-indigo-700 rounded-lg text-sm font-medium shadow-sm';
+        systemTab.className = 'px-4 py-2 bg-white text-teal-700 rounded-lg text-sm font-medium shadow-sm';
         customTab.className = 'px-4 py-2 text-gray-600 rounded-lg text-sm font-medium hover:bg-white/50';
         systemList.classList.remove('hidden');
         customList.classList.add('hidden');
       } else {
         systemTab.className = 'px-4 py-2 text-gray-600 rounded-lg text-sm font-medium hover:bg-white/50';
-        customTab.className = 'px-4 py-2 bg-white text-indigo-700 rounded-lg text-sm font-medium shadow-sm';
+        customTab.className = 'px-4 py-2 bg-white text-teal-700 rounded-lg text-sm font-medium shadow-sm';
         systemList.classList.add('hidden');
         customList.classList.remove('hidden');
         renderCustomTemplateList();
@@ -9335,7 +9338,7 @@ app.get('/', (c) => {
     function renderSystemTemplateList() {
       const container = document.getElementById('systemTemplateList');
       container.innerHTML = templates.map(t => \`
-        <div class="p-4 border border-gray-200 rounded-xl hover:border-indigo-300 hover:shadow-md transition-all">
+        <div class="p-4 border border-gray-200 rounded-xl hover:border-teal-300 hover:shadow-md transition-all">
           <div class="flex items-center space-x-3 mb-3">
             <div class="w-12 h-12 rounded-xl bg-\${t.color}-100 flex items-center justify-center">
               <i class="fas \${t.icon} text-\${t.color}-600 text-xl"></i>
@@ -9347,7 +9350,7 @@ app.get('/', (c) => {
           </div>
           <p class="text-sm text-gray-500 mb-3 line-clamp-2">\${t.description}</p>
           <div class="flex items-center justify-between">
-            <button onclick="viewTemplateDetail('\${t.id}', false)" class="text-xs text-indigo-600 hover:text-indigo-700">
+            <button onclick="viewTemplateDetail('\${t.id}', false)" class="text-xs text-teal-600 hover:text-teal-700">
               <i class="fas fa-eye mr-1"></i>查看详情
             </button>
             <button onclick="cloneSystemTemplate('\${t.id}')" class="text-xs text-emerald-600 hover:text-emerald-700">
@@ -9382,7 +9385,7 @@ app.get('/', (c) => {
               <p class="text-xs text-\${t.color || 'gray'}-600">自定义模板</p>
             </div>
             <div class="flex space-x-1">
-              <button onclick="editCustomTemplate('\${t.id}')" class="p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded" title="编辑">
+              <button onclick="editCustomTemplate('\${t.id}')" class="p-1.5 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded" title="编辑">
                 <i class="fas fa-edit text-xs"></i>
               </button>
               <button onclick="deleteCustomTemplate('\${t.id}')" class="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded" title="删除">
@@ -9405,21 +9408,21 @@ app.get('/', (c) => {
       document.getElementById('newTemplateName').value = '';
       document.getElementById('newTemplateDesc').value = '';
       document.getElementById('newTemplateIndustry').value = '餐饮';
-      selectedTemplateColor = 'indigo';
+      selectedTemplateColor = 'teal';
       templateCreateMethod = 'clone';
       selectedSourceTemplate = null;
       editingTemplateId = null;
       
-      document.getElementById('createTemplateTitle').innerHTML = '<i class="fas fa-plus-circle mr-2 text-indigo-600"></i>创建自定义模板';
+      document.getElementById('createTemplateTitle').innerHTML = '<i class="fas fa-plus-circle mr-2 text-teal-600"></i>创建自定义模板';
       document.getElementById('defaultParamsEditor').classList.add('hidden');
       
       // 重置颜色选择
       document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.classList.remove('border-indigo-600', 'border-amber-600', 'border-emerald-600', 'border-rose-600', 'border-purple-600', 'border-cyan-600');
+        btn.classList.remove('border-teal-600', 'border-amber-600', 'border-emerald-600', 'border-rose-600', 'border-cyan-600', 'border-cyan-600');
         btn.classList.add('border-transparent');
       });
       document.querySelector('.color-btn').classList.remove('border-transparent');
-      document.querySelector('.color-btn').classList.add('border-indigo-600');
+      document.querySelector('.color-btn').classList.add('border-teal-600');
       
       selectCreateMethod('clone');
     }
@@ -9428,17 +9431,17 @@ app.get('/', (c) => {
       templateCreateMethod = method;
       
       document.querySelectorAll('.create-method-btn').forEach(btn => {
-        btn.classList.remove('border-indigo-500', 'bg-indigo-50');
+        btn.classList.remove('border-teal-500', 'bg-teal-50');
         btn.classList.add('border-gray-200');
       });
       
       if (method === 'clone') {
         document.getElementById('methodClone').classList.remove('border-gray-200');
-        document.getElementById('methodClone').classList.add('border-indigo-500', 'bg-indigo-50');
+        document.getElementById('methodClone').classList.add('border-teal-500', 'bg-teal-50');
         document.getElementById('sourceTemplateSelect').classList.remove('hidden');
       } else {
         document.getElementById('methodBlank').classList.remove('border-gray-200');
-        document.getElementById('methodBlank').classList.add('border-indigo-500', 'bg-indigo-50');
+        document.getElementById('methodBlank').classList.add('border-teal-500', 'bg-teal-50');
         document.getElementById('sourceTemplateSelect').classList.add('hidden');
         document.getElementById('defaultParamsEditor').classList.add('hidden');
       }
@@ -9448,7 +9451,7 @@ app.get('/', (c) => {
       const container = document.getElementById('sourceTemplateOptions');
       container.innerHTML = templates.map(t => \`
         <button onclick="selectSourceTemplate('\${t.id}')" id="srcTpl_\${t.id}" 
-          class="source-tpl-btn p-3 border-2 border-gray-200 rounded-xl text-center hover:border-indigo-300 transition-all">
+          class="source-tpl-btn p-3 border-2 border-gray-200 rounded-xl text-center hover:border-teal-300 transition-all">
           <div class="w-10 h-10 rounded-lg bg-\${t.color}-100 flex items-center justify-center mx-auto mb-2">
             <i class="fas \${t.icon} text-\${t.color}-600"></i>
           </div>
@@ -9461,14 +9464,14 @@ app.get('/', (c) => {
       selectedSourceTemplate = templateId;
       
       document.querySelectorAll('.source-tpl-btn').forEach(btn => {
-        btn.classList.remove('border-indigo-500', 'bg-indigo-50');
+        btn.classList.remove('border-teal-500', 'bg-teal-50');
         btn.classList.add('border-gray-200');
       });
       
       const btn = document.getElementById('srcTpl_' + templateId);
       if (btn) {
         btn.classList.remove('border-gray-200');
-        btn.classList.add('border-indigo-500', 'bg-indigo-50');
+        btn.classList.add('border-teal-500', 'bg-teal-50');
       }
       
       // 加载源模板的默认参数
@@ -9507,7 +9510,7 @@ app.get('/', (c) => {
         <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-gray-100">
           <label class="text-sm text-gray-600">\${paramLabels[key] || key}</label>
           <input type="text" id="param_\${key}" value="\${value}" 
-            class="w-32 px-2 py-1 border border-gray-200 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-indigo-500">
+            class="w-32 px-2 py-1 border border-gray-200 rounded text-sm text-right focus:outline-none focus:ring-1 focus:ring-teal-500">
         </div>
       \`).join('');
     }
@@ -9516,7 +9519,7 @@ app.get('/', (c) => {
       selectedTemplateColor = color;
       
       document.querySelectorAll('.color-btn').forEach(btn => {
-        btn.classList.remove('border-indigo-600', 'border-amber-600', 'border-emerald-600', 'border-rose-600', 'border-purple-600', 'border-cyan-600');
+        btn.classList.remove('border-teal-600', 'border-amber-600', 'border-emerald-600', 'border-rose-600', 'border-cyan-600', 'border-cyan-600');
         btn.classList.add('border-transparent');
       });
       
@@ -9631,11 +9634,11 @@ app.get('/', (c) => {
       editingTemplateId = templateId;
       showCreateTemplateModal();
       
-      document.getElementById('createTemplateTitle').innerHTML = '<i class="fas fa-edit mr-2 text-indigo-600"></i>编辑模板';
+      document.getElementById('createTemplateTitle').innerHTML = '<i class="fas fa-edit mr-2 text-teal-600"></i>编辑模板';
       document.getElementById('newTemplateName').value = template.name;
       document.getElementById('newTemplateDesc').value = template.description || '';
       document.getElementById('newTemplateIndustry').value = template.industry || '其他';
-      selectedTemplateColor = template.color || 'indigo';
+      selectedTemplateColor = template.color || 'teal';
       
       if (template.sourceTemplateId) {
         templateCreateMethod = 'clone';
@@ -9662,7 +9665,7 @@ app.get('/', (c) => {
       document.getElementById('deleteTemplateName').textContent = template.name || '自定义模板';
       document.getElementById('deleteTemplateIndustry').textContent = (template.industry || '自定义') + ' · 创建于 ' + formatDate(template.createdAt);
       
-      const color = template.color || 'indigo';
+      const color = template.color || 'teal';
       const icon = template.icon || 'fa-file-contract';
       document.getElementById('deleteTemplateIcon').className = 'w-12 h-12 bg-' + color + '-100 rounded-xl flex items-center justify-center';
       document.getElementById('deleteTemplateIcon').innerHTML = '<i class="fas ' + icon + ' text-' + color + '-600"></i>';
@@ -9707,7 +9710,7 @@ app.get('/', (c) => {
       const allTemplates = [...templates, ...customTemplates];
       
       grid.innerHTML = allTemplates.map(t => \`
-        <div class="template-card p-4 border-2 rounded-xl \${selectedTemplateId === t.id ? 'selected border-indigo-500 bg-indigo-50' : 'border-gray-200'}" 
+        <div class="template-card p-4 border-2 rounded-xl \${selectedTemplateId === t.id ? 'selected border-teal-500 bg-teal-50' : 'border-gray-200'}" 
              onclick="selectTemplate('\${t.id}')">
           <div class="flex items-center space-x-3">
             <div class="w-10 h-10 rounded-lg bg-\${t.color}-100 flex items-center justify-center">
@@ -9760,18 +9763,18 @@ app.get('/', (c) => {
           <h4 class="text-sm font-medium text-gray-700 mb-2">包含模块</h4>
           <div class="flex flex-wrap gap-2">
             \${(template.modules || []).map(m => \`
-              <span class="px-2 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs">\${m.title}</span>
+              <span class="px-2 py-1 bg-teal-100 text-teal-700 rounded-full text-xs">\${m.title}</span>
             \`).join('') || '<span class="text-sm text-gray-400">无模块信息</span>'}
           </div>
         </div>
         
         <div class="mt-6 flex space-x-3">
           \${isCustom ? \`
-            <button onclick="editCustomTemplate('\${template.id}'); hideTemplateDetailModal();" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            <button onclick="editCustomTemplate('\${template.id}'); hideTemplateDetailModal();" class="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
               <i class="fas fa-edit mr-2"></i>编辑
             </button>
           \` : \`
-            <button onclick="cloneSystemTemplate('\${template.id}'); hideTemplateDetailModal();" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">
+            <button onclick="cloneSystemTemplate('\${template.id}'); hideTemplateDetailModal();" class="flex-1 px-4 py-2 bg-teal-600 text-white rounded-lg hover:bg-teal-700">
               <i class="fas fa-copy mr-2"></i>复制为我的模板
             </button>
           \`}
@@ -9790,14 +9793,15 @@ app.get('/', (c) => {
       if (!grid) return;
       
       const templateColorMap = {
-        purple: { bg: '#f3e8ff', icon: '#9333ea' },
+        purple: { bg: '#f3e8ff', icon: '#0D9488' },
         orange: { bg: '#fff7ed', icon: '#ea580c' },
         blue: { bg: '#eff6ff', icon: '#2563eb' },
         pink: { bg: '#fdf2f8', icon: '#db2777' },
         green: { bg: '#ecfdf5', icon: '#059669' },
         gray: { bg: '#f9fafb', icon: '#6b7280' },
         red: { bg: '#fef2f2', icon: '#dc2626' },
-        indigo: { bg: '#eef2ff', icon: '#4f46e5' },
+        indigo: { bg: '#F0FDFA', icon: '#49A89A' },
+        teal: { bg: '#F0FDFA', icon: '#49A89A' },
       };
       
       // 合并系统模板和自定义模板
@@ -9807,17 +9811,17 @@ app.get('/', (c) => {
         const tc = templateColorMap[t.color] || templateColorMap.gray;
         const isSelected = selectedTemplateId === t.id;
         return \`
-        <div class="template-card p-3.5 border-2 rounded-xl cursor-pointer transition-all duration-200 \${isSelected ? 'selected border-indigo-500 bg-indigo-50/50 shadow-md' : 'border-gray-200 hover:border-indigo-300 hover:shadow-sm'}" 
+        <div class="template-card p-3.5 border-2 rounded-xl cursor-pointer transition-all duration-200 \${isSelected ? 'selected border-teal-500 bg-teal-50/50 shadow-md' : 'border-gray-200 hover:border-teal-300 hover:shadow-sm'}" 
              onclick="selectTemplate('\${t.id}')">
           <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 \${isSelected ? 'ring-2 ring-indigo-300 ring-offset-1' : ''}" style="background: \${tc.bg};">
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 \${isSelected ? 'ring-2 ring-teal-300 ring-offset-1' : ''}" style="background: \${tc.bg};">
               <i class="fas \${t.icon}" style="color: \${tc.icon};"></i>
             </div>
             <div class="flex-1 min-w-0">
               <h4 class="font-semibold text-gray-900 text-sm truncate">\${t.name}</h4>
               <p class="text-xs text-gray-500 truncate">\${t.isCustom ? '<i class="fas fa-user mr-1"></i>自定义' : t.description}</p>
             </div>
-            \${isSelected ? '<i class="fas fa-check-circle text-indigo-500 text-base flex-shrink-0"></i>' : ''}
+            \${isSelected ? '<i class="fas fa-check-circle text-teal-500 text-base flex-shrink-0"></i>' : ''}
           </div>
         </div>
       \`;
@@ -9957,7 +9961,7 @@ app.get('/', (c) => {
       
       container.innerHTML = collaborators.map(c => {
         const roleConfig = {
-          investor: { icon: 'fa-landmark', color: 'indigo', label: '投资方' },
+          investor: { icon: 'fa-landmark', color: 'teal', label: '投资方' },
           borrower: { icon: 'fa-store', color: 'amber', label: '融资方' },
           viewer: { icon: 'fa-eye', color: 'gray', label: '观察者' }
         };
@@ -10000,7 +10004,7 @@ app.get('/', (c) => {
       document.getElementById('deleteCollaboratorName').textContent = collaborator.name || '协作者';
       
       const roleLabels = { investor: '投资方', borrower: '融资方', viewer: '观察者' };
-      const roleColors = { investor: 'indigo', borrower: 'amber', viewer: 'gray' };
+      const roleColors = { investor: 'teal', borrower: 'amber', viewer: 'gray' };
       const roleIcons = { investor: 'fa-landmark', borrower: 'fa-store', viewer: 'fa-eye' };
       
       const role = collaborator.role || 'viewer';
@@ -10151,8 +10155,8 @@ app.get('/', (c) => {
           <div class="version-item p-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors border border-gray-100">
             <div class="flex items-center justify-between">
               <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                  <span class="text-purple-600 font-bold text-sm">V\${index}</span>
+                <div class="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center">
+                  <span class="text-cyan-600 font-bold text-sm">V\${index}</span>
                 </div>
                 <div>
                   <p class="font-medium text-gray-900">\${v.name}</p>
@@ -10160,8 +10164,8 @@ app.get('/', (c) => {
                 </div>
               </div>
               <div class="flex items-center space-x-2">
-                \${isLatest ? '<span class="px-2 py-1 bg-purple-100 text-purple-700 rounded text-xs">最新</span>' : ''}
-                <button onclick="viewVersionDetail('\${v.id}')" class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg" title="查看详情">
+                \${isLatest ? '<span class="px-2 py-1 bg-cyan-100 text-cyan-700 rounded text-xs">最新</span>' : ''}
+                <button onclick="viewVersionDetail('\${v.id}')" class="p-2 text-gray-400 hover:text-teal-600 hover:bg-teal-50 rounded-lg" title="查看详情">
                   <i class="fas fa-eye text-sm"></i>
                 </button>
                 <button onclick="restoreVersion('\${v.id}')" class="p-2 text-gray-400 hover:text-amber-600 hover:bg-amber-50 rounded-lg" title="回退到此版本">
@@ -10186,21 +10190,21 @@ app.get('/', (c) => {
       content.innerHTML = \`
         <div class="space-y-4">
           <div class="text-center pb-4 border-b border-gray-100">
-            <div class="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-3">
-              <i class="fas fa-code-branch text-purple-600 text-2xl"></i>
+            <div class="w-16 h-16 bg-cyan-100 rounded-full flex items-center justify-center mx-auto mb-3">
+              <i class="fas fa-code-branch text-cyan-600 text-2xl"></i>
             </div>
             <h3 class="font-bold text-gray-900">\${version.name}</h3>
             <p class="text-sm text-gray-500">创建于 \${formatDateTime(version.createdAt)}</p>
           </div>
           
           <div class="grid grid-cols-2 gap-3">
-            <div class="bg-indigo-50 rounded-lg p-3 text-center">
-              <p class="text-2xl font-bold text-indigo-600">\${version.negotiationCount || (version.negotiations || []).length}</p>
-              <p class="text-xs text-indigo-500">协商轮次</p>
+            <div class="bg-teal-50 rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-teal-600">\${version.negotiationCount || (version.negotiations || []).length}</p>
+              <p class="text-xs text-teal-500">协商轮次</p>
             </div>
-            <div class="bg-purple-50 rounded-lg p-3 text-center">
-              <p class="text-2xl font-bold text-purple-600">\${version.paramCount || Object.keys(version.params || {}).length}</p>
-              <p class="text-xs text-purple-500">参数数量</p>
+            <div class="bg-cyan-50 rounded-lg p-3 text-center">
+              <p class="text-2xl font-bold text-cyan-600">\${version.paramCount || Object.keys(version.params || {}).length}</p>
+              <p class="text-xs text-cyan-500">参数数量</p>
             </div>
           </div>
           
@@ -10313,7 +10317,7 @@ app.get('/', (c) => {
       container.innerHTML = \`
         <div class="bg-gray-50 p-4 border-b border-gray-200">
           <div class="flex items-center justify-between text-sm">
-            <span class="font-medium text-purple-600">\${versionA.name}</span>
+            <span class="font-medium text-cyan-600">\${versionA.name}</span>
             <span class="text-gray-400">VS</span>
             <span class="font-medium text-blue-600">\${versionB.name}</span>
           </div>
@@ -10334,7 +10338,7 @@ app.get('/', (c) => {
                   <div class="flex-1">
                     <p class="text-sm font-medium text-gray-700">\${d.key}</p>
                     <div class="flex items-center mt-1 text-sm">
-                      <span class="text-purple-600 bg-purple-100 px-2 py-0.5 rounded">\${d.valA}</span>
+                      <span class="text-cyan-600 bg-cyan-100 px-2 py-0.5 rounded">\${d.valA}</span>
                       <i class="fas fa-arrow-right mx-2 text-gray-400"></i>
                       <span class="text-blue-600 bg-blue-100 px-2 py-0.5 rounded">\${d.valB}</span>
                     </div>
@@ -10365,13 +10369,13 @@ app.get('/', (c) => {
       
       // 更新标签样式
       document.querySelectorAll('.ai-tab').forEach(btn => {
-        btn.classList.remove('text-indigo-600', 'border-b-2', 'border-indigo-600', 'bg-white');
+        btn.classList.remove('text-teal-600', 'border-b-2', 'border-teal-600', 'bg-white');
         btn.classList.add('text-gray-500');
       });
       
       const activeTab = document.getElementById('tabAI' + tab.charAt(0).toUpperCase() + tab.slice(1));
       if (activeTab) {
-        activeTab.classList.add('text-indigo-600', 'border-b-2', 'border-indigo-600', 'bg-white');
+        activeTab.classList.add('text-teal-600', 'border-b-2', 'border-teal-600', 'bg-white');
         activeTab.classList.remove('text-gray-500');
       }
       
@@ -10393,7 +10397,7 @@ app.get('/', (c) => {
       const resultDiv = document.getElementById('aiAdviceResult');
       const initialDiv = document.getElementById('aiAdvicePanel').querySelector('.text-center');
       
-      initialDiv.innerHTML = '<div class="py-8"><i class="fas fa-spinner fa-spin text-4xl text-indigo-600 mb-4"></i><p class="text-gray-500">AI正在深度分析谈判态势...</p><p class="text-xs text-gray-400 mt-2">基于历史数据和市场行情生成建议</p></div>';
+      initialDiv.innerHTML = '<div class="py-8"><i class="fas fa-spinner fa-spin text-4xl text-teal-600 mb-4"></i><p class="text-gray-500">AI正在深度分析谈判态势...</p><p class="text-xs text-gray-400 mt-2">基于历史数据和市场行情生成建议</p></div>';
       resultDiv.classList.add('hidden');
       
       try {
@@ -10414,7 +10418,7 @@ app.get('/', (c) => {
         aiAdviceCache = advice;
         
         if (!advice.success) {
-          initialDiv.innerHTML = \`<div class="py-8"><i class="fas fa-exclamation-circle text-4xl text-red-500 mb-4"></i><p class="text-red-500">获取建议失败</p><p class="text-xs text-gray-400 mt-2">\${advice.error || '请稍后重试'}</p><button onclick="getAIAdvice()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm">重新获取</button></div>\`;
+          initialDiv.innerHTML = \`<div class="py-8"><i class="fas fa-exclamation-circle text-4xl text-red-500 mb-4"></i><p class="text-red-500">获取建议失败</p><p class="text-xs text-gray-400 mt-2">\${advice.error || '请稍后重试'}</p><button onclick="getAIAdvice()" class="mt-4 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm">重新获取</button></div>\`;
           return;
         }
         
@@ -10427,11 +10431,11 @@ app.get('/', (c) => {
         resultDiv.innerHTML = \`
           <div class="space-y-4">
             <!-- 谈判态势评分 -->
-            <div class="p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-xl border border-indigo-100">
+            <div class="p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl border border-teal-100">
               <div class="flex items-center justify-between mb-3">
                 <div>
-                  <h4 class="font-bold text-indigo-900"><i class="fas fa-gauge-high mr-2"></i>谈判态势评分</h4>
-                  <p class="text-xs text-indigo-600">基于当前条款和协商历史综合评估</p>
+                  <h4 class="font-bold text-teal-900"><i class="fas fa-gauge-high mr-2"></i>谈判态势评分</h4>
+                  <p class="text-xs text-teal-600">基于当前条款和协商历史综合评估</p>
                 </div>
                 <div class="text-right">
                   <div class="text-3xl font-bold text-\${positionColor}-600">\${positionScore}</div>
@@ -10488,22 +10492,22 @@ app.get('/', (c) => {
             
             <!-- 让步策略 -->
             \${advice.concessionStrategy ? \`
-              <div class="p-4 bg-purple-50 rounded-xl border border-purple-100">
-                <h4 class="font-bold text-purple-900 mb-3"><i class="fas fa-chess mr-2"></i>让步策略</h4>
+              <div class="p-4 bg-cyan-50 rounded-xl border border-cyan-100">
+                <h4 class="font-bold text-cyan-900 mb-3"><i class="fas fa-chess mr-2"></i>让步策略</h4>
                 <div class="grid grid-cols-2 gap-3">
-                  <div class="bg-white p-3 rounded-lg border border-purple-200">
-                    <div class="text-xs text-purple-600 mb-2 font-medium"><i class="fas fa-hand-holding-usd mr-1"></i>可让步点</div>
+                  <div class="bg-white p-3 rounded-lg border border-cyan-200">
+                    <div class="text-xs text-cyan-600 mb-2 font-medium"><i class="fas fa-hand-holding-usd mr-1"></i>可让步点</div>
                     <ul class="space-y-1">\${(advice.concessionStrategy.canGive || []).map(c => \`<li class="text-sm text-gray-600">• \${c}</li>\`).join('')}</ul>
                   </div>
-                  <div class="bg-white p-3 rounded-lg border border-purple-200">
+                  <div class="bg-white p-3 rounded-lg border border-cyan-200">
                     <div class="text-xs text-red-600 mb-2 font-medium"><i class="fas fa-shield-alt mr-1"></i>必须坚持</div>
                     <ul class="space-y-1">\${(advice.concessionStrategy.mustKeep || []).map(c => \`<li class="text-sm text-gray-600">• \${c}</li>\`).join('')}</ul>
                   </div>
                 </div>
                 \${advice.concessionStrategy.tradeOff ? \`
-                  <div class="mt-3 p-3 bg-purple-100 rounded-lg">
-                    <div class="text-xs text-purple-700 font-medium mb-1"><i class="fas fa-exchange-alt mr-1"></i>交换策略</div>
-                    <p class="text-sm text-purple-800">\${advice.concessionStrategy.tradeOff}</p>
+                  <div class="mt-3 p-3 bg-cyan-100 rounded-lg">
+                    <div class="text-xs text-cyan-700 font-medium mb-1"><i class="fas fa-exchange-alt mr-1"></i>交换策略</div>
+                    <p class="text-sm text-cyan-800">\${advice.concessionStrategy.tradeOff}</p>
                   </div>
                 \` : ''}
               </div>
@@ -10572,7 +10576,7 @@ app.get('/', (c) => {
         document.getElementById('aiLastUpdate').textContent = '更新于 ' + new Date().toLocaleTimeString('zh-CN');
         
       } catch (e) {
-        initialDiv.innerHTML = \`<div class="py-8"><i class="fas fa-wifi text-4xl text-red-500 mb-4"></i><p class="text-red-500">网络错误</p><button onclick="getAIAdvice()" class="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm">重试</button></div>\`;
+        initialDiv.innerHTML = \`<div class="py-8"><i class="fas fa-wifi text-4xl text-red-500 mb-4"></i><p class="text-red-500">网络错误</p><button onclick="getAIAdvice()" class="mt-4 px-4 py-2 bg-teal-600 text-white rounded-lg text-sm">重试</button></div>\`;
       }
     }
     
@@ -10865,10 +10869,10 @@ app.get('/', (c) => {
                           <span>市场最高: \${b.marketHigh}</span>
                         </div>
                         <div class="h-3 bg-gradient-to-r from-red-200 via-amber-200 to-emerald-200 rounded-full relative">
-                          <div class="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-indigo-600 rounded-full border-2 border-white shadow" style="left: calc(\${
+                          <div class="absolute top-1/2 transform -translate-y-1/2 w-4 h-4 bg-teal-600 rounded-full border-2 border-white shadow" style="left: calc(\${
                             b.position === 'below' ? 10 : b.position === 'above' ? 90 : 50
                           }% - 8px)">
-                            <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-indigo-600 whitespace-nowrap">
+                            <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2 text-xs font-bold text-teal-600 whitespace-nowrap">
                               \${b.currentValue}
                             </div>
                           </div>
@@ -10887,9 +10891,9 @@ app.get('/', (c) => {
             
             <!-- 综合评价 -->
             \${market.summary ? \`
-              <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-200">
-                <h4 class="font-bold text-indigo-900 mb-2"><i class="fas fa-clipboard-check mr-2"></i>综合评价</h4>
-                <p class="text-sm text-indigo-700">\${market.summary}</p>
+              <div class="p-4 bg-teal-50 rounded-xl border border-teal-200">
+                <h4 class="font-bold text-teal-900 mb-2"><i class="fas fa-clipboard-check mr-2"></i>综合评价</h4>
+                <p class="text-sm text-teal-700">\${market.summary}</p>
               </div>
             \` : ''}
           </div>

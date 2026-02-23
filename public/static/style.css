@@ -6,29 +6,29 @@
 
 /* ========== 1. 设计令牌系统 ========== */
 :root {
-  /* Apple-Inspired 精致色彩系统 */
-  --color-primary: #5856d6;
-  --color-primary-light: #7a79e0;
-  --color-primary-dark: #3634a3;
-  --color-accent: #af52de;
+  /* Contract Connect 品牌色彩系统 - Teal */
+  --color-primary: #5DC4B3;
+  --color-primary-light: #7DD4C7;
+  --color-primary-dark: #3D8F83;
+  --color-accent: #49A89A;
   --color-accent-cyan: #32ade6;
   --color-accent-emerald: #34c759;
   --color-accent-amber: #ff9f0a;
   --color-accent-rose: #ff375f;
   
   /* 渐变系统 - 精致柔和 */
-  --gradient-primary: linear-gradient(135deg, #5856d6 0%, #af52de 100%);
-  --gradient-cyber: linear-gradient(135deg, #0c0c1d 0%, #1a1040 50%, #2d1b69 100%);
-  --gradient-neon: linear-gradient(135deg, #32ade6 0%, #5856d6 40%, #af52de 70%, #ff375f 100%);
-  --gradient-aurora: linear-gradient(135deg, #0c0c1d 0%, #1a1040 25%, #0f172a 50%, #1e1b4b 75%, #2d1b69 100%);
+  --gradient-primary: linear-gradient(135deg, #5DC4B3 0%, #49A89A 100%);
+  --gradient-cyber: linear-gradient(135deg, #0a2e2a 0%, #0f3d36 50%, #164e47 100%);
+  --gradient-neon: linear-gradient(135deg, #32ade6 0%, #5DC4B3 40%, #49A89A 70%, #3D8F83 100%);
+  --gradient-aurora: linear-gradient(135deg, #0a2e2a 0%, #0f3d36 25%, #0c3530 50%, #164e47 75%, #1a6b5f 100%);
   --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
   --gradient-success: linear-gradient(135deg, #30b750 0%, #34c759 100%);
   --gradient-warning: linear-gradient(135deg, #f0840a 0%, #ff9f0a 100%);
   --gradient-danger: linear-gradient(135deg, #d62040 0%, #ff375f 100%);
   --gradient-info: linear-gradient(135deg, #0a84ff 0%, #32ade6 100%);
   --gradient-surface: linear-gradient(180deg, #ffffff 0%, #f8f9fe 100%);
-  --gradient-mesh: radial-gradient(at 20% 20%, rgba(88, 86, 214, 0.06) 0%, transparent 50%),
-                   radial-gradient(at 80% 80%, rgba(175, 82, 222, 0.04) 0%, transparent 50%),
+  --gradient-mesh: radial-gradient(at 20% 20%, rgba(93, 196, 179, 0.06) 0%, transparent 50%),
+                   radial-gradient(at 80% 80%, rgba(73, 168, 154, 0.04) 0%, transparent 50%),
                    radial-gradient(at 50% 50%, rgba(50, 173, 230, 0.03) 0%, transparent 50%);
   
   /* 玻璃态效果 - Apple风毛玻璃 */
@@ -36,13 +36,13 @@
   --glass-bg-solid: rgba(255, 255, 255, 0.92);
   --glass-bg-dark: rgba(15, 23, 42, 0.85);
   --glass-border: rgba(255, 255, 255, 0.18);
-  --glass-border-light: rgba(88, 86, 214, 0.15);
+  --glass-border-light: rgba(93, 196, 179, 0.15);
   --glass-blur: blur(24px) saturate(180%);
   
   /* 精致阴影 - Apple风分层阴影 */
-  --shadow-neon-primary: 0 0 24px rgba(88, 86, 214, 0.2), 0 0 48px rgba(88, 86, 214, 0.06);
+  --shadow-neon-primary: 0 0 24px rgba(93, 196, 179, 0.2), 0 0 48px rgba(93, 196, 179, 0.06);
   --shadow-neon-cyan: 0 0 24px rgba(50, 173, 230, 0.2), 0 0 48px rgba(50, 173, 230, 0.06);
-  --shadow-neon-purple: 0 0 24px rgba(175, 82, 222, 0.2), 0 0 48px rgba(175, 82, 222, 0.06);
+  --shadow-neon-purple: 0 0 24px rgba(73, 168, 154, 0.2), 0 0 48px rgba(73, 168, 154, 0.06);
   --shadow-neon-emerald: 0 0 24px rgba(52, 199, 89, 0.2), 0 0 48px rgba(52, 199, 89, 0.06);
   
   /* 层次阴影系统 - 更精致的阴影 */
@@ -54,7 +54,7 @@
   --shadow-2xl: 0 16px 32px rgba(0, 0, 0, 0.08), 0 32px 72px rgba(0, 0, 0, 0.14);
   --shadow-inner: inset 0 1px 3px rgba(0, 0, 0, 0.04);
   --shadow-card: 0 1px 1px rgba(0, 0, 0, 0.02), 0 2px 4px rgba(0, 0, 0, 0.03), 0 8px 24px rgba(0, 0, 0, 0.05);
-  --shadow-card-hover: 0 4px 8px rgba(0, 0, 0, 0.04), 0 16px 48px rgba(88, 86, 214, 0.1);
+  --shadow-card-hover: 0 4px 8px rgba(0, 0, 0, 0.04), 0 16px 48px rgba(93, 196, 179, 0.1);
   
   /* 圆角系统 */
   --radius-xs: 4px;
@@ -104,8 +104,8 @@ body {
   position: absolute;
   inset: 0;
   background: 
-    radial-gradient(ellipse at 20% 50%, rgba(88, 86, 214, 0.2) 0%, transparent 50%),
-    radial-gradient(ellipse at 80% 20%, rgba(175, 82, 222, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at 20% 50%, rgba(93, 196, 179, 0.2) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(73, 168, 154, 0.15) 0%, transparent 50%),
     radial-gradient(ellipse at 40% 80%, rgba(50, 173, 230, 0.12) 0%, transparent 50%);
   pointer-events: none;
 }
@@ -115,8 +115,8 @@ body {
   background-color: #f5f5f7;
   background-image: 
     var(--gradient-mesh),
-    linear-gradient(rgba(88, 86, 214, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(88, 86, 214, 0.02) 1px, transparent 1px);
+    linear-gradient(rgba(93, 196, 179, 0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(93, 196, 179, 0.02) 1px, transparent 1px);
   background-size: 100% 100%, 48px 48px, 48px 48px;
 }
 
@@ -126,13 +126,13 @@ body {
   position: absolute;
   inset: 0;
   background-image: 
-    radial-gradient(circle at 20% 30%, rgba(88, 86, 214, 0.5) 0, transparent 2px),
-    radial-gradient(circle at 40% 70%, rgba(175, 82, 222, 0.4) 0, transparent 2px),
+    radial-gradient(circle at 20% 30%, rgba(93, 196, 179, 0.5) 0, transparent 2px),
+    radial-gradient(circle at 40% 70%, rgba(73, 168, 154, 0.4) 0, transparent 2px),
     radial-gradient(circle at 60% 20%, rgba(50, 173, 230, 0.35) 0, transparent 2px),
     radial-gradient(circle at 80% 60%, rgba(52, 199, 89, 0.3) 0, transparent 2px),
     radial-gradient(circle at 10% 80%, rgba(255, 55, 95, 0.25) 0, transparent 2px),
-    radial-gradient(circle at 90% 40%, rgba(88, 86, 214, 0.35) 0, transparent 2px),
-    radial-gradient(circle at 55% 45%, rgba(175, 82, 222, 0.2) 0, transparent 3px),
+    radial-gradient(circle at 90% 40%, rgba(93, 196, 179, 0.35) 0, transparent 2px),
+    radial-gradient(circle at 55% 45%, rgba(73, 168, 154, 0.2) 0, transparent 3px),
     radial-gradient(circle at 75% 35%, rgba(50, 173, 230, 0.25) 0, transparent 2px);
   pointer-events: none;
   animation: particleFloat 30s linear infinite;
@@ -207,7 +207,7 @@ nav:hover, .navbar:hover {
   color: white;
   box-shadow: 
     0 1px 1px rgba(0, 0, 0, 0.04),
-    0 4px 12px rgba(88, 86, 214, 0.28),
+    0 4px 12px rgba(93, 196, 179, 0.28),
     inset 0 1px 0 rgba(255, 255, 255, 0.15);
 }
 
@@ -215,7 +215,7 @@ nav:hover, .navbar:hover {
   transform: translateY(-1px);
   box-shadow: 
     0 2px 4px rgba(0, 0, 0, 0.06),
-    0 8px 24px rgba(88, 86, 214, 0.35);
+    0 8px 24px rgba(93, 196, 179, 0.35);
   filter: brightness(1.06);
 }
 
@@ -233,10 +233,10 @@ nav:hover, .navbar:hover {
 }
 
 .btn-secondary:hover {
-  border-color: rgba(88, 86, 214, 0.4);
+  border-color: rgba(93, 196, 179, 0.4);
   color: var(--color-primary);
-  background: rgba(88, 86, 214, 0.04);
-  box-shadow: 0 2px 8px rgba(88, 86, 214, 0.1);
+  background: rgba(93, 196, 179, 0.04);
+  box-shadow: 0 2px 8px rgba(93, 196, 179, 0.1);
 }
 
 /* 成功按钮 */
@@ -272,7 +272,7 @@ nav:hover, .navbar:hover {
 }
 
 .btn-ghost:hover {
-  background: rgba(88, 86, 214, 0.06);
+  background: rgba(93, 196, 179, 0.06);
   color: var(--color-primary);
 }
 
@@ -304,7 +304,7 @@ nav:hover, .navbar:hover {
 .card:hover, .project-card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-card-hover);
-  border-color: rgba(88, 86, 214, 0.12);
+  border-color: rgba(93, 196, 179, 0.12);
 }
 
 .card:hover::before, .project-card:hover::before {
@@ -483,7 +483,7 @@ input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 
-    0 0 0 3px rgba(88, 86, 214, 0.12),
+    0 0 0 3px rgba(93, 196, 179, 0.12),
     0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
@@ -519,7 +519,7 @@ input::placeholder, textarea::placeholder {
 }
 
 .badge-primary {
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(139, 92, 246, 0.15) 100%);
+  background: linear-gradient(135deg, rgba(93, 196, 179, 0.15) 0%, rgba(73, 168, 154, 0.15) 100%);
   color: var(--color-primary);
 }
 
@@ -558,8 +558,8 @@ input::placeholder, textarea::placeholder {
   border-radius: 50%;
   background: var(--gradient-primary);
   box-shadow: 
-    0 4px 16px rgba(88, 86, 214, 0.35),
-    0 0 0 1px rgba(88, 86, 214, 0.1);
+    0 4px 16px rgba(93, 196, 179, 0.35),
+    0 0 0 1px rgba(93, 196, 179, 0.1);
   cursor: pointer;
   z-index: 500;
   transition: all var(--duration-normal) var(--ease-apple);
@@ -589,8 +589,8 @@ input::placeholder, textarea::placeholder {
 .ai-assistant-fab:hover {
   transform: scale(1.08);
   box-shadow: 
-    0 8px 28px rgba(88, 86, 214, 0.4),
-    0 0 0 1px rgba(88, 86, 214, 0.15);
+    0 8px 28px rgba(93, 196, 179, 0.4),
+    0 0 0 1px rgba(93, 196, 179, 0.15);
 }
 
 .ai-assistant-fab:hover::before {
@@ -695,7 +695,7 @@ input::placeholder, textarea::placeholder {
 .ai-message.assistant .ai-message-avatar {
   background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 8px rgba(93, 196, 179, 0.3);
 }
 
 .ai-message.user .ai-message-avatar {
@@ -723,7 +723,7 @@ input::placeholder, textarea::placeholder {
   background: var(--gradient-primary);
   color: white;
   border-bottom-right-radius: 4px;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  box-shadow: 0 2px 8px rgba(93, 196, 179, 0.3);
 }
 
 .ai-chat-input {
@@ -755,14 +755,14 @@ input::placeholder, textarea::placeholder {
 }
 
 .negotiation-item:hover {
-  border-color: rgba(99, 102, 241, 0.2);
+  border-color: rgba(93, 196, 179, 0.2);
   box-shadow: var(--shadow-sm);
   transform: translateX(4px);
 }
 
 .negotiation-item.investor {
   border-left: 3px solid var(--color-primary);
-  background: linear-gradient(90deg, rgba(99, 102, 241, 0.03) 0%, white 100%);
+  background: linear-gradient(90deg, rgba(93, 196, 179, 0.03) 0%, white 100%);
 }
 
 .negotiation-item.borrower {
@@ -789,7 +789,7 @@ input::placeholder, textarea::placeholder {
 .quick-input-btn:hover {
   border-color: var(--color-primary);
   color: var(--color-primary);
-  background: rgba(99, 102, 241, 0.05);
+  background: rgba(93, 196, 179, 0.05);
   transform: translateY(-1px);
   box-shadow: var(--shadow-sm);
 }
@@ -806,17 +806,17 @@ input::placeholder, textarea::placeholder {
 }
 
 .template-card:hover {
-  border-color: rgba(99, 102, 241, 0.3);
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.02) 0%, white 100%);
+  border-color: rgba(93, 196, 179, 0.3);
+  background: linear-gradient(135deg, rgba(93, 196, 179, 0.02) 0%, white 100%);
   transform: translateY(-4px);
   box-shadow: var(--shadow-lg);
 }
 
 .template-card.selected {
   border-color: var(--color-primary);
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  background: linear-gradient(135deg, rgba(93, 196, 179, 0.05) 0%, rgba(73, 168, 154, 0.05) 100%);
   box-shadow: 
-    0 0 0 3px rgba(99, 102, 241, 0.15),
+    0 0 0 3px rgba(93, 196, 179, 0.15),
     var(--shadow-md);
 }
 
@@ -835,7 +835,7 @@ input::placeholder, textarea::placeholder {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 2px 8px rgba(93, 196, 179, 0.4);
 }
 
 /* ========== 13. 签署流程进度 ========== */
@@ -880,7 +880,7 @@ input::placeholder, textarea::placeholder {
   width: 96px;
   height: 96px;
   margin: 0 auto 24px;
-  background: linear-gradient(135deg, rgba(88, 86, 214, 0.08) 0%, rgba(175, 82, 222, 0.08) 100%);
+  background: linear-gradient(135deg, rgba(93, 196, 179, 0.08) 0%, rgba(73, 168, 154, 0.08) 100%);
   border-radius: var(--radius-2xl);
   display: flex;
   align-items: center;
@@ -909,7 +909,7 @@ input::placeholder, textarea::placeholder {
 .empty-action-btn {
   padding: 22px;
   background: rgba(255, 255, 255, 0.9);
-  border: 1.5px dashed rgba(88, 86, 214, 0.25);
+  border: 1.5px dashed rgba(93, 196, 179, 0.25);
   border-radius: var(--radius-lg);
   text-align: left;
   cursor: pointer;
@@ -937,7 +937,7 @@ input::placeholder, textarea::placeholder {
 .perspective-badge.perspective-investor {
   background: var(--gradient-primary);
   color: white;
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+  box-shadow: 0 4px 12px rgba(93, 196, 179, 0.35);
 }
 
 .perspective-badge.perspective-borrower {
@@ -1145,7 +1145,7 @@ body.modal-open {
 .smart-change-item:hover {
   transform: translateX(4px);
   background: white;
-  border-color: rgba(99, 102, 241, 0.2);
+  border-color: rgba(93, 196, 179, 0.2);
   box-shadow: var(--shadow-sm);
 }
 
@@ -1160,12 +1160,12 @@ body.modal-open {
 
 .agent-card.processing {
   animation: agentProcess 1.5s ease-in-out infinite;
-  border-color: rgba(99, 102, 241, 0.3);
+  border-color: rgba(93, 196, 179, 0.3);
 }
 
 @keyframes agentProcess {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
-  50% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(93, 196, 179, 0.4); }
+  50% { box-shadow: 0 0 0 8px rgba(93, 196, 179, 0); }
 }
 
 .agent-card.completed {
@@ -1185,7 +1185,7 @@ body.modal-open {
   background: linear-gradient(90deg, 
     var(--color-primary), 
     var(--color-accent), 
-    #ec4899, 
+    #3D8F83, 
     var(--color-primary)
   );
   background-size: 300% 300%;
@@ -1443,7 +1443,7 @@ body.modal-open {
 
 .icon-gradient-primary {
   background: var(--gradient-primary);
-  box-shadow: 0 4px 12px rgba(88, 86, 214, 0.25);
+  box-shadow: 0 4px 12px rgba(93, 196, 179, 0.25);
 }
 
 .icon-gradient-success {
@@ -1484,7 +1484,7 @@ body.modal-open {
 }
 
 .badge-primary {
-  background: rgba(99, 102, 241, 0.1);
+  background: rgba(93, 196, 179, 0.1);
   color: var(--color-primary);
 }
 
@@ -1522,7 +1522,7 @@ body.modal-open {
   width: 80px;
   height: 80px;
   margin: 0 auto 20px;
-  background: linear-gradient(135deg, rgba(88, 86, 214, 0.08) 0%, rgba(175, 82, 222, 0.08) 100%);
+  background: linear-gradient(135deg, rgba(93, 196, 179, 0.08) 0%, rgba(73, 168, 154, 0.08) 100%);
   border-radius: var(--radius-2xl);
   display: flex;
   align-items: center;
@@ -1540,13 +1540,13 @@ body.modal-open {
   border-radius: var(--radius-lg);
   font-weight: 600;
   font-size: 0.9rem;
-  box-shadow: 0 4px 12px rgba(88, 86, 214, 0.28);
+  box-shadow: 0 4px 12px rgba(93, 196, 179, 0.28);
   transition: all var(--duration-normal) var(--ease-apple);
 }
 
 .empty-action-btn:hover {
   transform: translateY(-1px);
-  box-shadow: 0 8px 24px rgba(88, 86, 214, 0.35);
+  box-shadow: 0 8px 24px rgba(93, 196, 179, 0.35);
 }
 
 /* ========== 29. 搜索输入框 ========== */
@@ -1563,7 +1563,7 @@ body.modal-open {
 .search-input:focus {
   background: white;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 3px rgba(93, 196, 179, 0.15);
 }
 
 /* ========== 30. 快速输入按钮 ========== */
@@ -1571,8 +1571,8 @@ body.modal-open {
   display: inline-flex;
   align-items: center;
   padding: 6px 14px;
-  background: rgba(99, 102, 241, 0.06);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  background: rgba(93, 196, 179, 0.06);
+  border: 1px solid rgba(93, 196, 179, 0.15);
   border-radius: var(--radius-full);
   font-size: 0.8rem;
   color: var(--color-primary);
@@ -1581,8 +1581,8 @@ body.modal-open {
 }
 
 .quick-input-btn:hover {
-  background: rgba(99, 102, 241, 0.12);
-  border-color: rgba(99, 102, 241, 0.3);
+  background: rgba(93, 196, 179, 0.12);
+  border-color: rgba(93, 196, 179, 0.3);
   transform: translateY(-1px);
 }
 
@@ -1601,7 +1601,7 @@ body.modal-open {
 }
 
 .negotiation-item:hover {
-  background: rgba(99, 102, 241, 0.03);
+  background: rgba(93, 196, 179, 0.03);
 }
 
 .negotiation-item.investor {
@@ -1629,8 +1629,8 @@ body.modal-open {
 }
 
 .sign-progress-step.active {
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(93, 196, 179, 0.08);
+  border: 1px solid rgba(93, 196, 179, 0.2);
 }
 
 .sign-progress-step.completed {
@@ -1663,8 +1663,8 @@ body.modal-open {
 
 .template-card.selected {
   border-color: var(--color-primary);
-  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  background: linear-gradient(135deg, rgba(93, 196, 179, 0.05) 0%, rgba(73, 168, 154, 0.05) 100%);
+  box-shadow: 0 0 0 3px rgba(93, 196, 179, 0.15);
 }
 
 .template-card.selected::after {
@@ -1799,7 +1799,7 @@ body.modal-open {
   100% { background-position: 0% 50%; }
 }
 .route-animation {
-  background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899, #6366f1);
+  background: linear-gradient(90deg, #5DC4B3, #49A89A, #3D8F83, #5DC4B3);
   background-size: 300% 300%;
   animation: routeFlow 2s ease infinite;
 }
@@ -1894,7 +1894,7 @@ body.modal-open {
 .ai-quick-btn:hover {
   background: #e0e7ff;
   border-color: #c7d2fe;
-  color: #4f46e5;
+  color: #49A89A;
 }
 
 /* 基础动画 */
@@ -1992,7 +1992,7 @@ body.modal-open {
 .toast-success .toast-icon { background: rgba(16, 185, 129, 0.12); color: #059669; }
 .toast-error .toast-icon { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
 .toast-warning .toast-icon { background: rgba(245, 158, 11, 0.12); color: #d97706; }
-.toast-info .toast-icon { background: rgba(99, 102, 241, 0.12); color: #4f46e5; }
+.toast-info .toast-icon { background: rgba(93, 196, 179, 0.12); color: #49A89A; }
 
 .toast-body {
   flex: 1;
@@ -2088,7 +2088,7 @@ body.modal-open {
 
 .user-dropdown-header {
   padding: 16px;
-  background: linear-gradient(135deg, rgba(88, 86, 214, 0.06) 0%, rgba(175, 82, 222, 0.06) 100%);
+  background: linear-gradient(135deg, rgba(93, 196, 179, 0.06) 0%, rgba(73, 168, 154, 0.06) 100%);
   border-bottom: 1px solid rgba(0, 0, 0, 0.04);
 }
 
@@ -2108,7 +2108,7 @@ body.modal-open {
 }
 
 .user-dropdown-item:hover {
-  background: rgba(88, 86, 214, 0.06);
+  background: rgba(93, 196, 179, 0.06);
   color: var(--color-primary);
 }
 
@@ -2180,8 +2180,8 @@ body.modal-open {
 }
 
 .confirm-icon.info {
-  background: rgba(99, 102, 241, 0.12);
-  color: #6366f1;
+  background: rgba(93, 196, 179, 0.12);
+  color: #5DC4B3;
 }
 
 .confirm-title {
@@ -2287,7 +2287,7 @@ body.modal-open {
 }
 
 .btn-secondary.btn-loading::after {
-  border-color: rgba(99, 102, 241, 0.2);
+  border-color: rgba(93, 196, 179, 0.2);
   border-top-color: var(--color-primary);
 }
 
@@ -2487,7 +2487,7 @@ body.modal-open {
 input:focus, textarea:focus, select:focus {
   border-color: var(--color-primary);
   box-shadow: 
-    0 0 0 3px rgba(99, 102, 241, 0.12),
+    0 0 0 3px rgba(93, 196, 179, 0.12),
     var(--shadow-sm);
   transform: translateY(-1px);
 }
