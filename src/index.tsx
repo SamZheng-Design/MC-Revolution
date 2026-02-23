@@ -2281,7 +2281,9 @@ app.get('/', (c) => {
     .truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
     input, textarea, select { font-family: inherit; font-size: 1rem; }
+    input[type="checkbox"], input[type="radio"] { width: auto; padding: 0; border: none; background: transparent; box-shadow: none !important; flex-shrink: 0; }
     input:focus, textarea:focus, select:focus { outline: none; box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5); }
+    input[type="checkbox"]:focus, input[type="radio"]:focus { box-shadow: none !important; transform: none; }
     button { cursor: pointer; font-family: inherit; }
     button:disabled { opacity: 0.5; cursor: not-allowed; }
     /* Grid responsive */
@@ -3128,8 +3130,9 @@ app.get('/', (c) => {
               </div>
             </div>
             <div class="flex items-center justify-between text-sm">
-              <label class="flex items-center text-gray-600">
-                <input type="checkbox" id="rememberMe" class="mr-2 rounded">记住我
+              <label class="flex items-center text-gray-600 cursor-pointer whitespace-nowrap">
+                <input type="checkbox" id="rememberMe" class="mr-2 rounded" style="width:16px;height:16px;flex-shrink:0;">
+                <span>记住我</span>
               </label>
               <a href="#" class="text-indigo-600 hover:text-indigo-700">忘记密码？</a>
             </div>
@@ -7135,7 +7138,8 @@ app.get('/', (c) => {
               <input type="checkbox" 
                      \${checked ? 'checked' : ''} 
                      onchange="toggleSmartChange('\${type}', \${index}, this.checked)"
-                     class="w-5 h-5 \${checkColor} rounded border-gray-300 focus:ring-violet-500">
+                     class="\${checkColor} rounded border-gray-300 focus:ring-violet-500"
+                     style="width:20px;height:20px;flex-shrink:0;">
             </label>
             <div class="flex-1">
               <div class="flex items-center flex-wrap gap-2 mb-2">
