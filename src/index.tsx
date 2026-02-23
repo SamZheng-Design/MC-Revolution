@@ -3636,7 +3636,7 @@ app.get('/', (c) => {
               </div>
             </div>
           </div>
-          <div class="stat-card animate-fade-in delay-300">
+          <div class="stat-card animate-fade-in delay-300 stat-amount-card" onclick="showFundingBreakdown()" style="cursor:pointer;">
             <div class="flex items-center justify-between">
               <div>
                 <p class="stat-label">总融资额</p>
@@ -4067,6 +4067,53 @@ app.get('/', (c) => {
           </button>
         </div>
       </div>
+
+  <!-- ==================== 弹窗: 融资额拆分分析 ==================== -->
+  <div id="fundingBreakdownModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
+      <div class="p-5 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #0D9488, #3D8F83); box-shadow: 0 4px 12px rgba(73,168,154,0.3);">
+              <i class="fas fa-chart-pie text-white"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-bold text-gray-900">融资额构成分析</h2>
+              <p class="text-xs text-gray-400">按项目状态和行业拆分</p>
+            </div>
+          </div>
+          <button onclick="hideFundingBreakdown()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <i class="fas fa-times text-gray-400"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-5 overflow-y-auto max-h-[70vh]">
+        <!-- 总金额高亮 -->
+        <div class="text-center mb-5 py-4 rounded-xl" style="background: linear-gradient(135deg, rgba(13,148,136,0.06) 0%, rgba(61,143,131,0.04) 100%);">
+          <p class="text-xs text-gray-500 font-medium mb-1">总融资规模</p>
+          <p class="text-3xl font-extrabold" style="background: linear-gradient(135deg, #0D9488, #3D8F83); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.03em;" id="breakdownTotal">¥0万</p>
+        </div>
+        
+        <!-- 按状态拆分 -->
+        <div class="mb-5">
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"><i class="fas fa-layer-group mr-1.5 text-gray-400"></i>按项目状态</h4>
+          <div id="breakdownByStatus" class="space-y-2"></div>
+        </div>
+        
+        <!-- 按行业拆分 -->
+        <div class="mb-4">
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"><i class="fas fa-industry mr-1.5 text-gray-400"></i>按行业类型</h4>
+          <div id="breakdownByIndustry" class="space-y-2"></div>
+        </div>
+        
+        <!-- 项目明细 -->
+        <div>
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"><i class="fas fa-list-ul mr-1.5 text-gray-400"></i>项目明细</h4>
+          <div id="breakdownProjects" class="space-y-1.5"></div>
+        </div>
+      </div>
+    </div>
+  </div>
       <div class="p-6 overflow-y-auto max-h-[65vh]">
         <!-- 存储状态 -->
         <div class="mb-6 p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl">
@@ -6898,6 +6945,124 @@ app.get('/', (c) => {
       }, 0);
       document.getElementById('statAmount').textContent = '¥' + totalAmount.toLocaleString() + '万';
     }
+    
+    // ==================== 融资额拆分分析 ====================
+    function showFundingBreakdown() {
+      // 解析每个项目的金额
+      var projectAmounts = projects.map(function(p) {
+        var raw = (p.params?.investmentAmount || '0').replace(/[^0-9.]/g, '');
+        return {
+          id: p.id,
+          name: p.name,
+          status: p.status,
+          templateId: p.templateId,
+          amount: parseFloat(raw) || 0
+        };
+      }).filter(function(p) { return p.amount > 0; });
+      
+      var totalAmount = projectAmounts.reduce(function(s, p) { return s + p.amount; }, 0);
+      
+      // 总金额
+      document.getElementById('breakdownTotal').textContent = '¥' + totalAmount.toLocaleString() + '万';
+      
+      // ---- 按状态拆分 ----
+      var statusMap = {};
+      var statusConfig = {
+        draft: { label: '草稿', color: '#9ca3af', bg: '#f3f4f6', icon: 'fa-file-alt' },
+        negotiating: { label: '协商中', color: '#f59e0b', bg: '#fffbeb', icon: 'fa-comments' },
+        completed: { label: '已完成', color: '#10b981', bg: '#ecfdf5', icon: 'fa-check-circle' },
+        signed: { label: '已签署', color: '#0D9488', bg: '#F0FDFA', icon: 'fa-signature' }
+      };
+      projectAmounts.forEach(function(p) {
+        if (!statusMap[p.status]) statusMap[p.status] = { amount: 0, count: 0 };
+        statusMap[p.status].amount += p.amount;
+        statusMap[p.status].count++;
+      });
+      
+      var statusHTML = '';
+      Object.keys(statusMap).sort(function(a, b) { return statusMap[b].amount - statusMap[a].amount; }).forEach(function(key) {
+        var cfg = statusConfig[key] || statusConfig.draft;
+        var data = statusMap[key];
+        var pct = totalAmount > 0 ? (data.amount / totalAmount * 100) : 0;
+        statusHTML += '<div class="flex items-center gap-3 p-3 rounded-xl transition-all hover:shadow-sm" style="background:' + cfg.bg + ';">' +
+          '<div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:' + cfg.color + '20;"><i class="fas ' + cfg.icon + ' text-xs" style="color:' + cfg.color + ';"></i></div>' +
+          '<div class="flex-1 min-w-0">' +
+            '<div class="flex items-center justify-between mb-1">' +
+              '<span class="text-sm font-semibold text-gray-800">' + cfg.label + ' <span class="text-xs font-normal text-gray-400">(' + data.count + '个)</span></span>' +
+              '<span class="text-sm font-bold" style="color:' + cfg.color + ';">¥' + data.amount.toLocaleString() + '万</span>' +
+            '</div>' +
+            '<div class="w-full bg-gray-200/50 rounded-full h-1.5">' +
+              '<div class="h-1.5 rounded-full transition-all" style="width:' + pct.toFixed(1) + '%; background:' + cfg.color + ';"></div>' +
+            '</div>' +
+            '<p class="text-xs text-gray-400 mt-0.5 text-right">' + pct.toFixed(1) + '%</p>' +
+          '</div>' +
+        '</div>';
+      });
+      if (!statusHTML) statusHTML = '<p class="text-sm text-gray-400 text-center py-4">暂无数据</p>';
+      document.getElementById('breakdownByStatus').innerHTML = statusHTML;
+      
+      // ---- 按行业拆分 ----
+      var industryMap = {};
+      var industryColors = ['#0D9488', '#f59e0b', '#3b82f6', '#8b5cf6', '#ef4444', '#ec4899', '#06b6d4', '#84cc16'];
+      projectAmounts.forEach(function(p) {
+        var tpl = templates.find(function(t) { return t.id === p.templateId; });
+        var industryName = tpl ? tpl.name : '其他';
+        var industryIcon = tpl ? tpl.icon : 'fa-folder';
+        if (!industryMap[industryName]) industryMap[industryName] = { amount: 0, count: 0, icon: industryIcon };
+        industryMap[industryName].amount += p.amount;
+        industryMap[industryName].count++;
+      });
+      
+      var industryKeys = Object.keys(industryMap).sort(function(a, b) { return industryMap[b].amount - industryMap[a].amount; });
+      var industryHTML = '';
+      industryKeys.forEach(function(key, idx) {
+        var data = industryMap[key];
+        var color = industryColors[idx % industryColors.length];
+        var pct = totalAmount > 0 ? (data.amount / totalAmount * 100) : 0;
+        industryHTML += '<div class="flex items-center gap-3 p-3 rounded-xl bg-gray-50 hover:bg-gray-100/80 transition-all">' +
+          '<div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background:' + color + '15;"><i class="fas ' + data.icon + ' text-xs" style="color:' + color + ';"></i></div>' +
+          '<div class="flex-1 min-w-0">' +
+            '<div class="flex items-center justify-between mb-1">' +
+              '<span class="text-sm font-semibold text-gray-800">' + key + ' <span class="text-xs font-normal text-gray-400">(' + data.count + '个)</span></span>' +
+              '<span class="text-sm font-bold" style="color:' + color + ';">¥' + data.amount.toLocaleString() + '万</span>' +
+            '</div>' +
+            '<div class="w-full bg-gray-200/50 rounded-full h-1.5">' +
+              '<div class="h-1.5 rounded-full transition-all" style="width:' + pct.toFixed(1) + '%; background:' + color + ';"></div>' +
+            '</div>' +
+            '<p class="text-xs text-gray-400 mt-0.5 text-right">' + pct.toFixed(1) + '%</p>' +
+          '</div>' +
+        '</div>';
+      });
+      if (!industryHTML) industryHTML = '<p class="text-sm text-gray-400 text-center py-4">暂无数据</p>';
+      document.getElementById('breakdownByIndustry').innerHTML = industryHTML;
+      
+      // ---- 项目明细列表 ----
+      var sorted = projectAmounts.sort(function(a, b) { return b.amount - a.amount; });
+      var projHTML = '';
+      sorted.forEach(function(p, idx) {
+        var tpl = templates.find(function(t) { return t.id === p.templateId; });
+        var tplName = tpl ? tpl.name : '未知';
+        var sCfg = statusConfig[p.status] || statusConfig.draft;
+        var pct = totalAmount > 0 ? (p.amount / totalAmount * 100) : 0;
+        projHTML += '<div class="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-gray-50 transition-all cursor-pointer" onclick="hideFundingBreakdown(); setTimeout(function(){ openProject(\\'' + p.id + '\\'); }, 200);">' +
+          '<span class="text-xs font-bold text-gray-300 w-4 text-right">' + (idx + 1) + '</span>' +
+          '<div class="flex-1 min-w-0">' +
+            '<p class="text-sm font-medium text-gray-800 truncate">' + p.name + '</p>' +
+            '<p class="text-xs text-gray-400">' + tplName + ' · <span style="color:' + sCfg.color + ';">' + sCfg.label + '</span></p>' +
+          '</div>' +
+          '<div class="text-right flex-shrink-0">' +
+            '<p class="text-sm font-bold text-gray-800">¥' + p.amount.toLocaleString() + '万</p>' +
+            '<p class="text-xs text-gray-400">' + pct.toFixed(1) + '%</p>' +
+          '</div>' +
+        '</div>';
+      });
+      if (!projHTML) projHTML = '<p class="text-sm text-gray-400 text-center py-4">暂无融资项目</p>';
+      document.getElementById('breakdownProjects').innerHTML = projHTML;
+      
+      showModal('fundingBreakdownModal');
+    }
+    
+    function hideFundingBreakdown() { hideModal('fundingBreakdownModal'); }
     
     // ==================== 新建项目 ====================
     function showNewProjectModal() { showModal('newProjectModal'); }
