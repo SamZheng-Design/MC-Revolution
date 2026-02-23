@@ -4067,53 +4067,6 @@ app.get('/', (c) => {
           </button>
         </div>
       </div>
-
-  <!-- ==================== 弹窗: 融资额拆分分析 ==================== -->
-  <div id="fundingBreakdownModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
-    <div class="bg-white rounded-2xl max-w-md w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
-      <div class="p-5 border-b border-gray-100">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #0D9488, #3D8F83); box-shadow: 0 4px 12px rgba(73,168,154,0.3);">
-              <i class="fas fa-chart-pie text-white"></i>
-            </div>
-            <div>
-              <h2 class="text-base font-bold text-gray-900">融资额构成分析</h2>
-              <p class="text-xs text-gray-400">按项目状态和行业拆分</p>
-            </div>
-          </div>
-          <button onclick="hideFundingBreakdown()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <i class="fas fa-times text-gray-400"></i>
-          </button>
-        </div>
-      </div>
-      <div class="p-5 overflow-y-auto max-h-[70vh]">
-        <!-- 总金额高亮 -->
-        <div class="text-center mb-5 py-4 rounded-xl" style="background: linear-gradient(135deg, rgba(13,148,136,0.06) 0%, rgba(61,143,131,0.04) 100%);">
-          <p class="text-xs text-gray-500 font-medium mb-1">总融资规模</p>
-          <p class="text-3xl font-extrabold" style="background: linear-gradient(135deg, #0D9488, #3D8F83); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.03em;" id="breakdownTotal">¥0万</p>
-        </div>
-        
-        <!-- 按状态拆分 -->
-        <div class="mb-5">
-          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"><i class="fas fa-layer-group mr-1.5 text-gray-400"></i>按项目状态</h4>
-          <div id="breakdownByStatus" class="space-y-2"></div>
-        </div>
-        
-        <!-- 按行业拆分 -->
-        <div class="mb-4">
-          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"><i class="fas fa-industry mr-1.5 text-gray-400"></i>按行业类型</h4>
-          <div id="breakdownByIndustry" class="space-y-2"></div>
-        </div>
-        
-        <!-- 项目明细 -->
-        <div>
-          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"><i class="fas fa-list-ul mr-1.5 text-gray-400"></i>项目明细</h4>
-          <div id="breakdownProjects" class="space-y-1.5"></div>
-        </div>
-      </div>
-    </div>
-  </div>
       <div class="p-6 overflow-y-auto max-h-[65vh]">
         <!-- 存储状态 -->
         <div class="mb-6 p-4 bg-gradient-to-r from-teal-50 to-cyan-50 rounded-xl">
@@ -4199,6 +4152,53 @@ app.get('/', (c) => {
             <div class="flex items-center text-xs text-gray-400"><i class="fas fa-check mr-1 text-gray-300"></i>团队协作</div>
             <div class="flex items-center text-xs text-gray-400"><i class="fas fa-check mr-1 text-gray-300"></i>版本历史</div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 弹窗: 融资额拆分分析 ==================== -->
+  <div id="fundingBreakdownModal" class="hidden fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[200]">
+    <div class="bg-white rounded-2xl max-w-md w-full mx-4 max-h-[85vh] overflow-hidden animate-in">
+      <div class="p-5 border-b border-gray-100">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #0D9488, #3D8F83); box-shadow: 0 4px 12px rgba(73,168,154,0.3);">
+              <i class="fas fa-chart-pie text-white"></i>
+            </div>
+            <div>
+              <h2 class="text-base font-bold text-gray-900">融资额构成分析</h2>
+              <p class="text-xs text-gray-400">按项目状态和行业拆分</p>
+            </div>
+          </div>
+          <button onclick="hideFundingBreakdown()" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+            <i class="fas fa-times text-gray-400"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-5 overflow-y-auto max-h-[70vh]">
+        <!-- 总金额高亮 -->
+        <div class="text-center mb-5 py-4 rounded-xl" style="background: linear-gradient(135deg, rgba(13,148,136,0.06) 0%, rgba(61,143,131,0.04) 100%);">
+          <p class="text-xs text-gray-500 font-medium mb-1">总融资规模</p>
+          <p class="text-3xl font-extrabold" style="background: linear-gradient(135deg, #0D9488, #3D8F83); -webkit-background-clip: text; -webkit-text-fill-color: transparent; letter-spacing: -0.03em;" id="breakdownTotal">¥0万</p>
+        </div>
+        
+        <!-- 按状态拆分 -->
+        <div class="mb-5">
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"><i class="fas fa-layer-group mr-1.5 text-gray-400"></i>按项目状态</h4>
+          <div id="breakdownByStatus" class="space-y-2"></div>
+        </div>
+        
+        <!-- 按行业拆分 -->
+        <div class="mb-4">
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"><i class="fas fa-industry mr-1.5 text-gray-400"></i>按行业类型</h4>
+          <div id="breakdownByIndustry" class="space-y-2"></div>
+        </div>
+        
+        <!-- 项目明细 -->
+        <div>
+          <h4 class="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3"><i class="fas fa-list-ul mr-1.5 text-gray-400"></i>项目明细</h4>
+          <div id="breakdownProjects" class="space-y-1.5"></div>
         </div>
       </div>
     </div>
