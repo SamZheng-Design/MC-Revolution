@@ -5633,10 +5633,14 @@ app.get('/', (c) => {
       localStorage.setItem('rbf_current_user', JSON.stringify(currentUser));
       localStorage.setItem('rbf_auth_token', authToken);
       
+      // 清除旧项目数据，确保每次游客登录都有完整 demo 体验
+      projects = [];
+      localStorage.removeItem('rbf_projects');
+      
       // 注入 demo 项目数据
       injectDemoProjects();
       
-      showToast('info', '游客模式', '已加载演示项目，可自由体验所有功能');
+      showToast('info', '游客模式', '已加载 ' + projects.length + ' 个演示项目，可自由体验所有功能');
       onLoginSuccess();
     }
     
@@ -5941,9 +5945,16 @@ app.get('/', (c) => {
       // 注入 demo 数据（不覆盖已有项目）
       const existingIds = projects.map(p => p.id);
       const newDemos = demoProjects.filter(p => !existingIds.includes(p.id));
+      console.log('[injectDemoProjects] Existing:', existingIds.length, 'New demos:', newDemos.length);
       if (newDemos.length > 0) {
         projects = [...newDemos, ...projects];
         saveProjects();
+        console.log('[injectDemoProjects] Injected', newDemos.length, 'demo projects. Total:', projects.length);
+      } else if (projects.length === 0) {
+        // 极端情况：没有新demo也没有现有项目，强制注入所有
+        projects = demoProjects;
+        saveProjects();
+        console.log('[injectDemoProjects] Force injected all', demoProjects.length, 'demo projects');
       }
       renderProjects();
       updateStats();
@@ -5962,6 +5973,11 @@ app.get('/', (c) => {
         cancelText: '取消',
         confirmClass: 'btn-danger',
         onConfirm: function() {
+          // 游客用户退出时清除 demo 项目数据，确保下次登录获得全新体验
+          if (currentUser && currentUser.isGuest) {
+            projects = [];
+            localStorage.removeItem('rbf_projects');
+          }
           currentUser = null;
           authToken = null;
           localStorage.removeItem('rbf_current_user');
@@ -6539,12 +6555,23 @@ app.get('/', (c) => {
       
       // 检查用户是否已登录
       if (currentUser) {
+        // 游客用户：检测 demo 数据是否完整，否则自动注入
+        if (currentUser.isGuest) {
+          const hasDemoProjects = projects.some(p => p.id && p.id.startsWith('demo_'));
+          if (!hasDemoProjects || projects.length === 0) {
+            console.log('[init] Guest user detected, injecting demo projects. Current count:', projects.length);
+            injectDemoProjects();
+          }
+        }
         // 已登录用户：跳转到项目页并显示教程
         updateNavUserInfo();
         showPage('pageProjects');
+        // 确保项目列表在页面切换后再次渲染（防止 DOM 时序问题）
         setTimeout(() => {
+          renderProjects();
+          updateStats();
           checkShowOnboarding();
-        }, 500);
+        }, 300);
       }
       // 未登录用户：保持在登录页，等待登录成功后再显示教程
     }
