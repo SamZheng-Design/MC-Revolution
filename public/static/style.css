@@ -2315,10 +2315,16 @@ body.modal-open {
     flex-shrink: 0;
   }
   
-  /* 隐藏部分次要导航按钮 */
-  #pageProjects nav .tooltip[data-tip="帮助"],
-  #pageProjects nav .tooltip[data-tip="模板"] {
+  /* 移动端：帮助/模板按钮只显示图标，隐藏文字 */
+  #pageProjects nav .tooltip[data-tip="新手引导"] span,
+  #pageProjects nav .tooltip[data-tip="查看和管理合同模板"] span {
     display: none;
+  }
+  
+  #pageProjects nav .tooltip[data-tip="新手引导"],
+  #pageProjects nav .tooltip[data-tip="查看和管理合同模板"] {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
   }
   
   /* 统计卡片2列 */

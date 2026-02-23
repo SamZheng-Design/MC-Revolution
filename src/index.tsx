@@ -3520,14 +3520,16 @@ app.get('/', (c) => {
             <span id="navSyncIndicator" class="w-1.5 h-1.5 bg-emerald-400 rounded-full" style="box-shadow: 0 0 4px rgba(16,185,129,0.5);"></span>
           </button>
           <!-- 使用帮助 -->
-          <button onclick="showOnboarding()" class="tooltip w-8 h-8 flex items-center justify-center rounded-full text-sm transition-all" style="color: #86868b; background: rgba(0,0,0,0.03);" data-tip="帮助"
-            onmouseover="this.style.background='rgba(93,196,179,0.1)'; this.style.color='#5DC4B3'" onmouseout="this.style.background='rgba(0,0,0,0.03)'; this.style.color='#86868b'">
-            <i class="fas fa-question-circle"></i>
+          <button onclick="showOnboarding()" class="tooltip flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all" style="color: #6b7280; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.06);" data-tip="新手引导"
+            onmouseover="this.style.background='rgba(93,196,179,0.1)'; this.style.color='#3D8F83'; this.style.borderColor='rgba(93,196,179,0.25)'" onmouseout="this.style.background='rgba(0,0,0,0.03)'; this.style.color='#6b7280'; this.style.borderColor='rgba(0,0,0,0.06)'">
+            <i class="fas fa-question-circle text-xs"></i>
+            <span>帮助</span>
           </button>
           <!-- 模板管理 -->
-          <button onclick="showTemplateManagerModal()" class="tooltip w-8 h-8 flex items-center justify-center rounded-full text-sm transition-all" style="color: #86868b; background: rgba(0,0,0,0.03);" data-tip="模板管理"
-            onmouseover="this.style.background='rgba(93,196,179,0.1)'; this.style.color='#5DC4B3'" onmouseout="this.style.background='rgba(0,0,0,0.03)'; this.style.color='#86868b'">
-            <i class="fas fa-layer-group"></i>
+          <button onclick="showTemplateManagerModal()" class="tooltip flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all" style="color: #6b7280; background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.06);" data-tip="查看和管理合同模板"
+            onmouseover="this.style.background='rgba(93,196,179,0.1)'; this.style.color='#3D8F83'; this.style.borderColor='rgba(93,196,179,0.25)'" onmouseout="this.style.background='rgba(0,0,0,0.03)'; this.style.color='#6b7280'; this.style.borderColor='rgba(0,0,0,0.06)'">
+            <i class="fas fa-layer-group text-xs"></i>
+            <span>模板</span>
           </button>
           <!-- 分隔线 -->
           <div class="h-5 mx-0.5" style="width: 1px; background: rgba(0,0,0,0.08);"></div>
