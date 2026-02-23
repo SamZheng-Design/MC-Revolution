@@ -3574,8 +3574,8 @@ app.get('/', (c) => {
     <div class="flex-1 p-4">
       <div class="max-w-7xl mx-auto">
         <!-- 欢迎区域 Hero Banner -->
-        <div class="relative overflow-hidden rounded-2xl mb-5 p-6" style="background: linear-gradient(135deg, #1a1040 0%, #2d1b69 40%, #1e1b4b 100%);">
-          <div class="absolute inset-0" style="background: radial-gradient(ellipse at 70% 30%, rgba(93,196,179,0.3) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(175,82,222,0.2) 0%, transparent 50%); pointer-events:none;"></div>
+        <div class="relative overflow-hidden rounded-2xl mb-5 p-6" style="background: linear-gradient(135deg, #0a2e2a 0%, #0f3d36 40%, #164e47 100%);">
+          <div class="absolute inset-0" style="background: radial-gradient(ellipse at 70% 30%, rgba(93,196,179,0.35) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, rgba(46,196,182,0.2) 0%, transparent 50%); pointer-events:none;"></div>
           <div class="relative z-10 flex items-center justify-between">
             <div>
               <h2 class="text-xl font-bold text-white mb-1" style="letter-spacing: -0.02em;" id="welcomeText">欢迎回来</h2>
@@ -3585,7 +3585,7 @@ app.get('/', (c) => {
               <button onclick="showJoinCollabModal()" class="px-4 py-2.5 rounded-xl text-sm font-medium flex items-center gap-2" style="background: rgba(255,255,255,0.12); color: white; border: 1px solid rgba(255,255,255,0.15); backdrop-filter: blur(8px);">
                 <i class="fas fa-user-plus"></i>加入协作
               </button>
-              <button onclick="showNewProjectModal()" class="px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2" style="background: white; color: #1a1040; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+              <button onclick="showNewProjectModal()" class="px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2" style="background: white; color: #0a2e2a; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
                 <i class="fas fa-plus"></i>新建项目
               </button>
             </div>
@@ -3690,14 +3690,14 @@ app.get('/', (c) => {
               <h4 class="text-xs font-bold uppercase tracking-wider mb-4" style="color: #86868b;"><i class="fas fa-sparkles mr-1.5" style="color: #5DC4B3;"></i>平台核心能力</h4>
               <div class="grid grid-cols-4 gap-4">
                 <div class="text-center group">
-                  <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(93,196,179,0.08) 0%, rgba(175,82,222,0.08) 100%);">
+                  <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(93,196,179,0.08) 0%, rgba(73,168,154,0.08) 100%);">
                     <i class="fas fa-robot text-base" style="color: #5DC4B3;"></i>
                   </div>
                   <p class="font-medium text-xs text-gray-700">AI智能解析</p>
                   <p class="text-xs text-gray-400 mt-0.5">自然语言驱动</p>
                 </div>
                 <div class="text-center group">
-                  <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(175,82,222,0.08) 0%, rgba(255,55,95,0.06) 100%);">
+                  <div class="w-11 h-11 rounded-xl flex items-center justify-center mx-auto mb-2 transition-all" style="background: linear-gradient(135deg, rgba(73,168,154,0.08) 0%, rgba(50,173,230,0.06) 100%);">
                     <i class="fas fa-users text-base" style="color: #49A89A;"></i>
                   </div>
                   <p class="font-medium text-xs text-gray-700">多方协作</p>
