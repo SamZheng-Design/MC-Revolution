@@ -3601,9 +3601,9 @@ app.get('/', (c) => {
           </div>
         </div>
         
-        <!-- 统计卡片 - 紧凑型 / 移动2列 -->
+        <!-- 统计卡片 - 紧凑型 / 移动2列 / 可点击筛选 -->
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
-          <div class="stat-card animate-fade-in">
+          <div class="stat-card animate-fade-in stat-filter-card" data-filter="all" onclick="filterByStatCard('all')">
             <div class="flex items-center justify-between">
               <div>
                 <p class="stat-label">全部项目</p>
@@ -3614,7 +3614,7 @@ app.get('/', (c) => {
               </div>
             </div>
           </div>
-          <div class="stat-card animate-fade-in delay-100">
+          <div class="stat-card animate-fade-in delay-100 stat-filter-card" data-filter="negotiating" onclick="filterByStatCard('negotiating')">
             <div class="flex items-center justify-between">
               <div>
                 <p class="stat-label">协商中</p>
@@ -3625,7 +3625,7 @@ app.get('/', (c) => {
               </div>
             </div>
           </div>
-          <div class="stat-card animate-fade-in delay-200">
+          <div class="stat-card animate-fade-in delay-200 stat-filter-card" data-filter="completed" onclick="filterByStatCard('completed')">
             <div class="flex items-center justify-between">
               <div>
                 <p class="stat-label">已签署</p>
@@ -6763,10 +6763,46 @@ app.get('/', (c) => {
     }
     
     // ==================== 项目列表 ====================
+    // 统计卡片点击筛选
+    function filterByStatCard(filterValue) {
+      // 1) 同步下拉选择器
+      var selectEl = document.getElementById('filterStatus');
+      if (selectEl) selectEl.value = filterValue;
+      
+      // 2) 更新卡片激活状态
+      document.querySelectorAll('.stat-filter-card').forEach(function(card) {
+        var cardFilter = card.getAttribute('data-filter');
+        if (cardFilter === filterValue) {
+          card.classList.add('stat-filter-active');
+        } else {
+          card.classList.remove('stat-filter-active');
+        }
+      });
+      
+      // 3) 渲染项目列表
+      renderProjects();
+      
+      // 4) 平滑滚动到项目列表
+      var gridEl = document.getElementById('projectGrid');
+      if (gridEl) {
+        gridEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+    
     function renderProjects() {
       const grid = document.getElementById('projectGrid');
       const empty = document.getElementById('emptyState');
       const filterVal = document.getElementById('filterStatus')?.value || 'all';
+      
+      // 同步统计卡片激活状态
+      document.querySelectorAll('.stat-filter-card').forEach(function(card) {
+        var cardFilter = card.getAttribute('data-filter');
+        if (cardFilter === filterVal) {
+          card.classList.add('stat-filter-active');
+        } else {
+          card.classList.remove('stat-filter-active');
+        }
+      });
       
       const filtered = filterVal === 'all' ? projects : projects.filter(function(p) {
         if (filterVal === 'completed') return p.status === 'completed' || p.status === 'signed';
