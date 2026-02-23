@@ -3796,71 +3796,85 @@ app.get('/', (c) => {
     </nav>
     
     <div class="flex flex-1 overflow-hidden">
-      <!-- 左侧：协商面板 -->
-      <div class="w-2/5 border-r border-gray-200 flex flex-col bg-white">
-        <div class="p-3 border-b border-gray-100 bg-gradient-to-b from-slate-50 to-white">
-          <div class="flex items-center justify-between mb-2">
-            <label class="text-xs font-semibold text-gray-700 flex items-center">
-              <i class="fas fa-comment-dots mr-1.5 text-teal-500"></i>描述条款变动
-            </label>
-            <button onclick="showAIAdvisorPanel()" id="btnAIAdvisor" class="text-xs bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-2.5 py-1 rounded-full hover:from-teal-600 hover:to-cyan-600 flex items-center shadow-md pulse-glow">
+      <!-- 左侧：协商面板 - 重新设计：大输入框 + 紧凑记录 -->
+      <div class="w-2/5 border-r border-gray-200 flex flex-col bg-white" id="negotiationPanel">
+        <!-- 主输入区：Genspark风格大输入框 -->
+        <div class="flex-shrink-0 p-4" style="background: linear-gradient(180deg, #f0fdfa 0%, #ffffff 100%);">
+          <!-- 标题栏 -->
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center">
+              <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 10px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+                <i class="fas fa-magic text-white text-sm"></i>
+              </div>
+              <div>
+                <h3 style="font-size: 14px; font-weight: 700; color: #1e293b; line-height: 1.2;">智能条款协商</h3>
+                <p style="font-size: 11px; color: #94a3b8; line-height: 1.2;">用自然语言描述，AI自动解析变更</p>
+              </div>
+            </div>
+            <button onclick="showAIAdvisorPanel()" id="btnAIAdvisor" class="text-xs bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-3 py-1.5 rounded-full hover:from-teal-600 hover:to-cyan-600 flex items-center shadow-md pulse-glow" style="font-weight: 600;">
               <i class="fas fa-robot mr-1"></i>AI助手
             </button>
           </div>
-          <textarea id="negotiationInput" rows="2" 
-            placeholder="用自然语言描述变动...&#10;例如：投资金额改成600万，分成比例降到12%&#10;提示：Ctrl+Enter 快速发送"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 resize-none text-sm"></textarea>
           
-          <!-- 快捷输入提示 - 更紧凑 -->
-          <div class="mt-2 p-2 bg-teal-50/70 rounded-lg border border-teal-100">
-            <p class="text-xs text-teal-600 mb-1.5 font-medium"><i class="fas fa-bolt mr-1"></i>快捷输入</p>
-            <div class="flex gap-1.5 flex-wrap">
-              <button onclick="quickInput('投资金额调整为')" class="quick-input-btn">
-                <i class="fas fa-yen-sign"></i>金额
-              </button>
-              <button onclick="quickInput('分成比例改为')" class="quick-input-btn">
-                <i class="fas fa-percent"></i>分成
-              </button>
-              <button onclick="quickInput('违约金调整为')" class="quick-input-btn">
-                <i class="fas fa-exclamation-triangle"></i>违约
-              </button>
-              <button onclick="quickInput('分成期限改为')" class="quick-input-btn">
-                <i class="fas fa-calendar"></i>期限
-              </button>
-              <button onclick="quickInput('终止返还比例提高')" class="quick-input-btn">
-                <i class="fas fa-undo"></i>返还
-              </button>
+          <!-- 大输入框容器 -->
+          <div class="nego-input-wrapper" style="background: white; border: 2px solid #e2e8f0; border-radius: 16px; padding: 2px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 2px 8px rgba(0,0,0,0.04);">
+            <textarea id="negotiationInput" rows="5" 
+              placeholder="在这里输入你的协商要求...&#10;&#10;例如：&#10;• 投资金额从500万提高到600万&#10;• 分成比例从15%降到12%&#10;• 合同期限延长至5年"
+              style="width: 100%; padding: 16px 18px; border: none; outline: none; resize: none; font-size: 14px; line-height: 1.7; color: #334155; background: transparent; font-family: inherit; min-height: 140px; max-height: 260px;"></textarea>
+            
+            <!-- 底部工具栏 - 在输入框内部 -->
+            <div style="padding: 8px 12px; border-top: 1px solid #f1f5f9; display: flex; align-items: center; justify-content: space-between;">
+              <!-- 快捷标签 -->
+              <div class="flex gap-1.5 flex-wrap" style="flex: 1; margin-right: 12px;">
+                <button onclick="quickInput('投资金额调整为')" class="quick-input-btn" style="padding: 4px 10px; font-size: 11px; border-radius: 20px;">
+                  <i class="fas fa-yen-sign" style="font-size: 10px;"></i>金额
+                </button>
+                <button onclick="quickInput('分成比例改为')" class="quick-input-btn" style="padding: 4px 10px; font-size: 11px; border-radius: 20px;">
+                  <i class="fas fa-percent" style="font-size: 10px;"></i>分成
+                </button>
+                <button onclick="quickInput('违约金调整为')" class="quick-input-btn" style="padding: 4px 10px; font-size: 11px; border-radius: 20px;">
+                  <i class="fas fa-exclamation-triangle" style="font-size: 10px;"></i>违约
+                </button>
+                <button onclick="quickInput('分成期限改为')" class="quick-input-btn" style="padding: 4px 10px; font-size: 11px; border-radius: 20px;">
+                  <i class="fas fa-calendar" style="font-size: 10px;"></i>期限
+                </button>
+                <button onclick="quickInput('终止返还比例提高')" class="quick-input-btn" style="padding: 4px 10px; font-size: 11px; border-radius: 20px;">
+                  <i class="fas fa-undo" style="font-size: 10px;"></i>返还
+                </button>
+              </div>
+              <!-- 发送按钮 -->
+              <div class="flex items-center gap-2">
+                <span style="font-size: 10px; color: #cbd5e1;" class="hidden sm:flex items-center">
+                  <kbd style="padding: 1px 5px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 3px; font-size: 10px; color: #94a3b8;">⌘</kbd>
+                  <span style="margin: 0 2px; color: #cbd5e1;">+</span>
+                  <kbd style="padding: 1px 5px; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 3px; font-size: 10px; color: #94a3b8;">↵</kbd>
+                </span>
+                <button onclick="submitNegotiation()" id="btnSubmit" style="background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%); color: white; border: none; padding: 8px 20px; border-radius: 12px; font-size: 13px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); transition: all 0.2s ease;">
+                  <i class="fas fa-paper-plane" style="font-size: 12px;"></i>发送
+                </button>
+              </div>
             </div>
-          </div>
-          
-          <div class="flex items-center justify-between mt-2">
-            <span class="text-xs text-gray-300 flex items-center">
-              <kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-200 rounded text-gray-400 text-xs font-mono mr-0.5">Ctrl</kbd>
-              <span class="text-gray-300 mx-0.5">+</span>
-              <kbd class="px-1.5 py-0.5 bg-gray-100 border border-gray-200 rounded text-gray-400 text-xs font-mono">Enter</kbd>
-              <span class="ml-1.5 text-gray-400">快速发送</span>
-            </span>
-            <button onclick="submitNegotiation()" id="btnSubmit" class="btn-primary text-sm flex items-center">
-              <i class="fas fa-paper-plane mr-1.5"></i>发送变更
-            </button>
           </div>
         </div>
         
-        <div class="flex-1 overflow-y-auto p-3">
-          <div class="flex items-center justify-between mb-2">
-            <h3 class="text-xs font-semibold text-gray-600 flex items-center">
-              <i class="fas fa-history mr-1.5 text-gray-400"></i>协商记录
-              <span id="negotiationCount" class="ml-1.5 px-1.5 py-0.5 bg-teal-100 text-teal-700 rounded-full text-xs">0</span>
+        <!-- 协商记录：紧凑可滚动区域 -->
+        <div class="flex-1 flex flex-col overflow-hidden" style="border-top: 1px solid #f1f5f9;">
+          <!-- 记录标题栏 - 固定 -->
+          <div style="padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; background: #fafbfc; flex-shrink: 0; border-bottom: 1px solid #f1f5f9;">
+            <h3 style="font-size: 11px; font-weight: 600; color: #64748b; display: flex; align-items: center;">
+              <i class="fas fa-history" style="margin-right: 6px; color: #94a3b8; font-size: 10px;"></i>协商记录
+              <span id="negotiationCount" style="margin-left: 6px; padding: 1px 7px; background: #ccfbf1; color: #0d9488; border-radius: 10px; font-size: 10px; font-weight: 700;">0</span>
             </h3>
-            <button onclick="createVersionSnapshot()" class="text-xs text-teal-600 hover:text-teal-700 flex items-center px-2 py-1 bg-teal-50 rounded-md hover:bg-teal-100 transition-colors" title="保存当前合同版本">
-              <i class="fas fa-save mr-1"></i>保存版本
+            <button onclick="createVersionSnapshot()" style="font-size: 10px; color: #0d9488; display: flex; align-items: center; padding: 3px 8px; background: #f0fdfa; border-radius: 6px; border: 1px solid #ccfbf1; cursor: pointer; transition: all 0.2s;" title="保存当前合同版本">
+              <i class="fas fa-save" style="margin-right: 4px; font-size: 9px;"></i>保存版本
             </button>
           </div>
-          <div id="negotiationHistory" class="space-y-2">
-            <div class="text-center text-gray-400 py-6">
-              <i class="fas fa-comments text-3xl mb-2 opacity-40"></i>
-              <p class="text-xs font-medium">开始协商</p>
-              <p class="text-xs mt-0.5 opacity-70">输入变动内容，AI将自动解析</p>
+          <!-- 记录列表 - 可滚动 -->
+          <div id="negotiationHistory" class="space-y-2" style="flex: 1; overflow-y: auto; padding: 8px 10px; scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;">
+            <div class="text-center text-gray-400 py-4">
+              <i class="fas fa-comments text-2xl mb-1.5 opacity-40"></i>
+              <p style="font-size: 11px; font-weight: 500;">开始协商</p>
+              <p style="font-size: 10px; margin-top: 2px; opacity: 0.7;">输入变动内容，AI将自动解析</p>
             </div>
           </div>
         </div>

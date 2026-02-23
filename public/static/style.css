@@ -1742,9 +1742,58 @@ body.modal-open {
   background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
 }
 
-/* 协商输入框动画 */
-#negotiationInput:focus { min-height: 80px; }
-#negotiationInput { transition: min-height 0.2s ease; }
+/* ========== 协商输入框 - Genspark风格大输入区 ========== */
+/* 输入框容器 focus 状态 */
+.nego-input-wrapper:focus-within {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.1), 0 4px 16px rgba(0,0,0,0.06) !important;
+  transform: translateY(-1px);
+}
+.nego-input-wrapper {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+/* textarea placeholder 美化 */
+#negotiationInput::placeholder {
+  color: #94a3b8;
+  font-size: 13px;
+  line-height: 1.8;
+}
+#negotiationInput:focus::placeholder {
+  color: #cbd5e1;
+}
+#negotiationInput {
+  transition: min-height 0.3s ease;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+#negotiationInput:focus {
+  min-height: 160px;
+}
+
+/* 发送按钮 hover */
+#btnSubmit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45) !important;
+}
+#btnSubmit:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* 协商记录滚动条 */
+#negotiationHistory::-webkit-scrollbar {
+  width: 4px;
+}
+#negotiationHistory::-webkit-scrollbar-track {
+  background: transparent;
+}
+#negotiationHistory::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 4px;
+}
+#negotiationHistory::-webkit-scrollbar-thumb:hover {
+  background: #cbd5e1;
+}
 
 /* 快捷输入提示 */
 @keyframes quickHint { 0%,100% { box-shadow: none; } 50% { box-shadow: 0 0 0 2px rgba(93,196,179,0.3); } }
