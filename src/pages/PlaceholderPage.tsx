@@ -7,7 +7,7 @@ import { ProductLogo } from '../components/Logos'
 const roleLabels: Record<string, { text: string; icon: string; class: string }> = {
   shared: { text: '统一入口', icon: 'fa-sign-in-alt', class: 'bg-blue-50 text-blue-600 border-blue-200' },
   borrower: { text: '融资者专属', icon: 'fa-upload', class: 'bg-amber-50 text-amber-600 border-amber-200' },
-  investor: { text: '投资者专属', icon: 'fa-filter', class: 'bg-indigo-50 text-indigo-600 border-indigo-200' },
+  investor: { text: '投资者专属', icon: 'fa-filter', class: 'bg-teal-50 text-teal-600 border-teal-200' },
   collaborative: { text: '投融资协同', icon: 'fa-handshake', class: 'bg-[#5DC4B3]/10 text-[#5DC4B3] border-[#5DC4B3]/20' },
 }
 
@@ -57,7 +57,7 @@ export const PlaceholderPage: FC<{ productId: string }> = ({ productId }) => {
               </span>
             )}
             {product.isFilter && (
-              <span class="inline-flex items-center text-xs px-3 py-1 rounded-lg font-semibold bg-indigo-50 text-indigo-600 border border-indigo-200">
+              <span class="inline-flex items-center text-xs px-3 py-1 rounded-lg font-semibold bg-teal-50 text-teal-600 border border-teal-200">
                 <i class="fas fa-robot mr-1.5"></i>AI筛子工作流
               </span>
             )}

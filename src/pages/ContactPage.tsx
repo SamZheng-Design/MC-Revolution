@@ -31,9 +31,9 @@ export const ContactPage: FC = () => {
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="grid md:grid-cols-2 gap-8 mb-14">
             {/* Investor inquiry */}
-            <div class="rounded-2xl border-2 border-gray-100 p-8 hover:border-indigo-200 hover:shadow-xl transition-all group bg-gradient-to-br from-white to-indigo-50/20">
-              <div class="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
-                <i class="fas fa-chart-pie text-indigo-500 text-xl"></i>
+            <div class="rounded-2xl border-2 border-gray-100 p-8 hover:border-teal-200 hover:shadow-xl transition-all group bg-gradient-to-br from-white to-teal-50/20">
+              <div class="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center mb-5 group-hover:scale-105 transition-transform">
+                <i class="fas fa-chart-pie text-teal-500 text-xl"></i>
               </div>
               <h3 class="text-lg font-extrabold text-[#1d1d1f] mb-2">投资者咨询</h3>
               <p class="text-sm text-gray-500 leading-relaxed mb-5">
@@ -41,16 +41,16 @@ export const ContactPage: FC = () => {
               </p>
               <div class="space-y-3">
                 <div class="flex items-center gap-3 text-sm text-gray-600">
-                  <i class="fas fa-envelope text-indigo-400 text-xs w-5 text-center"></i>
+                  <i class="fas fa-envelope text-teal-400 text-xs w-5 text-center"></i>
                   <span>investor@microconnect.com</span>
                 </div>
                 <div class="flex items-center gap-3 text-sm text-gray-600">
-                  <i class="fas fa-phone text-indigo-400 text-xs w-5 text-center"></i>
+                  <i class="fas fa-phone text-teal-400 text-xs w-5 text-center"></i>
                   <span>+852 2668 0268</span>
                 </div>
               </div>
               <div class="mt-6">
-                <a href="#" class="inline-flex items-center px-5 py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-bold rounded-xl transition-all no-underline shadow-sm">
+                <a href="#" class="inline-flex items-center px-5 py-2.5 bg-teal-500 hover:bg-teal-600 text-white text-sm font-bold rounded-xl transition-all no-underline shadow-sm">
                   <i class="fas fa-calendar-alt mr-2 text-xs"></i>预约演示
                 </a>
               </div>

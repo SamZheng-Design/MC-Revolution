@@ -8,7 +8,7 @@ export const renderer = jsxRenderer(({ children, title }) => {
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="Assess Connect 评估通 — 多智能体协作投资决策平台" />
         <title>{title || 'Assess Connect · 评估通'}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%236366F1'/><stop offset='100%' stop-color='%238B5CF6'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g)'/></svg>" />
+        <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0%' stop-color='%235DC4B3'/><stop offset='100%' stop-color='%2349A89A'/></linearGradient></defs><circle cx='50' cy='50' r='45' fill='url(%23g)'/></svg>" />
         <script src="https://cdn.tailwindcss.com"></script>
         <link href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
@@ -23,10 +23,10 @@ export const renderer = jsxRenderer(({ children, title }) => {
                 },
                 colors: {
                   brand: {
-                    DEFAULT: '#6366F1',
-                    light: '#818CF8',
-                    dark: '#4F46E5',
-                    accent: '#8B5CF6'
+                    DEFAULT: '#5DC4B3',
+                    light: '#7DD4C7',
+                    dark: '#3D8F83',
+                    accent: '#49A89A'
                   }
                 },
                 borderRadius: {

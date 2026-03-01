@@ -18,9 +18,9 @@ interface TeamMember {
 
 const teamMembers: TeamMember[] = [
   { name: '创始人 / CEO', title: '首席执行官', titleEn: 'CEO', desc: '深耕金融科技领域十余年，曾主导多个大型金融基础设施项目的架构设计与交付。', icon: 'fa-chess-king', color: '#5DC4B3' },
-  { name: '联合创始人 / CTO', title: '首席技术官', titleEn: 'CTO', desc: '全栈技术专家，专注于AI/ML与分布式系统架构，推动Agent矩阵核心技术研发。', icon: 'fa-microchip', color: '#6366F1' },
+  { name: '联合创始人 / CTO', title: '首席技术官', titleEn: 'CTO', desc: '全栈技术专家，专注于AI/ML与分布式系统架构，推动Agent矩阵核心技术研发。', icon: 'fa-microchip', color: '#5DC4B3' },
   { name: '首席投资官', title: '首席投资官', titleEn: 'CIO', desc: '资深投资管理人，横跨PE/VC与另类投资，具备丰富的RBF与结构化融资经验。', icon: 'fa-chart-pie', color: '#F59E0B' },
-  { name: '首席产品官', title: '首席产品官', titleEn: 'CPO', desc: '前头部金融科技公司产品负责人，擅长复杂金融产品的用户体验设计与流程优化。', icon: 'fa-compass', color: '#8B5CF6' },
+  { name: '首席产品官', title: '首席产品官', titleEn: 'CPO', desc: '前头部金融科技公司产品负责人，擅长复杂金融产品的用户体验设计与流程优化。', icon: 'fa-compass', color: '#49A89A' },
 ]
 
 const advisors: TeamMember[] = [

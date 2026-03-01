@@ -4,10 +4,10 @@ import type { FC } from 'hono/jsx'
 // 评估通 — AssessPage（v33配色重构版）
 //
 // 设计对标 MC-Revolution v33：
-//   - 主色：indigo-500 (#6366f1) + purple-600 (#8b5cf6)
+//   - 主色：teal-500 (#5DC4B3) + teal-600 (#49A89A)
 //   - 背景：gray-50 (#f9fafb)
 //   - 卡片：白色 + 精致border + 柔和阴影
-//   - 重点色：indigo渐变按钮、emerald通过、red否决
+//   - 重点色：teal渐变按钮、emerald通过、red否决
 //   - 不再包含官网 Navbar
 // =====================================================
 
@@ -23,18 +23,18 @@ export const AssessPage: FC = () => {
         .assess-root { font-family: 'Inter', 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif; }
 
         :root {
-          --primary-50:  #EEF2FF;
-          --primary-100: #E0E7FF;
-          --primary-200: #C7D2FE;
-          --primary-300: #A5B4FC;
-          --primary-400: #818CF8;
-          --primary-500: #6366F1;
-          --primary-600: #4F46E5;
-          --primary-700: #4338CA;
-          --primary-800: #3730A3;
-          --primary-900: #312E81;
-          --accent-500: #8B5CF6;
-          --accent-600: #7C3AED;
+          --primary-50:  #F0FDFA;
+          --primary-100: #CCFBF1;
+          --primary-200: #99F6E4;
+          --primary-300: #5EEAD4;
+          --primary-400: #7DD4C7;
+          --primary-500: #5DC4B3;
+          --primary-600: #49A89A;
+          --primary-700: #0F766E;
+          --primary-800: #115E59;
+          --primary-900: #134E4A;
+          --accent-500: #49A89A;
+          --accent-600: #3D8F83;
           --warm-bg:  #f9fafb;
           --card-bg:  #FFFFFF;
           --border:   #E5E7EB;
@@ -55,9 +55,9 @@ export const AssessPage: FC = () => {
           display: inline-flex;
           align-items: center;
           gap: 0.4rem;
-          box-shadow: 0 4px 14px rgba(99,102,241,0.25);
+          box-shadow: 0 4px 14px rgba(93,196,179,0.25);
         }
-        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.35); }
+                .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(93,196,179,0.35); }
         .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
         .track-filter-btn.active {
@@ -114,7 +114,7 @@ export const AssessPage: FC = () => {
         <div class="max-w-7xl mx-auto flex items-center justify-between">
           <div class="flex items-center space-x-4">
             <div class="flex items-center space-x-3">
-              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+              <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-lg shadow-teal-500/20">
                 <i class="fas fa-clipboard-check text-white text-lg"></i>
               </div>
               <div>
@@ -153,8 +153,8 @@ export const AssessPage: FC = () => {
           {/* ── 统计概览 ── */}
           <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
             <div class="gs-card p-4 flex items-center space-x-4">
-              <div class="w-10 h-10 rounded-lg bg-indigo-50 flex items-center justify-center">
-                <i class="fas fa-robot text-indigo-500"></i>
+              <div class="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
+                <i class="fas fa-robot text-teal-500"></i>
               </div>
               <div>
                 <p class="text-xs text-slate-500">智能体数量</p>
@@ -162,8 +162,8 @@ export const AssessPage: FC = () => {
               </div>
             </div>
             <div class="gs-card p-4 flex items-center space-x-4">
-              <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center">
-                <i class="fas fa-layer-group text-purple-500"></i>
+              <div class="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
+                <i class="fas fa-layer-group text-teal-600"></i>
               </div>
               <div>
                 <p class="text-xs text-slate-500">待评估标的</p>
@@ -194,7 +194,7 @@ export const AssessPage: FC = () => {
           <div class="gs-card p-6 mb-6">
             <div class="flex items-center justify-between mb-5">
               <h3 class="font-semibold text-lg flex items-center text-slate-800">
-                <i class="fas fa-database mr-2 text-indigo-500"></i>
+                <i class="fas fa-database mr-2 text-teal-500"></i>
                 选择评估数据来源
               </h3>
               <div class="flex rounded-lg border border-gray-200 overflow-hidden text-sm">
@@ -212,11 +212,11 @@ export const AssessPage: FC = () => {
 
             {/* ── 平台标的库 Panel ── */}
             <div id="panel-db">
-              <div id="login-notice" class="hidden mb-4 p-4 bg-indigo-50 border border-indigo-200 rounded-xl flex items-start gap-3">
-                <i class="fas fa-lock text-indigo-500 mt-0.5 flex-shrink-0"></i>
+              <div id="login-notice" class="hidden mb-4 p-4 bg-teal-50 border border-teal-200 rounded-xl flex items-start gap-3">
+                <i class="fas fa-lock text-teal-500 mt-0.5 flex-shrink-0"></i>
                 <div>
-                  <p class="text-sm font-semibold text-indigo-800">请先登录查看您的项目</p>
-                  <p class="text-xs text-indigo-600 mt-1">平台标的库展示您名下的融资申请项目，需通过身份通验证后方可访问。</p>
+                  <p class="text-sm font-semibold text-teal-800">请先登录查看您的项目</p>
+                  <p class="text-xs text-teal-600 mt-1">平台标的库展示您名下的融资申请项目，需通过身份通验证后方可访问。</p>
                   <a href="/" class="inline-flex items-center mt-2 text-xs font-semibold px-3 py-1.5 rounded-lg text-white" style="background: var(--primary-500)">
                     <i class="fas fa-sign-in-alt mr-1.5"></i>前往登录
                   </a>
@@ -269,13 +269,13 @@ export const AssessPage: FC = () => {
 
               <div id="upload-zone"
                 class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer transition-all"
-                ondragover="event.preventDefault(); this.style.borderColor='#6366F1'; this.style.background='rgba(99,102,241,0.04)'"
+                ondragover="event.preventDefault(); this.style.borderColor='#5DC4B3'; this.style.background='rgba(93,196,179,0.04)'"
                 ondragleave="this.style.borderColor=''; this.style.background=''"
                 ondrop="handleFileDrop(event)"
                 onclick="document.getElementById('file-input').click()">
                 <input type="file" id="file-input" class="hidden" accept=".pdf,.xlsx,.xls,.txt,.doc,.docx,.csv"
                   onchange="handleFileSelect(event)" multiple />
-                <i class="fas fa-cloud-upload-alt text-3xl text-indigo-300 mb-3"></i>
+                <i class="fas fa-cloud-upload-alt text-3xl text-teal-300 mb-3"></i>
                 <p class="text-sm font-medium text-gray-600">拖拽文件到此处，或点击选择文件</p>
                 <p class="text-xs text-gray-400 mt-1">支持 PDF · Excel · TXT · Word · CSV，单文件最大 10MB</p>
               </div>
@@ -286,12 +286,12 @@ export const AssessPage: FC = () => {
                 <div>
                   <label class="text-xs font-medium text-gray-500 block mb-1">企业名称 <span class="text-red-400">*</span></label>
                   <input id="upload-company-name" type="text" placeholder="从文件中识别或手动输入"
-                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400 bg-indigo-50/30" />
+                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400 bg-teal-50/30" />
                 </div>
                 <div>
                   <label class="text-xs font-medium text-gray-500 block mb-1">行业分类</label>
                   <select id="upload-industry"
-                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-indigo-50/30">
+                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-300 bg-teal-50/30">
                     <option value="catering">餐饮</option>
                     <option value="retail">零售</option>
                     <option value="service">生活服务</option>
@@ -305,17 +305,17 @@ export const AssessPage: FC = () => {
                 <div>
                   <label class="text-xs font-medium text-gray-500 block mb-1">融资金额（万元）</label>
                   <input id="upload-funding" type="number" placeholder="例: 50"
-                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-indigo-50/30" />
+                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-300 bg-teal-50/30" />
                 </div>
                 <div>
                   <label class="text-xs font-medium text-gray-500 block mb-1">联系人</label>
                   <input id="upload-contact" type="text" placeholder="项目负责人姓名"
-                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-indigo-50/30" />
+                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-300 bg-teal-50/30" />
                 </div>
                 <div class="col-span-2">
                   <label class="text-xs font-medium text-gray-500 block mb-1">业务简介（可从文件自动提取）</label>
                   <textarea id="upload-business" rows={3} placeholder="主要业务描述、商业模式、盈利方式..."
-                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300 bg-indigo-50/30 resize-none"></textarea>
+                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-300 bg-teal-50/30 resize-none"></textarea>
                 </div>
               </div>
 
@@ -412,7 +412,7 @@ export const AssessPage: FC = () => {
               <div id="inner-section" class="gs-card p-5 opacity-40 border-2 border-dashed border-gray-200 transition-all duration-500">
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="font-semibold text-gray-800 flex items-center">
-                    <i class="fas fa-filter mr-2 text-purple-500"></i>
+                    <i class="fas fa-filter mr-2 text-teal-500"></i>
                     中环筛子体系
                     <span id="inner-step-badge" class="ml-2 text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded">第2步</span>
                   </h3>
@@ -434,7 +434,7 @@ export const AssessPage: FC = () => {
               <div id="final-section" class="gs-card p-5 opacity-40 border-2 border-dashed border-gray-200 transition-all duration-500">
                 <div class="flex items-center justify-between mb-4">
                   <h3 class="font-semibold text-gray-800 flex items-center">
-                    <i class="fas fa-chart-pie mr-2 text-indigo-500"></i>
+                    <i class="fas fa-chart-pie mr-2 text-teal-500"></i>
                     综合评分
                     <span id="final-step-badge" class="ml-2 text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded">第3步</span>
                   </h3>
@@ -495,10 +495,10 @@ export const AssessPage: FC = () => {
                     </div>
                     <ul id="missing-materials" class="space-y-1"></ul>
                   </div>
-                  <div class="bg-indigo-50 rounded-xl p-3 cursor-pointer hover:bg-indigo-100 transition" onclick="showImprovementPopup('improvement')">
+                  <div class="bg-teal-50 rounded-xl p-3 cursor-pointer hover:bg-teal-100 transition" onclick="showImprovementPopup('improvement')">
                     <div class="flex items-center justify-between mb-2">
-                      <span class="text-xs font-semibold text-indigo-700"><i class="fas fa-arrow-up mr-1"></i>改进建议</span>
-                      <span id="improvement-count" class="text-xs bg-indigo-200 text-indigo-700 px-1.5 rounded-full">0</span>
+                      <span class="text-xs font-semibold text-teal-700"><i class="fas fa-arrow-up mr-1"></i>改进建议</span>
+                      <span id="improvement-count" class="text-xs bg-teal-200 text-teal-700 px-1.5 rounded-full">0</span>
                     </div>
                     <ul id="improvement-suggestions" class="space-y-1"></ul>
                   </div>

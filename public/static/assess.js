@@ -20,8 +20,8 @@ let parsedFileContents = [];
 const API_BASE = '/api/dgt';
 
 // v33 主色
-const PRIMARY_COLOR = '#6366F1';
-const ACCENT_COLOR = '#8B5CF6';
+const PRIMARY_COLOR = '#5DC4B3';
+const ACCENT_COLOR = '#49A89A';
 
 // ==========================================================
 // 登录状态 & 用户显示
@@ -249,7 +249,7 @@ const trackNameMap = { all:'通用', catering:'餐饮', retail:'零售', ecommer
   'douyin-ecommerce':'抖音投流', education:'教育培训', service:'生活服务', 'light-asset':'文娱轻资产' };
 const trackIconMap = { catering:'fas fa-utensils', retail:'fas fa-shopping-cart', ecommerce:'fas fa-shopping-bag',
   'douyin-ecommerce':'fas fa-video', education:'fas fa-graduation-cap', service:'fas fa-concierge-bell', 'light-asset':'fas fa-star' };
-const trackColorMap = { catering:'#F59E0B', retail:'#10B981', ecommerce:'#8B5CF6',
+const trackColorMap = { catering:'#F59E0B', retail:'#10B981', ecommerce:'#49A89A',
   'douyin-ecommerce':'#EC4899', education:'#3B82F6', service:'#06B6D4', 'light-asset':'#F97316' };
 
 // ==========================================================
@@ -419,7 +419,7 @@ function renderAgentCards() {
 
   document.getElementById('inner-agents').innerHTML = filteredInnerAgents.map(agent => {
     const isGeneral = agent.industry === 'all';
-    const tagClass = isGeneral ? 'bg-blue-100 text-blue-600' : 'bg-purple-100 text-purple-600';
+    const tagClass = isGeneral ? 'bg-blue-100 text-blue-600' : 'bg-teal-100 text-teal-600';
     const tagText  = isGeneral ? '通用' : '专属';
     return '<div id="agent-' + agent.id + '" class="border rounded-lg overflow-hidden transition-all duration-300">' +
       '<div class="flex items-center justify-between p-3 bg-gray-50 cursor-pointer hover:bg-gray-100" onclick="toggleAgentDetail(\'' + agent.id + '\')">' +
@@ -502,11 +502,11 @@ async function startEvaluation() {
     const innerSection = document.getElementById('inner-section');
     innerSection.classList.remove('opacity-40','border-dashed','border-gray-200');
     innerSection.classList.add('border-solid','ring-2','ring-green-100');
-    innerSection.style.borderColor = '#7C3AED';
-    document.getElementById('inner-step-badge').className = 'ml-2 text-xs bg-purple-500 text-white px-2 py-0.5 rounded animate-pulse';
+    innerSection.style.borderColor = '#3D8F83';
+    document.getElementById('inner-step-badge').className = 'ml-2 text-xs bg-teal-500 text-white px-2 py-0.5 rounded animate-pulse';
     document.getElementById('inner-step-badge').textContent = '执行中';
     document.getElementById('inner-status').innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>并行评估中...';
-    document.getElementById('inner-status').className = 'text-sm text-purple-600 font-medium';
+    document.getElementById('inner-status').className = 'text-sm text-teal-600 font-medium';
 
     const innerAgentIds = filteredInnerAgents.map(a => a.id);
     innerAgentIds.forEach(id => updateAgentStatus(id, 'running'));
@@ -755,10 +755,10 @@ function updateAgentSteps(agentId, status, result=null) {
       '<span class="px-2 py-0.5 rounded text-xs bg-'+riskInfo.color+'-100 text-'+riskInfo.color+'-700"><i class="fas fa-'+riskInfo.icon+' mr-1"></i>'+riskInfo.text+'</span>' +
       '<span class="font-mono font-bold '+(isPassed?'text-green-600':'text-red-600')+'">'+score+'分</span></div></div></div></div>' +
       '<div class="ml-9 space-y-3">' +
-      '<div class="bg-purple-50 rounded-lg p-3 cursor-pointer hover:bg-purple-100 transition" onclick="showReasoningPopup(\''+agentId+'\',\'reasoning\')">' +
+      '<div class="bg-teal-50 rounded-lg p-3 cursor-pointer hover:bg-teal-100 transition" onclick="showReasoningPopup(\''+agentId+'\',\'reasoning\')">' +
       '<div class="flex items-center justify-between mb-2">' +
-      '<span class="font-medium text-sm text-purple-700 flex items-center"><i class="fas fa-brain mr-2"></i>AI推理过程</span>' +
-      '<span class="text-xs text-purple-500">点击查看完整内容 <i class="fas fa-external-link-alt ml-1"></i></span></div>' +
+      '<span class="font-medium text-sm text-teal-700 flex items-center"><i class="fas fa-brain mr-2"></i>AI推理过程</span>' +
+      '<span class="text-xs text-teal-500">点击查看完整内容 <i class="fas fa-external-link-alt ml-1"></i></span></div>' +
       '<div class="text-sm text-gray-600 line-clamp-3">'+reasoningPreview+'</div></div>' +
       (findings.length>0 ? '<div class="bg-amber-50 rounded-lg p-3"><div class="flex items-center space-x-2 mb-2"><i class="fas fa-search text-amber-500"></i><span class="font-medium text-sm text-gray-700">检查发现</span></div>' +
         '<ul class="space-y-1 text-sm">' + findings.slice(0,3).map(f=>'<li class="flex items-start space-x-2"><i class="fas '+getFindingIcon(f)+' mt-0.5 text-xs"></i><span class="text-gray-600">'+formatFinding(f)+'</span></li>').join('') +
@@ -769,7 +769,7 @@ function updateAgentSteps(agentId, status, result=null) {
         '<div class="text-sm text-gray-600 line-clamp-2">'+recPreview+'</div></div>' : '') +
       '</div>' +
       '<div class="ml-9 pt-2 flex space-x-3">' +
-      '<button onclick="showFullReport(\''+agentId+'\')" class="text-sm flex items-center space-x-1" style="color:var(--primary-600,#4F46E5)"><i class="fas fa-file-alt"></i><span>完整报告</span></button>' +
+      '<button onclick="showFullReport(\''+agentId+'\')" class="text-sm flex items-center space-x-1" style="color:var(--primary-600,#49A89A)"><i class="fas fa-file-alt"></i><span>完整报告</span></button>' +
       '<button onclick="showReasoningPopup(\''+agentId+'\',\'raw\')" class="text-sm text-gray-500 hover:text-gray-700 flex items-center space-x-1"><i class="fas fa-code"></i><span>原始数据</span></button>' +
       '</div></div>';
   }
@@ -781,7 +781,7 @@ function updateRadarChart(scores) {
   const data   = filteredInnerAgents.map(a => scores[a.id] || 0);
   radarChart = new Chart(ctx, {
     type: 'radar',
-    data: { labels, datasets: [{ label:'评分', data, fill:true, backgroundColor:'rgba(99,102,241,0.15)', borderColor:'#6366F1', pointBackgroundColor:'#6366F1', pointBorderColor:'#fff' }] },
+    data: { labels, datasets: [{ label:'评分', data, fill:true, backgroundColor:'rgba(93,196,179,0.15)', borderColor:'#5DC4B3', pointBackgroundColor:'#5DC4B3', pointBorderColor:'#fff' }] },
     options: { scales:{ r:{ beginAtZero:true, max:100, ticks:{ stepSize:20 } } }, plugins:{ legend:{ display:false } } }
   });
 }
@@ -840,7 +840,7 @@ function showReasoningPopup(agentId, type='reasoning') {
       '<span class="text-2xl font-bold '+(result.pass?'text-green-600':'text-red-600')+'">'+( result.result?.score||0)+'</span></div>' +
       '<span class="px-3 py-1 rounded-full text-sm '+(result.pass?'bg-green-100 text-green-700':'bg-red-100 text-red-700')+'">'+(result.pass?'✓ 通过':'✗ 未通过')+'</span></div>' +
       '<div class="prose max-w-none"><h4 class="text-gray-700 font-medium mb-2">详细推理分析</h4>' +
-      '<div class="bg-purple-50 rounded-lg p-4 reasoning-text text-gray-700">'+formatReasoningText(reasoning)+'</div></div></div>';
+      '<div class="bg-teal-50 rounded-lg p-4 reasoning-text text-gray-700">'+formatReasoningText(reasoning)+'</div></div></div>';
   } else if (type==='recommendation') {
     title='评估建议 - '+agent.name;
     const rec=getFullRecommendation(result.result);
@@ -870,7 +870,7 @@ function showFullReport(agentId) {
     '<p class="text-sm text-gray-500">执行耗时: '+(execTime/1000).toFixed(1)+'秒</p></div></div>' +
     '<div class="text-right"><div class="text-4xl font-bold '+(isPassed?'text-green-600':'text-red-600')+'">'+score+'</div>' +
     '<div class="text-sm text-gray-500">阈值: '+agent.pass_threshold+'分</div></div></div>' +
-    '<div class="bg-purple-50 rounded-xl p-4"><h4 class="font-semibold mb-3 flex items-center text-purple-700"><i class="fas fa-brain mr-2"></i>AI推理过程</h4>' +
+    '<div class="bg-teal-50 rounded-xl p-4"><h4 class="font-semibold mb-3 flex items-center text-teal-700"><i class="fas fa-brain mr-2"></i>AI推理过程</h4>' +
     '<div class="bg-white rounded-lg p-4 text-sm text-gray-700 reasoning-text max-h-64 overflow-y-auto">'+formatReasoningText(reasoning)+'</div></div>' +
     (findings.length>0?'<div class="bg-amber-50 rounded-xl p-4"><h4 class="font-semibold mb-3 flex items-center text-amber-700"><i class="fas fa-search mr-2"></i>检查发现</h4>' +
       '<div class="grid gap-2">'+findings.map((f,i)=>'<div class="flex items-start space-x-3 bg-white p-3 rounded-lg">' +
@@ -967,7 +967,7 @@ function checkUrlParams() {
       selectDeal(dealId);
       showToast('已预选标的 '+dealId+'，可以直接开始评估', 'success');
       card.scrollIntoView({ behavior:'smooth', block:'center' });
-      card.style.outline='2px solid #6366F1';
+      card.style.outline='2px solid #5DC4B3';
       setTimeout(() => card.style.outline='', 3000);
     }
   }, 500);

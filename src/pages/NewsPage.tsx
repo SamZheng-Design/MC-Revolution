@@ -36,7 +36,7 @@ const newsItems: NewsItem[] = [
   {
     date: '2026-02-10',
     category: '技术创新',
-    categoryClass: 'bg-purple-50 text-purple-600',
+    categoryClass: 'bg-teal-50 text-teal-600',
     categoryIcon: 'fa-brain',
     title: 'AI筛选引擎升级：支持投资者个性化评估模型',
     summary: '评估通和风控通完成重大技术升级，投资者可自定义AI评估模型和风控规则，实现真正的个性化项目筛选。'

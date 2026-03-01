@@ -4,7 +4,7 @@ import type { FC } from 'hono/jsx'
 // 评估通 — 独立登录页
 // 
 // 设计对标 MC-Revolution v33：
-//   - 深色 indigo/purple 渐变背景
+//   - 深色 teal 渐变背景
 //   - 精致玻璃态卡片
 //   - 流畅入场动画
 //   - 专业金融科技质感
@@ -12,7 +12,7 @@ import type { FC } from 'hono/jsx'
 
 export const LoginPage: FC = () => {
   return (
-    <div class="login-root min-h-screen relative overflow-hidden" style="background: linear-gradient(135deg, #0f0b2e 0%, #1a1145 30%, #1e1b4b 60%, #0c0a20 100%);">
+    <div class="login-root min-h-screen relative overflow-hidden" style="background: linear-gradient(135deg, #0a2e2a 0%, #0f3d36 30%, #164e47 60%, #0a2e2a 100%);">
       
       {/* ── 全局样式 ── */}
       <style>{`
@@ -33,19 +33,19 @@ export const LoginPage: FC = () => {
         }
         .bg-orb-1 {
           width: 500px; height: 500px;
-          background: radial-gradient(circle, #6366f1 0%, transparent 70%);
+          background: radial-gradient(circle, #5DC4B3 0%, transparent 70%);
           top: -100px; left: -100px;
           animation-delay: 0s;
         }
         .bg-orb-2 {
           width: 600px; height: 600px;
-          background: radial-gradient(circle, #8b5cf6 0%, transparent 70%);
+          background: radial-gradient(circle, #49A89A 0%, transparent 70%);
           bottom: -150px; right: -100px;
           animation-delay: -4s;
         }
         .bg-orb-3 {
           width: 300px; height: 300px;
-          background: radial-gradient(circle, #a78bfa 0%, transparent 70%);
+          background: radial-gradient(circle, #7DD4C7 0%, transparent 70%);
           top: 40%; left: 60%;
           animation-delay: -8s;
           opacity: 0.12;
@@ -60,8 +60,8 @@ export const LoginPage: FC = () => {
         .grid-bg {
           position: absolute; inset: 0;
           background-image: 
-            linear-gradient(rgba(99,102,241,0.06) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(99,102,241,0.06) 1px, transparent 1px);
+            linear-gradient(rgba(93,196,179,0.06) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(93,196,179,0.06) 1px, transparent 1px);
           background-size: 50px 50px;
           mask-image: radial-gradient(ellipse at 50% 50%, black 30%, transparent 75%);
           -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 30%, transparent 75%);
@@ -76,7 +76,7 @@ export const LoginPage: FC = () => {
           border-radius: 24px;
           box-shadow: 
             0 25px 60px rgba(0,0,0,0.4),
-            0 0 0 1px rgba(99,102,241,0.06),
+            0 0 0 1px rgba(93,196,179,0.06),
             inset 0 1px 0 rgba(255,255,255,0.06);
           animation: cardEntry 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
           opacity: 0;
@@ -112,9 +112,9 @@ export const LoginPage: FC = () => {
           color: rgba(148,163,184,0.5);
         }
         .login-input:focus {
-          border-color: rgba(99,102,241,0.5);
-          background: rgba(99,102,241,0.06);
-          box-shadow: 0 0 0 4px rgba(99,102,241,0.1);
+          border-color: rgba(93,196,179,0.5);
+          background: rgba(93,196,179,0.06);
+          box-shadow: 0 0 0 4px rgba(93,196,179,0.1);
         }
         .input-icon {
           position: absolute;
@@ -126,14 +126,14 @@ export const LoginPage: FC = () => {
           transition: color 0.3s;
         }
         .input-group:focus-within .input-icon {
-          color: #818cf8;
+          color: #7DD4C7;
         }
 
         /* ── 主按钮 ── */
         .btn-login {
           width: 100%;
           padding: 14px 24px;
-          background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+          background: linear-gradient(135deg, #5DC4B3 0%, #49A89A 100%);
           color: white;
           font-weight: 700;
           font-size: 15px;
@@ -147,11 +147,11 @@ export const LoginPage: FC = () => {
           align-items: center;
           justify-content: center;
           gap: 8px;
-          box-shadow: 0 4px 20px rgba(99,102,241,0.35);
+          box-shadow: 0 4px 20px rgba(93,196,179,0.35);
         }
         .btn-login:hover {
           transform: translateY(-1px);
-          box-shadow: 0 8px 30px rgba(99,102,241,0.45);
+          box-shadow: 0 8px 30px rgba(93,196,179,0.45);
         }
         .btn-login:active {
           transform: translateY(0);
@@ -186,8 +186,8 @@ export const LoginPage: FC = () => {
           flex-shrink: 0;
         }
         .custom-checkbox:checked {
-          background: linear-gradient(135deg, #6366f1, #8b5cf6);
-          border-color: #6366f1;
+          background: linear-gradient(135deg, #5DC4B3, #49A89A);
+          border-color: #5DC4B3;
         }
         .custom-checkbox:checked::after {
           content: '✓';
@@ -227,24 +227,24 @@ export const LoginPage: FC = () => {
           animation: logoPulse 3s ease-in-out infinite;
         }
         @keyframes logoPulse {
-          0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0.4); }
-          50% { box-shadow: 0 0 0 12px rgba(99,102,241,0); }
+          0%, 100% { box-shadow: 0 0 0 0 rgba(93,196,179,0.4); }
+          50% { box-shadow: 0 0 0 12px rgba(93,196,179,0); }
         }
 
         /* ── 粒子效果 ── */
         .particle {
           position: absolute;
           width: 3px; height: 3px;
-          background: rgba(99,102,241,0.4);
+          background: rgba(93,196,179,0.4);
           border-radius: 50%;
           pointer-events: none;
         }
         .particle:nth-child(1) { top: 15%; left: 10%; animation: particleDrift 8s infinite; }
         .particle:nth-child(2) { top: 25%; right: 15%; animation: particleDrift 12s infinite 2s; width: 2px; height: 2px; }
         .particle:nth-child(3) { bottom: 20%; left: 20%; animation: particleDrift 10s infinite 4s; }
-        .particle:nth-child(4) { top: 60%; right: 10%; animation: particleDrift 9s infinite 1s; width: 4px; height: 4px; background: rgba(139,92,246,0.3); }
+        .particle:nth-child(4) { top: 60%; right: 10%; animation: particleDrift 9s infinite 1s; width: 4px; height: 4px; background: rgba(73,168,154,0.3); }
         .particle:nth-child(5) { bottom: 30%; left: 50%; animation: particleDrift 11s infinite 3s; width: 2px; height: 2px; }
-        .particle:nth-child(6) { top: 10%; left: 65%; animation: particleDrift 14s infinite 5s; background: rgba(167,139,250,0.3); }
+        .particle:nth-child(6) { top: 10%; left: 65%; animation: particleDrift 14s infinite 5s; background: rgba(125,212,199,0.3); }
         @keyframes particleDrift {
           0%, 100% { transform: translate(0, 0); opacity: 0.6; }
           25% { transform: translate(15px, -20px); opacity: 1; }
@@ -314,14 +314,14 @@ export const LoginPage: FC = () => {
         {/* ── 顶部品牌 ── */}
         <div class="title-animate text-center mb-8">
           <div class="inline-flex items-center gap-3 mb-6">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center logo-pulse shadow-lg shadow-indigo-500/25">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center logo-pulse shadow-lg shadow-teal-500/25">
               <i class="fas fa-clipboard-check text-white text-2xl"></i>
             </div>
           </div>
           <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2">
             Assess Connect
           </h1>
-          <p class="text-indigo-300/60 text-sm font-medium tracking-wide">
+          <p class="text-teal-300/60 text-sm font-medium tracking-wide">
             评估通 · 多智能体协作投资决策平台
           </p>
         </div>
@@ -362,7 +362,7 @@ export const LoginPage: FC = () => {
                 <input type="checkbox" class="custom-checkbox" checked />
                 <span class="text-sm text-slate-400">记住登录</span>
               </label>
-              <a href="javascript:void(0)" class="text-sm text-indigo-400 hover:text-indigo-300 font-medium transition no-underline">
+              <a href="javascript:void(0)" class="text-sm text-teal-400 hover:text-teal-300 font-medium transition no-underline">
                 忘记密码？
               </a>
             </div>
@@ -392,7 +392,7 @@ export const LoginPage: FC = () => {
               <span>钉钉</span>
             </button>
             <button onclick="socialLogin('sso')" class="social-btn">
-              <i class="fas fa-building text-purple-400"></i>
+              <i class="fas fa-building text-teal-400"></i>
               <span>企业SSO</span>
             </button>
           </div>
@@ -401,7 +401,7 @@ export const LoginPage: FC = () => {
           <div class="mt-8 text-center">
             <p class="text-sm text-slate-500">
               还没有账户？
-              <a href="javascript:void(0)" onclick="showRegisterHint()" class="text-indigo-400 hover:text-indigo-300 font-semibold transition no-underline ml-1">
+              <a href="javascript:void(0)" onclick="showRegisterHint()" class="text-teal-400 hover:text-teal-300 font-semibold transition no-underline ml-1">
                 申请试用
               </a>
             </p>
@@ -490,7 +490,7 @@ export const LoginPage: FC = () => {
           const colors = {
             success: 'background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.2);',
             error:   'background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.2);',
-            info:    'background: rgba(99,102,241,0.15); color: #818cf8; border: 1px solid rgba(99,102,241,0.2);'
+            info:    'background: rgba(93,196,179,0.15); color: #7DD4C7; border: 1px solid rgba(93,196,179,0.2);'
           };
           const icons = { success: 'fa-check-circle', error: 'fa-exclamation-circle', info: 'fa-info-circle' };
           container.innerHTML = '<div class="login-toast" style="' + (colors[type] || colors.info) + '">' +

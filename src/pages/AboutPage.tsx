@@ -40,8 +40,8 @@ export const AboutPage: FC = () => {
               </p>
             </div>
             <div class="card-hover rounded-2xl p-8 border border-gray-100">
-              <div class="w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center mb-5">
-                <i class="fas fa-eye text-indigo-500 text-lg"></i>
+              <div class="w-12 h-12 rounded-2xl bg-teal-50 flex items-center justify-center mb-5">
+                <i class="fas fa-eye text-teal-500 text-lg"></i>
               </div>
               <h3 class="text-lg font-extrabold text-[#1d1d1f] mb-3">愿景</h3>
               <p class="text-sm text-gray-500 leading-relaxed">

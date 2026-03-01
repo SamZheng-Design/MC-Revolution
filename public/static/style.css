@@ -1,14 +1,14 @@
 /* ═══════════════════════════════════════════
    评估通设计系统 (Assess Connect Design System)
-   v33 配色 — Indigo/Purple 主题
+   v33 配色 — Teal 主题（对标合约通v33）
    ═══════════════════════════════════════════ */
 
 :root {
-  /* 品牌主色系 - Indigo */
-  --color-primary: #6366F1;
-  --color-primary-light: #818CF8;
-  --color-primary-dark: #4F46E5;
-  --color-accent: #8B5CF6;
+  /* 品牌主色系 - Teal（对标合约通v33） */
+  --color-primary: #5DC4B3;
+  --color-primary-light: #7DD4C7;
+  --color-primary-dark: #3D8F83;
+  --color-accent: #49A89A;
 
   /* 文本色 */
   --text-primary: #1d1d1f;

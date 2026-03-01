@@ -29,8 +29,8 @@ const TEAL = '#5DC4B3'
 const phaseConfig = [
   { label: '统一入口', color: '#5DC4B3', icon: 'fa-fingerprint', ids: ['identity'] },
   { label: '融资路径', color: '#F59E0B', icon: 'fa-store', ids: ['application'] },
-  { label: '投资路径', color: '#6366F1', icon: 'fa-chart-pie', ids: ['assess', 'risk', 'opportunity'] },
-  { label: '交易撮合', color: '#8B5CF6', icon: 'fa-handshake', ids: ['terms', 'contract'] },
+  { label: '投资路径', color: '#5DC4B3', icon: 'fa-chart-pie', ids: ['assess', 'risk', 'opportunity'] },
+  { label: '交易撮合', color: '#49A89A', icon: 'fa-handshake', ids: ['terms', 'contract'] },
   { label: '投后管理', color: '#10B981', icon: 'fa-chart-line', ids: ['settlement', 'performance'] },
 ]
 
@@ -50,7 +50,7 @@ export const HomePage: FC = () => {
           <div class="absolute inset-0 opacity-[0.03]" style="background-image: linear-gradient(rgba(93,196,179,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(93,196,179,0.3) 1px, transparent 1px); background-size: 60px 60px;"></div>
           {/* Radial glow */}
           <div class="absolute top-[-20%] left-[50%] translate-x-[-50%] w-[800px] h-[800px] rounded-full" style="background: radial-gradient(circle, rgba(93,196,179,0.08) 0%, transparent 60%);"></div>
-          <div class="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] rounded-full" style="background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 60%);"></div>
+          <div class="absolute bottom-[-10%] right-[10%] w-[400px] h-[400px] rounded-full" style="background: radial-gradient(circle, rgba(73,168,154,0.06) 0%, transparent 60%);"></div>
         </div>
 
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -201,7 +201,7 @@ export const HomePage: FC = () => {
                             {statusLabels[p.status].text}
                           </span>
                           {p.isFilter && (
-                            <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-200 font-semibold">
+                            <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-teal-50 text-teal-600 border border-teal-200 font-semibold">
                               <i class="fas fa-filter mr-0.5 text-[7px]"></i>AI筛子
                             </span>
                           )}
@@ -244,39 +244,39 @@ export const HomePage: FC = () => {
 
           <div class="grid md:grid-cols-2 gap-8">
             {/* Investor */}
-            <div class="relative rounded-2xl border-2 border-indigo-100 p-8 lg:p-10 hover:border-indigo-300 hover:shadow-xl transition-all group overflow-hidden">
+            <div class="relative rounded-2xl border-2 border-teal-100 p-8 lg:p-10 hover:border-teal-300 hover:shadow-xl transition-all group overflow-hidden">
               <div class="absolute top-0 right-0 w-32 h-32 rounded-full opacity-0 group-hover:opacity-100 transition-opacity" style="background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%); transform: translate(30%, -30%);"></div>
               <div class="relative">
                 <div class="flex items-center gap-3 mb-6">
-                  <div class="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center">
-                    <i class="fas fa-chart-pie text-indigo-500 text-xl"></i>
+                  <div class="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center">
+                    <i class="fas fa-chart-pie text-teal-500 text-xl"></i>
                   </div>
                   <div>
                     <h3 class="text-xl font-extrabold text-[#1d1d1f]">投资者</h3>
-                    <p class="text-xs text-indigo-400 font-medium">Investor Platform</p>
+                    <p class="text-xs text-teal-400 font-medium">Investor Platform</p>
                   </div>
                 </div>
                 <ul class="space-y-4 mb-8">
                   <li class="flex items-start gap-3 text-sm text-gray-600">
-                    <span class="w-5 h-5 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <i class="fas fa-check text-indigo-500 text-[9px]"></i>
+                    <span class="w-5 h-5 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <i class="fas fa-check text-teal-500 text-[9px]"></i>
                     </span>
                     <span><strong class="text-[#1d1d1f]">个性化AI评估</strong> — 自定义评估模型和风控规则，精准匹配投资偏好</span>
                   </li>
                   <li class="flex items-start gap-3 text-sm text-gray-600">
-                    <span class="w-5 h-5 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <i class="fas fa-check text-indigo-500 text-[9px]"></i>
+                    <span class="w-5 h-5 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <i class="fas fa-check text-teal-500 text-[9px]"></i>
                     </span>
                     <span><strong class="text-[#1d1d1f]">智能机会看板</strong> — 经AI筛选的优质项目一览，支持多维度排序与对比</span>
                   </li>
                   <li class="flex items-start gap-3 text-sm text-gray-600">
-                    <span class="w-5 h-5 rounded-full bg-indigo-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                      <i class="fas fa-check text-indigo-500 text-[9px]"></i>
+                    <span class="w-5 h-5 rounded-full bg-teal-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <i class="fas fa-check text-teal-500 text-[9px]"></i>
                     </span>
                     <span><strong class="text-[#1d1d1f]">投后全透明</strong> — 自动结算 + 实时履约监控，每笔收入分成清清楚楚</span>
                   </li>
                 </ul>
-                <a href="/portal" class="inline-flex items-center text-sm font-bold text-indigo-600 hover:text-indigo-700 no-underline group/link">
+                <a href="/portal" class="inline-flex items-center text-sm font-bold text-teal-600 hover:text-teal-700 no-underline group/link">
                   探索投资者工具 <i class="fas fa-arrow-right text-xs ml-2 group-hover/link:translate-x-1 transition-transform"></i>
                 </a>
               </div>
@@ -345,9 +345,9 @@ export const HomePage: FC = () => {
           <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
               { icon: 'fa-code-branch', color: '#5DC4B3', title: 'Y型分流架构', desc: '身份通统一入口，智能识别角色后自动分流。投资者和融资企业各走专属路径，在条款协商时精准汇合。', tag: 'Architecture' },
-              { icon: 'fa-robot', color: '#6366F1', title: '个性化AI筛子', desc: '投资者自定义评估标准和风控规则。评估通和风控通作为AI代理，在海量项目中执行个性化筛选。', tag: 'AI Engine' },
+              { icon: 'fa-robot', color: '#5DC4B3', title: '个性化AI筛子', desc: '投资者自定义评估标准和风控规则。评估通和风控通作为AI代理，在海量项目中执行个性化筛选。', tag: 'AI Engine' },
               { icon: 'fa-layer-group', color: '#F59E0B', title: '跨行业通用', desc: '不按赛道造轮子。餐饮、零售、医美、教育——同一套Agent矩阵适配一切收入分成场景。', tag: 'Scalability' },
-              { icon: 'fa-handshake', color: '#8B5CF6', title: '投融资协同', desc: '条款通+合约通实现双方在线协商、电子签约。从出价到签约全流程线上完成，摩擦成本降到最低。', tag: 'Collaboration' },
+              { icon: 'fa-handshake', color: '#49A89A', title: '投融资协同', desc: '条款通+合约通实现双方在线协商、电子签约。从出价到签约全流程线上完成，摩擦成本降到最低。', tag: 'Collaboration' },
               { icon: 'fa-chart-line', color: '#EF4444', title: '全生命周期管理', desc: '结算通自动执行收入分成，履约通实时监控经营数据。投后不再是黑箱，每笔流向清清楚楚。', tag: 'Lifecycle' },
               { icon: 'fa-database', color: '#10B981', title: '统一数据底座', desc: 'Account身份体系、Data数据底座、AI智能引擎。三层基础设施确保9个Agent共享数据、统一治理。', tag: 'Foundation' },
             ].map((item) => (

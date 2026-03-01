@@ -33,18 +33,18 @@ const phases = [
   {
     label: '投资者',
     labelEn: 'Investor',
-    color: '#6366F1',
-    bg: 'from-indigo-50 to-indigo-100/50',
-    borderColor: 'border-indigo-200',
+    color: '#5DC4B3',
+    bg: 'from-teal-50 to-teal-100/50',
+    borderColor: 'border-teal-200',
     icon: 'fa-filter',
     ids: ['assess', 'risk', 'opportunity']
   },
   {
     label: '磋商',
     labelEn: 'Deal',
-    color: '#8B5CF6',
-    bg: 'from-purple-50 to-purple-100/50',
-    borderColor: 'border-purple-200',
+    color: '#49A89A',
+    bg: 'from-teal-50 to-teal-100/50',
+    borderColor: 'border-teal-200',
     icon: 'fa-handshake',
     ids: ['terms', 'contract']
   },
@@ -89,7 +89,7 @@ const shortDesc: Record<string, string> = {
 const roleBadge: Record<string, { text: string, class: string }> = {
   shared: { text: '共用', class: 'bg-blue-100 text-blue-600' },
   borrower: { text: '融资者', class: 'bg-amber-100 text-amber-700' },
-  investor: { text: '投资者', class: 'bg-indigo-100 text-indigo-600' },
+  investor: { text: '投资者', class: 'bg-teal-100 text-teal-600' },
   collaborative: { text: '协同', class: 'bg-[#5DC4B3]/15 text-[#0d9488]' }
 }
 
@@ -123,7 +123,7 @@ const MenuItem: FC<{ product: typeof products[0], phaseColor: string }> = ({ pro
         {/* Badges */}
         <div class="flex items-center gap-2 flex-shrink-0">
           {p.isFilter && (
-            <span class="text-[9px] px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-500 font-bold hidden sm:inline-block">
+            <span class="text-[9px] px-1.5 py-0.5 rounded bg-teal-50 text-teal-500 font-bold hidden sm:inline-block">
               AI筛子
             </span>
           )}

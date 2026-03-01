@@ -6,9 +6,9 @@ import { ProductLogoSmall, ProductLogoFlow, ProductLogo } from '../components/Lo
 
 const TEAL = '#5DC4B3'
 const AMBER = '#F59E0B'
-const INDIGO = '#6366F1'
+const TEAL_PRIMARY = '#5DC4B3'
 const EMERALD = '#10B981'
-const PURPLE = '#8B5CF6'
+const TEAL_ACCENT = '#49A89A'
 
 export const DesignPage: FC = () => {
   return (
@@ -50,7 +50,7 @@ export const DesignPage: FC = () => {
                 <span class="text-xs text-gray-500">融资者路径</span>
               </div>
               <div class="flex items-center gap-2">
-                <div class="w-4 h-4 rounded bg-indigo-100 border-2 border-indigo-400"></div>
+                <div class="w-4 h-4 rounded bg-teal-100 border-2 border-teal-400"></div>
                 <span class="text-xs text-gray-500">投资者路径</span>
               </div>
               <div class="flex items-center gap-2">
@@ -156,27 +156,27 @@ export const DesignPage: FC = () => {
             {/* RIGHT: 投资者搭建筛子 */}
             <div>
               <div class="flex items-center gap-3 mb-4">
-                <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">2b</div>
+                <div class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">2b</div>
                 <div>
-                  <span class="text-sm font-bold text-indigo-600">投资者搭建筛子</span>
+                  <span class="text-sm font-bold text-teal-600">投资者搭建筛子</span>
                   <span class="text-[10px] text-gray-400 ml-2">Investor</span>
                 </div>
               </div>
-              <div class="border-l-4 border-indigo-300 pl-4">
-                <div class="p-4 bg-indigo-50/40 rounded-xl border border-dashed border-indigo-300">
+              <div class="border-l-4 border-teal-300 pl-4">
+                <div class="p-4 bg-teal-50/40 rounded-xl border border-dashed border-teal-300">
                   <div class="text-center mb-3">
-                    <span class="inline-flex items-center px-3 py-1 bg-indigo-100 text-indigo-600 text-[10px] font-bold rounded-full border border-indigo-200">
+                    <span class="inline-flex items-center px-3 py-1 bg-teal-100 text-teal-600 text-[10px] font-bold rounded-full border border-teal-200">
                       <i class="fas fa-robot mr-1"></i>投资者配置个性化AI筛选标准
                     </span>
                   </div>
-                  <p class="text-[11px] text-indigo-600/70 text-center leading-relaxed mb-3">
+                  <p class="text-[11px] text-teal-600/70 text-center leading-relaxed mb-3">
                     每个投资者可通过评估通和风控通搭建自己的筛选工作流。<br/>
                     <strong>不设置任何筛子 = 在机会通看到所有融资项目。</strong>
                   </p>
-                  <div class="flex items-center justify-center gap-2 text-[9px] text-indigo-400">
-                    <span class="px-2 py-0.5 bg-white rounded border border-indigo-200">自定义投资标准</span>
-                    <span class="px-2 py-0.5 bg-white rounded border border-indigo-200">自定义风控规则</span>
-                    <span class="px-2 py-0.5 bg-white rounded border border-indigo-200">核验方式</span>
+                  <div class="flex items-center justify-center gap-2 text-[9px] text-teal-400">
+                    <span class="px-2 py-0.5 bg-white rounded border border-teal-200">自定义投资标准</span>
+                    <span class="px-2 py-0.5 bg-white rounded border border-teal-200">自定义风控规则</span>
+                    <span class="px-2 py-0.5 bg-white rounded border border-teal-200">核验方式</span>
                   </div>
                 </div>
               </div>
@@ -186,7 +186,7 @@ export const DesignPage: FC = () => {
           {/* ===== PHASE 3: 数据筛选管道（核心过程） ===== */}
           <div class="mb-8">
             <div class="flex items-center gap-3 mb-4">
-              <div class="w-8 h-8 rounded-full bg-gradient-to-r from-amber-500 via-indigo-500 to-emerald-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">3</div>
+              <div class="w-8 h-8 rounded-full bg-gradient-to-r from-amber-500 via-teal-500 to-emerald-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">3</div>
               <div>
                 <span class="text-sm font-bold text-gray-800">数据筛选管道</span>
                 <span class="text-[10px] text-gray-400 ml-2">申请通数据 → 评估通 → 风控通 → 机会通</span>
@@ -195,14 +195,14 @@ export const DesignPage: FC = () => {
             </div>
 
             {/* Pipeline info banner */}
-            <div class="bg-gradient-to-r from-amber-50 via-indigo-50 to-emerald-50 rounded-xl p-4 border border-gray-200 mb-4">
+            <div class="bg-gradient-to-r from-amber-50 via-teal-50 to-emerald-50 rounded-xl p-4 border border-gray-200 mb-4">
               <div class="flex items-start gap-3">
                 <div class="w-8 h-8 rounded-lg bg-white border border-gray-200 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <i class="fas fa-long-arrow-alt-right text-amber-500"></i>
                 </div>
                 <div class="text-xs text-gray-600 leading-relaxed">
                   融资者在申请通上传的数据<strong class="text-amber-600">直接进入</strong>投资者搭建的评估通→风控通筛选管道。
-                  数据依次经过<strong class="text-indigo-600">评估通</strong>（投资标准筛选）和<strong class="text-indigo-600">风控通</strong>（风控标准筛选），
+                  数据依次经过<strong class="text-teal-600">评估通</strong>（投资标准筛选）和<strong class="text-teal-600">风控通</strong>（风控标准筛选），
                   <strong class="text-emerald-600">只有通过全部标准的项目</strong>才会出现在该投资者的机会通看板上。
                   不通过的项目会被淘汰或通知融资者补充材料。
                 </div>
@@ -211,19 +211,19 @@ export const DesignPage: FC = () => {
 
             {/* 评估通 */}
             <div class="relative mb-3">
-              <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-300 to-indigo-300 hidden sm:block"></div>
+              <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-amber-300 to-teal-300 hidden sm:block"></div>
               <div class="sm:ml-10">
                 <div class="flex items-center gap-2 mb-2">
                   <span class="text-[9px] px-2 py-0.5 bg-amber-100 text-amber-600 rounded-full font-bold border border-amber-200">
                     <i class="fas fa-database mr-0.5"></i>申请通数据流入
                   </span>
                   <span class="text-gray-300">→</span>
-                  <span class="text-[9px] px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded-full font-bold border border-indigo-200">
+                  <span class="text-[9px] px-2 py-0.5 bg-teal-100 text-teal-600 rounded-full font-bold border border-teal-200">
                     <i class="fas fa-filter mr-0.5"></i>筛子①
                   </span>
                 </div>
                 <a href={`/${investorFilterProducts[0].id}`} class="block no-underline group">
-                  <div class="portal-card bg-white rounded-2xl p-5 transition-all border border-indigo-200 hover:border-indigo-400 hover:shadow-md">
+                  <div class="portal-card bg-white rounded-2xl p-5 transition-all border border-teal-200 hover:border-teal-400 hover:shadow-md">
                     <div class="flex items-start gap-4">
                       <ProductLogo name={investorFilterProducts[0].name} englishShort={investorFilterProducts[0].englishShort} size={60} />
                       <div class="flex-1 min-w-0">
@@ -232,7 +232,7 @@ export const DesignPage: FC = () => {
                           <span class={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${statusLabels[investorFilterProducts[0].status].class}`}>
                             {statusLabels[investorFilterProducts[0].status].text}
                           </span>
-                          <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 font-bold border border-indigo-200">
+                          <span class="text-[10px] px-2 py-0.5 rounded-full bg-teal-50 text-teal-600 font-bold border border-teal-200">
                             <i class="fas fa-filter mr-0.5"></i>AI筛子
                           </span>
                         </div>
@@ -256,18 +256,18 @@ export const DesignPage: FC = () => {
             {/* Arrow between assess and risk */}
             <div class="sm:ml-10 flex items-center gap-2 mb-3 pl-2">
               <svg width="16" height="20" viewBox="0 0 16 20">
-                <line x1="8" y1="0" x2="8" y2="14" stroke="#6366F1" stroke-width="1.5" opacity="0.4" />
-                <polygon points="4,14 8,20 12,14" fill="#6366F1" opacity="0.4" />
+                <line x1="8" y1="0" x2="8" y2="14" stroke="#5DC4B3" stroke-width="1.5" opacity="0.4" />
+                <polygon points="4,14 8,20 12,14" fill="#5DC4B3" opacity="0.4" />
               </svg>
-              <span class="text-[9px] text-indigo-400">评估通过的项目继续流入 →</span>
+              <span class="text-[9px] text-teal-400">评估通过的项目继续流入 →</span>
             </div>
 
             {/* 风控通 */}
             <div class="relative mb-3">
-              <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-indigo-300 to-emerald-300 hidden sm:block"></div>
+              <div class="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-teal-300 to-emerald-300 hidden sm:block"></div>
               <div class="sm:ml-10">
                 <div class="flex items-center gap-2 mb-2">
-                  <span class="text-[9px] px-2 py-0.5 bg-indigo-100 text-indigo-600 rounded-full font-bold border border-indigo-200">
+                  <span class="text-[9px] px-2 py-0.5 bg-teal-100 text-teal-600 rounded-full font-bold border border-teal-200">
                     <i class="fas fa-shield-alt mr-0.5"></i>筛子②
                   </span>
                   <span class="text-[9px] text-red-400 ml-2">
@@ -275,7 +275,7 @@ export const DesignPage: FC = () => {
                   </span>
                 </div>
                 <a href={`/${investorFilterProducts[1].id}`} class="block no-underline group">
-                  <div class="portal-card bg-white rounded-2xl p-5 transition-all border border-indigo-200 hover:border-indigo-400 hover:shadow-md">
+                  <div class="portal-card bg-white rounded-2xl p-5 transition-all border border-teal-200 hover:border-teal-400 hover:shadow-md">
                     <div class="flex items-start gap-4">
                       <ProductLogo name={investorFilterProducts[1].name} englishShort={investorFilterProducts[1].englishShort} size={60} />
                       <div class="flex-1 min-w-0">
@@ -284,7 +284,7 @@ export const DesignPage: FC = () => {
                           <span class={`text-[10px] px-2 py-0.5 rounded-full border font-medium ${statusLabels[investorFilterProducts[1].status].class}`}>
                             {statusLabels[investorFilterProducts[1].status].text}
                           </span>
-                          <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 font-bold border border-indigo-200">
+                          <span class="text-[10px] px-2 py-0.5 rounded-full bg-teal-50 text-teal-600 font-bold border border-teal-200">
                             <i class="fas fa-filter mr-0.5"></i>AI筛子
                           </span>
                         </div>
@@ -364,7 +364,7 @@ export const DesignPage: FC = () => {
                 <div class="w-10 h-10 rounded-full bg-[#5DC4B3] flex items-center justify-center shadow-lg shadow-[#5DC4B3]/30">
                   <i class="fas fa-handshake text-white text-sm"></i>
                 </div>
-                <div class="h-px w-16 bg-indigo-300"></div>
+                <div class="h-px w-16 bg-teal-300"></div>
               </div>
               <span class="text-[10px] text-[#5DC4B3] font-bold mt-1">Y型汇合 · 投融资双方协同</span>
             </div>
@@ -373,9 +373,9 @@ export const DesignPage: FC = () => {
           {/* ===== PHASE 4: 交易达成（协同） ===== */}
           <div class="mb-8">
             <div class="flex items-center gap-3 mb-4">
-              <div class="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">4</div>
+              <div class="w-8 h-8 rounded-full bg-teal-500 flex items-center justify-center text-white text-xs font-bold shadow-sm">4</div>
               <div>
-                <span class="text-sm font-bold text-purple-600">交易达成</span>
+                <span class="text-sm font-bold text-teal-600">交易达成</span>
                 <span class="text-[10px] text-gray-400 ml-2">Deal Making</span>
               </div>
               <div class="flex-1 h-px bg-gray-200"></div>
@@ -510,7 +510,7 @@ export const DesignPage: FC = () => {
                           {statusLabels[p.status].text}
                         </span>
                         {p.isFilter && (
-                          <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-500 border border-indigo-200 font-semibold">
+                          <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-teal-50 text-teal-500 border border-teal-200 font-semibold">
                             <i class="fas fa-filter mr-0.5"></i>筛子
                           </span>
                         )}
