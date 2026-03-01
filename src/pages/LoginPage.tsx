@@ -330,9 +330,30 @@ export const LoginPage: FC = () => {
         <div class="login-card w-full max-w-md p-8 sm:p-10">
           
           {/* 欢迎语 */}
-          <div class="mb-8">
+          <div class="mb-6">
             <h2 class="text-xl font-bold text-white mb-1.5">欢迎回来</h2>
             <p class="text-sm text-slate-400">登录您的账户以访问评估系统</p>
+          </div>
+
+          {/* 演示账号提示 */}
+          <div class="mb-6 p-4 rounded-xl" style="background: rgba(93,196,179,0.08); border: 1px solid rgba(93,196,179,0.15);">
+            <div class="flex items-center gap-2 mb-2.5">
+              <i class="fas fa-key text-xs" style="color: #5DC4B3;"></i>
+              <span class="text-xs font-semibold" style="color: #7DD4C7;">演示账号</span>
+            </div>
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-slate-400">邮箱</span>
+                <code class="text-xs font-mono px-2 py-0.5 rounded" style="background: rgba(255,255,255,0.06); color: #5DC4B3;">demo@microconnect.com</code>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-slate-400">密码</span>
+                <code class="text-xs font-mono px-2 py-0.5 rounded" style="background: rgba(255,255,255,0.06); color: #5DC4B3;">assess2026</code>
+              </div>
+            </div>
+            <button type="button" onclick="fillDemoCredentials()" class="mt-3 w-full py-2 text-xs font-medium rounded-lg transition-all" style="background: rgba(93,196,179,0.1); color: #7DD4C7; border: 1px solid rgba(93,196,179,0.12);" onmouseover="this.style.background='rgba(93,196,179,0.18)'" onmouseout="this.style.background='rgba(93,196,179,0.1)'">
+              <i class="fas fa-bolt mr-1.5"></i>一键填入演示账号
+            </button>
           </div>
 
           {/* 登录表单 */}
@@ -424,6 +445,16 @@ export const LoginPage: FC = () => {
 
       {/* ── 登录逻辑 ── */}
       <script dangerouslySetInnerHTML={{ __html: `
+        // 一键填入演示账号
+        function fillDemoCredentials() {
+          document.getElementById('loginEmail').value = 'demo@microconnect.com';
+          document.getElementById('loginPassword').value = 'assess2026';
+          // 触发一下 input 事件使浏览器识别
+          document.getElementById('loginEmail').dispatchEvent(new Event('input'));
+          document.getElementById('loginPassword').dispatchEvent(new Event('input'));
+          showLoginToast('已填入演示账号', 'success');
+        }
+
         // 密码可见性切换
         function togglePasswordVisibility() {
           const pwd = document.getElementById('loginPassword');
@@ -453,16 +484,30 @@ export const LoginPage: FC = () => {
           btn.disabled = true;
           btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i><span>验证中...</span>';
 
-          // 模拟验证动画（实际可对接身份通API）
+          // 模拟验证（演示模式）
           setTimeout(() => {
-            // Demo模式：任意邮箱+密码均可登录
+            // 验证账号密码
+            const validAccounts = [
+              { email: 'demo@microconnect.com', password: 'assess2026', name: 'Demo User', role: 'investor' },
+              { email: 'admin@microconnect.com', password: 'admin2026', name: 'Admin', role: 'admin' },
+            ];
+            
+            const account = validAccounts.find(a => a.email === email && a.password === password);
+            
+            if (!account) {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fas fa-arrow-right-to-bracket"></i><span>登录</span>';
+              showLoginToast('账号或密码错误，请使用演示账号登录', 'error');
+              return;
+            }
+            
             showLoginToast('登录成功，正在跳转...', 'success');
             
             // 保存登录状态
             sessionStorage.setItem('assess_auth', JSON.stringify({
-              email: email,
-              name: email.split('@')[0],
-              role: 'investor',
+              email: account.email,
+              name: account.name,
+              role: account.role,
               loginTime: new Date().toISOString()
             }));
 
