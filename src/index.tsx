@@ -1,14 +1,7 @@
 import { Hono } from 'hono'
 import { renderer } from './renderer'
-import { HomePage } from './pages/HomePage'
-import { DesignPage } from './pages/DesignPage'
-import { PortalPage } from './pages/PortalPage'
-import { PlaceholderPage } from './pages/PlaceholderPage'
 import { AssessPage } from './pages/AssessPage'
-import { AboutPage } from './pages/AboutPage'
-import { TeamPage } from './pages/TeamPage'
-import { NewsPage } from './pages/NewsPage'
-import { ContactPage } from './pages/ContactPage'
+import { LoginPage } from './pages/LoginPage'
 import { platformDeals, industryLabels, dealStatusLabels, cashflowFrequencyLabels } from './data/deals-data'
 
 const LLM_PROXY = 'http://127.0.0.1:3001'
@@ -17,48 +10,25 @@ const app = new Hono()
 
 app.use(renderer)
 
-// Homepage — 官网首页
+// ==================== 评估通独立入口 ====================
+// 进入即为登录页，登录成功后跳转至 /assess
+
 app.get('/', (c) => {
-  return c.render(<HomePage />, { title: 'Micro Connect 滴灌通 | 收入分成投资的操作系统' })
+  return c.render(<LoginPage />, { title: 'Assess Connect · 评估通 | 登录' })
 })
 
-// Page 1: Design philosophy — 产品设计思路（L1核心页面，不动）
-app.get('/design', (c) => {
-  return c.render(<DesignPage />, { title: '产品设计思路 - Micro Connect 滴灌通' })
-})
-
-// Page 2: Product portal — 产品入口（L1核心页面，不动）
-app.get('/portal', (c) => {
-  return c.render(<PortalPage />, { title: '产品入口 - Micro Connect 滴灌通' })
-})
-
-// Company pages
-app.get('/about', (c) => {
-  return c.render(<AboutPage />, { title: '关于我们 - Micro Connect 滴灌通' })
-})
-
-app.get('/team', (c) => {
-  return c.render(<TeamPage />, { title: '核心团队 - Micro Connect 滴灌通' })
-})
-
-app.get('/news', (c) => {
-  return c.render(<NewsPage />, { title: '新闻动态 - Micro Connect 滴灌通' })
-})
-
-app.get('/contact', (c) => {
-  return c.render(<ContactPage />, { title: '联系我们 - Micro Connect 滴灌通' })
+// ==================== 评估通主页面 ====================
+app.get('/assess', (c) => {
+  return c.render(<AssessPage />, { title: 'Assess Connect · 评估通' })
 })
 
 // ==================== 本地 Deals API ====================
-// 返回平台标的数据（来自 MC-Awesome-Project seed）
-
 app.get('/api/deals', (c) => {
   const status = c.req.query('status')
   const industry = c.req.query('industry')
   let deals = platformDeals
   if (status) deals = deals.filter(d => d.status === status)
   if (industry) deals = deals.filter(d => d.industry === industry)
-  // 返回简要列表（不含 project_documents，减少传输体积）
   const list = deals.map(d => ({
     id: d.id,
     company_name: d.company_name,
@@ -88,8 +58,6 @@ app.get('/api/deals/:id', (c) => {
 })
 
 // ==================== 评估通 API 代理 ====================
-// 转发到 llm-proxy:3001，真正执行 Agent 工作流
-
 app.post('/api/assess/start', async (c) => {
   try {
     const body = await c.req.json().catch(() => ({}))
@@ -115,17 +83,7 @@ app.get('/api/assess/progress/:jobId', async (c) => {
   }
 })
 
-// ==================== Product pages ====================
-
-// 评估通 — 独立页面（功能已集成至 dgt-intelligence-platform）
-app.get('/assess', (c) => {
-  return c.render(<AssessPage />, { title: '评估通 - Micro Connect 滴灌通' })
-})
-
-// dgt 平台 API 代理（供 L1 评估通入口调用）
-// GET /api/dgt/deals → dgt平台 GET /api/deals
-// POST /api/dgt/deals → dgt平台 POST /api/deals
-// POST /api/dgt/ai/evaluate-deal → dgt平台 POST /api/ai/evaluate-deal
+// ==================== DGT 平台代理 ====================
 const DGT_PLATFORM = 'http://127.0.0.1:3000'
 
 app.all('/api/dgt/*', async (c) => {
@@ -146,19 +104,6 @@ app.all('/api/dgt/*', async (c) => {
   } catch (e) {
     return c.json({ error: String(e), note: 'dgt平台未运行，请确认dgt-intelligence-platform已在3002端口启动' }, 502)
   }
-})
-
-// 其他 8 个通仍使用 PlaceholderPage
-const productIds = [
-  'identity', 'application',
-  'risk', 'opportunity', 'terms', 'contract',
-  'settlement', 'performance'
-]
-
-productIds.forEach((id) => {
-  app.get(`/${id}`, (c) => {
-    return c.render(<PlaceholderPage productId={id} />, { title: `${id} - Micro Connect 滴灌通` })
-  })
 })
 
 export default app

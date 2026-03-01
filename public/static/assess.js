@@ -19,6 +19,39 @@ let parsedFileContents = [];
 // API 路径前缀（代理到 dgt 平台）
 const API_BASE = '/api/dgt';
 
+// v33 主色
+const PRIMARY_COLOR = '#6366F1';
+const ACCENT_COLOR = '#8B5CF6';
+
+// ==========================================================
+// 登录状态 & 用户显示
+// ==========================================================
+function checkAssessAuth() {
+  const auth = sessionStorage.getItem('assess_auth');
+  if (!auth) {
+    window.location.href = '/';
+    return null;
+  }
+  try {
+    const data = JSON.parse(auth);
+    const avatarEl = document.getElementById('user-avatar-el');
+    const nameEl = document.getElementById('user-name-el');
+    if (avatarEl && data.name) avatarEl.textContent = data.name.charAt(0).toUpperCase();
+    if (nameEl && data.name) nameEl.textContent = data.name;
+    return data;
+  } catch(e) {
+    window.location.href = '/';
+    return null;
+  }
+}
+
+function handleLogout() {
+  if (confirm('确认退出登录？')) {
+    sessionStorage.removeItem('assess_auth');
+    window.location.href = '/';
+  }
+}
+
 // ==========================================================
 // Toast
 // ==========================================================
@@ -666,7 +699,7 @@ function updateAgentStatus(agentId, status, score=null, result=null) {
   if (status==='running') {
     statusEl.innerHTML='<i class="fas fa-spinner fa-spin text-xs" style="color:var(--primary-500)"></i>';
     statusEl.className='w-6 h-6 rounded-full flex items-center justify-center';
-    statusEl.style.background='var(--primary-100, #D6E8DB)';
+    statusEl.style.background='var(--primary-100, #E0E7FF)';
     cardEl?.classList.add('ring-2');
     cardEl && (cardEl.style.outlineColor='var(--primary-300)');
     if (progressEl) { progressEl.classList.remove('hidden'); progressEl.querySelector('div').style.width='30%'; setTimeout(()=>progressEl.querySelector('div').style.width='70%',500); }
@@ -697,9 +730,9 @@ function updateAgentSteps(agentId, status, result=null) {
   if (!el) return;
   if (status==='running') {
     el.innerHTML='<div class="space-y-3"><div class="flex items-start space-x-3">' +
-      '<div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background:var(--primary-100,#D6E8DB)">' +
+      '<div class="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background:var(--primary-100,#E0E7FF)">' +
       '<i class="fas fa-spinner fa-spin text-xs" style="color:var(--primary-500)"></i></div>' +
-      '<div><p class="font-medium" style="color:var(--primary-700,#3A5444)">正在执行评估...</p>' +
+      '<div><p class="font-medium" style="color:var(--primary-700,#4338CA)">正在执行评估...</p>' +
       '<p class="text-sm text-gray-500 mt-1">AI智能体正在分析项目材料</p></div></div></div>';
   } else {
     const isPassed = status==='pass';
@@ -736,7 +769,7 @@ function updateAgentSteps(agentId, status, result=null) {
         '<div class="text-sm text-gray-600 line-clamp-2">'+recPreview+'</div></div>' : '') +
       '</div>' +
       '<div class="ml-9 pt-2 flex space-x-3">' +
-      '<button onclick="showFullReport(\''+agentId+'\')" class="text-sm flex items-center space-x-1" style="color:var(--primary-600,#4A6854)"><i class="fas fa-file-alt"></i><span>完整报告</span></button>' +
+      '<button onclick="showFullReport(\''+agentId+'\')" class="text-sm flex items-center space-x-1" style="color:var(--primary-600,#4F46E5)"><i class="fas fa-file-alt"></i><span>完整报告</span></button>' +
       '<button onclick="showReasoningPopup(\''+agentId+'\',\'raw\')" class="text-sm text-gray-500 hover:text-gray-700 flex items-center space-x-1"><i class="fas fa-code"></i><span>原始数据</span></button>' +
       '</div></div>';
   }
@@ -748,7 +781,7 @@ function updateRadarChart(scores) {
   const data   = filteredInnerAgents.map(a => scores[a.id] || 0);
   radarChart = new Chart(ctx, {
     type: 'radar',
-    data: { labels, datasets: [{ label:'评分', data, fill:true, backgroundColor:'rgba(90,122,100,0.2)', borderColor:'#5A7A64', pointBackgroundColor:'#5A7A64', pointBorderColor:'#fff' }] },
+    data: { labels, datasets: [{ label:'评分', data, fill:true, backgroundColor:'rgba(99,102,241,0.15)', borderColor:'#6366F1', pointBackgroundColor:'#6366F1', pointBorderColor:'#fff' }] },
     options: { scales:{ r:{ beginAtZero:true, max:100, ticks:{ stepSize:20 } } }, plugins:{ legend:{ display:false } } }
   });
 }
@@ -934,7 +967,7 @@ function checkUrlParams() {
       selectDeal(dealId);
       showToast('已预选标的 '+dealId+'，可以直接开始评估', 'success');
       card.scrollIntoView({ behavior:'smooth', block:'center' });
-      card.style.outline='2px solid #5A7A64';
+      card.style.outline='2px solid #6366F1';
       setTimeout(() => card.style.outline='', 3000);
     }
   }, 500);
@@ -943,6 +976,10 @@ function checkUrlParams() {
 
 // 初始化
 document.addEventListener('DOMContentLoaded', () => {
+  // 先检查登录状态
+  const user = checkAssessAuth();
+  if (!user) return;
+  
   setTimeout(loadAllDeals, 300);
   setTimeout(loadEvaluationAgents, 500);
   setTimeout(checkUrlParams, 1000);
