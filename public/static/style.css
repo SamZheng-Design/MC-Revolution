@@ -1,0 +1,514 @@
+/* ═══════════════════════════════════════════
+   合约通设计系统 (Contract Connect Design System)
+   版本: 1.0
+   ═══════════════════════════════════════════ */
+
+/* ── 一、色彩令牌 (CSS Variables) ── */
+:root {
+  /* 品牌主色系 - Teal */
+  --color-primary: #5DC4B3;
+  --color-primary-light: #7DD4C7;
+  --color-primary-dark: #3D8F83;
+  --color-accent: #49A89A;
+
+  /* 语义辅助色 */
+  --color-accent-cyan: #32ade6;
+  --color-accent-emerald: #34c759;
+  --color-accent-amber: #ff9f0a;
+  --color-accent-rose: #ff375f;
+
+  /* 渐变 */
+  --gradient-primary: linear-gradient(135deg, #5DC4B3 0%, #49A89A 100%);
+  --gradient-success: linear-gradient(135deg, #30b750 0%, #34c759 100%);
+  --gradient-warning: linear-gradient(135deg, #f0840a 0%, #ff9f0a 100%);
+  --gradient-danger: linear-gradient(135deg, #d62040 0%, #ff375f 100%);
+  --gradient-info: linear-gradient(135deg, #0a84ff 0%, #32ade6 100%);
+  --gradient-neon: linear-gradient(135deg, #32ade6 0%, #5DC4B3 40%, #49A89A 70%, #3D8F83 100%);
+  --gradient-surface: linear-gradient(180deg, #ffffff 0%, #f8f9fe 100%);
+  --gradient-cyber: linear-gradient(135deg, #0a2e2a 0%, #0f3d36 50%, #164e47 100%);
+  --gradient-aurora: linear-gradient(135deg, #0a2e2a 0%, #0f3d36 25%, #0c3530 50%, #164e47 75%, #1a6b5f 100%);
+  --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.04) 100%);
+
+  /* 文本色 */
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #86868b;
+  --text-placeholder: #aeaeb2;
+  --text-inverse: #1e293b;
+  --text-light-desc: #64748b;
+
+  /* 背景色 */
+  --bg-page: #f5f5f7;
+  --bg-card: rgba(255, 255, 255, 0.88);
+  --bg-navbar: rgba(255, 255, 255, 0.92);
+  --bg-dark: linear-gradient(135deg, #0a2e2a 0%, #1a6b5f 100%);
+  --bg-modal-overlay: rgba(0, 0, 0, 0.4);
+
+  /* 边框/分割线 */
+  --border-default: rgba(0, 0, 0, 0.06);
+  --border-input: rgba(0, 0, 0, 0.12);
+  --border-divider: #f1f5f9;
+  --border-hover: rgba(93, 196, 179, 0.2);
+  --border-focus: #5DC4B3;
+
+  /* 圆角系统 */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 32px;
+  --radius-full: 9999px;
+
+  /* 阴影系统 */
+  --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 2px 8px rgba(0,0,0,0.04);
+  --shadow-md: 0 2px 4px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
+  --shadow-lg: 0 4px 8px rgba(0,0,0,0.04), 0 16px 40px rgba(0,0,0,0.08);
+  --shadow-xl: 0 8px 16px rgba(0,0,0,0.06), 0 24px 56px rgba(0,0,0,0.1);
+  --shadow-2xl: 0 16px 32px rgba(0,0,0,0.08), 0 32px 72px rgba(0,0,0,0.14);
+  --shadow-inner: inset 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-card: 0 1px 1px rgba(0,0,0,0.02), 0 2px 4px rgba(0,0,0,0.03), 0 8px 24px rgba(0,0,0,0.05);
+  --shadow-card-hover: 0 4px 8px rgba(0,0,0,0.04), 0 16px 48px rgba(93,196,179,0.1);
+
+  /* 霓虹辉光 */
+  --shadow-neon-primary: 0 0 24px rgba(93,196,179,0.2), 0 0 48px rgba(93,196,179,0.06);
+  --shadow-neon-cyan: 0 0 24px rgba(50,173,230,0.2), 0 0 48px rgba(50,173,230,0.06);
+  --shadow-neon-emerald: 0 0 24px rgba(52,199,89,0.2), 0 0 48px rgba(52,199,89,0.06);
+
+  /* 缓动曲线 */
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-smooth: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-apple: cubic-bezier(0.28, 0.11, 0.32, 1);
+
+  /* 时长 */
+  --duration-fast: 180ms;
+  --duration-normal: 280ms;
+  --duration-slow: 420ms;
+}
+
+/* ── 二、字体系统 ── */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+  color: var(--text-primary);
+  background-color: var(--bg-page);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', Roboto, 'Noto Sans SC', sans-serif;
+  letter-spacing: -0.02em;
+}
+
+/* ── 三、滚动条 ── */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.15);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,0,0,0.25);
+}
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,0,0,0.15) transparent;
+}
+
+/* ── 四、卡片系统 ── */
+.card-hover {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--duration-normal) var(--ease-spring),
+              box-shadow var(--duration-normal) var(--ease-spring),
+              border-color var(--duration-normal) var(--ease-smooth);
+  position: relative;
+  overflow: hidden;
+}
+.card-hover::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-neon);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-smooth);
+}
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--border-hover);
+}
+.card-hover:hover::before {
+  opacity: 1;
+}
+
+/* Portal Card — same neon top-bar effect */
+.portal-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  transition: transform var(--duration-normal) var(--ease-spring),
+              box-shadow var(--duration-normal) var(--ease-spring),
+              border-color var(--duration-normal) var(--ease-smooth);
+}
+.portal-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--gradient-neon);
+  opacity: 0;
+  transition: opacity var(--duration-normal) var(--ease-smooth);
+}
+.portal-card:hover {
+  border-color: var(--border-hover) !important;
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-card-hover);
+}
+.portal-card:hover::before {
+  opacity: 1;
+}
+
+/* ── 五、菜单项 hover ── */
+.menu-item {
+  border-radius: var(--radius-md);
+  transition: transform var(--duration-normal) var(--ease-spring),
+              box-shadow var(--duration-normal) var(--ease-spring),
+              border-color var(--duration-normal) var(--ease-smooth);
+  position: relative;
+  overflow: hidden;
+}
+.menu-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--gradient-neon);
+  border-radius: 0 2px 2px 0;
+  opacity: 0;
+  transform: scaleY(0);
+  transition: opacity var(--duration-normal) var(--ease-spring),
+              transform var(--duration-normal) var(--ease-spring);
+}
+.menu-item:hover {
+  transform: translateX(4px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-primary) !important;
+}
+.menu-item:hover::before {
+  opacity: 1;
+  transform: scaleY(1);
+}
+
+/* ── 六、按钮系统 ── */
+/* 主按钮 */
+.btn-primary,
+a[class*="bg-[#5DC4B3]"],
+a[class*="bg-[#4ECDC4]"] {
+  background: var(--gradient-primary) !important;
+  color: white !important;
+  border-radius: var(--radius-md) !important;
+  font-weight: 600;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.04), 0 4px 12px rgba(93,196,179,0.28), inset 0 1px 0 rgba(255,255,255,0.15);
+  transition: transform var(--duration-fast) var(--ease-spring),
+              box-shadow var(--duration-fast) var(--ease-spring),
+              filter var(--duration-fast) var(--ease-smooth);
+}
+.btn-primary:hover,
+a[class*="bg-[#5DC4B3]"]:hover,
+a[class*="bg-[#4ECDC4]"]:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.06), 0 8px 20px rgba(93,196,179,0.35), inset 0 1px 0 rgba(255,255,255,0.15);
+}
+.btn-primary:active,
+a[class*="bg-[#5DC4B3]"]:active,
+a[class*="bg-[#4ECDC4]"]:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* 次按钮 */
+.btn-secondary {
+  background: white;
+  color: var(--text-primary);
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-fast) var(--ease-spring),
+              box-shadow var(--duration-fast) var(--ease-spring),
+              border-color var(--duration-fast) var(--ease-smooth);
+}
+.btn-secondary:hover {
+  transform: translateY(-1px);
+  border-color: var(--border-hover);
+  box-shadow: var(--shadow-md);
+}
+.btn-secondary:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* ── 七、输入框 ── */
+input, textarea, select {
+  padding: 12px 16px;
+  font-size: 14px;
+  border: 1px solid var(--border-input);
+  border-radius: var(--radius-md);
+  background: white;
+  color: var(--text-primary);
+  transition: border-color var(--duration-fast) var(--ease-smooth),
+              box-shadow var(--duration-fast) var(--ease-smooth),
+              transform var(--duration-fast) var(--ease-spring);
+}
+input::placeholder, textarea::placeholder {
+  color: var(--text-placeholder);
+}
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px rgba(93,196,179,0.12), var(--shadow-sm);
+  transform: translateY(-1px);
+}
+
+/* ── 八、徽章/标签 ── */
+.badge-primary {
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  border-radius: var(--radius-full);
+  background: rgba(93,196,179,0.1);
+  color: var(--color-primary);
+}
+.badge-success {
+  background: rgba(16,185,129,0.1);
+  color: var(--color-accent-emerald);
+}
+.badge-warning {
+  background: rgba(245,158,11,0.1);
+  color: var(--color-accent-amber);
+}
+.badge-danger {
+  background: rgba(244,63,94,0.1);
+  color: var(--color-accent-rose);
+}
+.badge-info {
+  background: rgba(6,182,212,0.1);
+  color: var(--color-accent-cyan);
+}
+
+/* ── 九、玻璃态导航栏 ── */
+.navbar-glass {
+  background: var(--bg-navbar);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 1px solid var(--border-default);
+  box-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* ── 十、动画系统 ── */
+
+/* Fade-in 页面进入 */
+.fade-in {
+  animation: fadeIn 0.35s var(--ease-spring);
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Shimmer 骨架屏 */
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-sm);
+}
+
+/* Modal 进入 */
+@keyframes modalEnter {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.92);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+.modal-enter {
+  animation: modalEnter 0.4s var(--ease-spring);
+}
+
+/* Modal 退出 */
+@keyframes modalExit {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(24px) scale(0.95);
+    filter: blur(3px);
+  }
+}
+.modal-exit {
+  animation: modalExit 0.25s var(--ease-smooth);
+}
+
+/* Toast 进入 */
+@keyframes toastEnter {
+  from {
+    opacity: 0;
+    transform: translateX(60px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+.toast-enter {
+  animation: toastEnter 0.3s var(--ease-spring);
+}
+
+/* 浮动动画 (空状态图标) */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.float-animation {
+  animation: float 3s var(--ease-smooth) infinite;
+}
+
+/* Accordion */
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height var(--duration-slow) var(--ease-apple);
+}
+.accordion-content.open {
+  max-height: 2000px;
+}
+
+/* ── 十一、响应式断点 ── */
+@media (max-width: 1024px) {
+  .stat-number { font-size: 1.5rem !important; }
+}
+@media (max-width: 768px) {
+  .navbar-glass { padding: 12px 16px; }
+  .modal-card {
+    margin: 12px;
+    border-radius: var(--radius-xl) !important;
+  }
+  .toast {
+    width: 100% !important;
+    max-width: none !important;
+  }
+}
+@media (max-width: 480px) {
+  .modal-card {
+    margin: 8px;
+    border-radius: var(--radius-lg) !important;
+  }
+  .stat-number { font-size: 1.25rem !important; }
+}
+@media (max-width: 420px) {
+  .stat-card { padding: 12px !important; }
+  .stat-number { font-size: 1.1rem !important; }
+}
+
+/* ── 十二、Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .card-hover:hover,
+  .portal-card:hover,
+  .menu-item:hover {
+    transform: none !important;
+  }
+}
+
+/* ── 十三、Dot pattern background ── */
+.dot-pattern {
+  background-image: radial-gradient(circle, #e5e7eb 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* Line clamp */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Smooth scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ── 十四、空状态 ── */
+.empty-state-icon {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(135deg, rgba(93,196,179,0.08) 0%, rgba(93,196,179,0.15) 100%);
+  border-radius: var(--radius-2xl);
+  animation: float 3s var(--ease-smooth) infinite;
+}
+
+/* CTA 按钮 in empty state */
+.empty-state-cta {
+  background: var(--gradient-primary);
+  color: white;
+  border-radius: var(--radius-lg);
+  font-weight: 600;
+}
+
+/* ── 十五、链接/交互元素通用过渡 ── */
+a, button {
+  transition: color var(--duration-fast) var(--ease-smooth),
+              background-color var(--duration-fast) var(--ease-smooth),
+              border-color var(--duration-fast) var(--ease-smooth),
+              box-shadow var(--duration-fast) var(--ease-smooth),
+              transform var(--duration-fast) var(--ease-spring),
+              filter var(--duration-fast) var(--ease-smooth),
+              opacity var(--duration-fast) var(--ease-smooth);
+}
